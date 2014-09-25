@@ -25,6 +25,14 @@
 #include <cstdio>
 #include <limits>
 
+
+#if defined _WIN32
+    #if ! defined snprintf
+        #define snprintf _snprintf
+    #endif
+#endif
+
+
 namespace json11 {
 
 static const int max_depth = 200;
@@ -236,8 +244,8 @@ const Json & static_null() {
  * Constructors
  */
 
-Json::Json() noexcept                  : m_ptr(statics().null) {}
-Json::Json(std::nullptr_t) noexcept    : m_ptr(statics().null) {}
+Json::Json() JSON11_NOEXCEPT                  : m_ptr(statics().null) {}
+Json::Json(std::nullptr_t) JSON11_NOEXCEPT    : m_ptr(statics().null) {}
 Json::Json(double value)               : m_ptr(make_shared<JsonDouble>(value)) {}
 Json::Json(int value)                  : m_ptr(make_shared<JsonInt>(value)) {}
 Json::Json(bool value)                 : m_ptr(value ? statics().t : statics().f) {}
@@ -381,16 +389,16 @@ struct JsonParser {
             return;
 
         if (pt < 0x80) {
-            out += pt;
+            out += static_cast<char>(pt);
         } else if (pt < 0x800) {
-            out += (pt >> 6) | 0xC0;
+            out += static_cast<char>((pt >> 6) | 0xC0);
             out += (pt & 0x3F) | 0x80;
         } else if (pt < 0x10000) {
-            out += (pt >> 12) | 0xE0;
+            out += static_cast<char>((pt >> 12) | 0xE0);
             out += ((pt >> 6) & 0x3F) | 0x80;
             out += (pt & 0x3F) | 0x80;
         } else {
-            out += (pt >> 18) | 0xF0;
+            out += static_cast<char>((pt >> 18) | 0xF0);
             out += ((pt >> 12) & 0x3F) | 0x80;
             out += ((pt >> 6) & 0x3F) | 0x80;
             out += (pt & 0x3F) | 0x80;
