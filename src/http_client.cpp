@@ -63,9 +63,9 @@ namespace ppconsul { namespace http {
         http::client m_client;
     };
 
-    Client::Client(const char *host)
+    Client::Client(const std::string& baseUrl)
     : m_impl(new Impl)
-    , m_host(host)
+    , m_baseUrl(baseUrl)
     {}
 
     Client::~Client()
@@ -73,7 +73,7 @@ namespace ppconsul { namespace http {
 
     std::string Client::get(Status& status, const std::string& path, const Parameters& parameters)
     {
-        http::client::request request(createUrl(m_host, path, parameters));
+        http::client::request request(createUrl(m_baseUrl, path, parameters));
         auto response = m_impl->m_client.get(request);
         status = Status(response.status(), response.status_message());
         return response.body();
@@ -81,7 +81,7 @@ namespace ppconsul { namespace http {
 
     void Client::put(Status& status, const std::string& path, const std::string& body, const Parameters& parameters)
     {
-        http::client::request request(createUrl(m_host, path, parameters));
+        http::client::request request(createUrl(m_baseUrl, path, parameters));
         // TODO: add content type header?
         request.body(body);
         auto response = m_impl->m_client.delete_(request);
@@ -90,7 +90,7 @@ namespace ppconsul { namespace http {
 
     void Client::del(Status& status, const std::string& path, const Parameters& parameters)
     {
-        http::client::request request(createUrl(m_host, path, parameters));
+        http::client::request request(createUrl(m_baseUrl, path, parameters));
         auto response = m_impl->m_client.delete_(request);
         status = Status(response.status(), response.status_message());
     }

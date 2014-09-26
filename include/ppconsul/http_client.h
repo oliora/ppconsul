@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppconsul.h"
+#include "config.h"
 #include <string>
 #include <memory>
 #include <utility>
@@ -108,7 +108,7 @@ namespace ppconsul { namespace http {
     };
 
 
-    std::string createUrl(const std::string& host, const std::string& path, const Parameters& parameters = Parameters());
+    std::string createUrl(const std::string& baseUrl, const std::string& path, const Parameters& parameters = Parameters());
 
 
     class Status
@@ -161,7 +161,7 @@ namespace ppconsul { namespace http {
     class Client
     {
     public:
-        explicit Client(const char *host = "http://localhost:8500");
+        explicit Client(const std::string& baseUrl);
         ~Client();
 
         std::string get(const std::string& path, const Parameters& parameters = Parameters());
@@ -177,20 +177,20 @@ namespace ppconsul { namespace http {
         class Impl;
 
         std::unique_ptr<Impl> m_impl;
-        std::string m_host;
+        std::string m_baseUrl;
     };
 
 
     // Implementation
 
-    inline std::string createUrl(const std::string& host, const std::string& path, const Parameters& parameters)
+    inline std::string createUrl(const std::string& baseUrl, const std::string& path, const Parameters& parameters)
     {
         auto query = parameters.query();
 
         std::string r;
-        r.reserve(host.size() + path.size() + query.size() + 1); // 1 is for query prefix '?'
+        r.reserve(baseUrl.size() + path.size() + query.size() + 1); // 1 is for query prefix '?'
 
-        r += host;
+        r += baseUrl;
         r += path;
         r += '?';
         r += query;

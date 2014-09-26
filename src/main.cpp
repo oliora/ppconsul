@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
     try
     {
-        std::cout << ppconsul::http::Client().get(argv[1], {{"pretty", 1}}) << std::endl;
+        std::cout << ppconsul::http::Client("http://localhost:8500").get(argv[1], {{"pretty", 1}}) << std::endl;
     }
     catch (const std::exception& ex)
     {
