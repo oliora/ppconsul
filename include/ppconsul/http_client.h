@@ -170,8 +170,8 @@ namespace ppconsul { namespace http {
         void put(const std::string& path, const std::string& body, const Parameters& parameters = Parameters());
         void put(Status& status, const std::string& path, const std::string& body, const Parameters& parameters = Parameters());
 
-        void  del(const std::string& path, const Parameters& parameters = Parameters());
-        void  del(Status& status, const std::string& path, const Parameters& parameters = Parameters());
+        void del(const std::string& path, const Parameters& parameters = Parameters());
+        void del(Status& status, const std::string& path, const Parameters& parameters = Parameters());
 
     private:
         class Impl;
