@@ -5,8 +5,10 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CPPNETLIB_INCLUDE_DIRS})
 
 set(SOURCES
-    "${HEADER_DIR}/ppconsul.h"
+    "${HEADER_DIR}/client.h"
     "${HEADER_DIR}/http_client.h"
+    "${HEADER_DIR}/ppconsul.h"
+    "${HEADER_DIR}/kv.h"
     http_client.cpp
 )
 
