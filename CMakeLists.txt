@@ -15,16 +15,19 @@ elseif (MSVC)
     # Build for Windows Vista / Windows Server 2008
     add_definitions(-D_WIN32_WINNT=0x0600)
 
-    set(Boost_USE_STATIC_LIBS        ON)
-    #set(Boost_USE_MULTITHREADED      ON)
-    #set(Boost_USE_STATIC_RUNTIME     OFF)
+    set(Boost_USE_STATIC_LIBS ON)
+    #set(Boost_USE_STATIC_RUNTIME OFF)
 endif()
+
+enable_testing()
 
 find_package(Boost 1.55 REQUIRED COMPONENTS thread filesystem system date_time chrono regex)
 
 find_package(cppnetlib 0.11.0 REQUIRED)
 
 set(JSON11_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/ext/json11")
+set(CATCH_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/ext/catch")
 
 add_subdirectory(ext/json11)
 add_subdirectory(src)
+add_subdirectory(tests)
