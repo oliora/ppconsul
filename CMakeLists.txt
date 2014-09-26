@@ -27,6 +27,7 @@ find_package(cppnetlib 0.11.0 REQUIRED)
 
 set(JSON11_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/ext/json11")
 set(CATCH_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/ext/catch")
+set(HEADER_DIR "${CMAKE_SOURCE_DIR}/include/ppconsul")
 
 add_subdirectory(ext/json11)
 add_subdirectory(src)
