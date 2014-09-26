@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ppconsul/ppconsul.h"
+#include "ppconsul.h"
 #include <string>
 #include <memory>
 #include <utility>
@@ -14,25 +14,36 @@ namespace ppconsul { namespace http {
 
     namespace detail {
 
-//        inline std::string to_string(std::string v)
-//        {
-//            return std::move(v);
-//        }
-//
-//        inline std::string to_string(const char *v)
-//        {
-//            return {v};
-//        }
+        template<class T> struct is_widechar_: public std::false_type {};
+        // If your compiler does not distinguish wchar_t and unsigned short, comment this line
+        // and report an issue.
+        template<> struct is_widechar_<wchar_t>: public std::true_type{};
+        // MSVS 2013 does not distinguish charXX_t and unsigned short/long types
+        // TODO: check for other compilers and probably disable only for MS
+        //template<> struct is_widechar_<char16_t>: public std::true_type{};
+        //template<> struct is_widechar_<char32_t>: public std::true_type{};
+
+        template<class T>
+        struct is_widechar: public is_widechar_<
+            typename std::remove_cv<
+                typename std::remove_reference<T>::type>
+            ::type>
+        {};
+
 
         inline std::string to_string(char v)
         {
-            return {1, v};
+            return std::string(1, v);
         }
 
         template<class T,
-            class Enabler = typename std::enable_if<std::is_arithmetic<T>::value>::type>
+            class Enabler = typename std::enable_if<
+                std::is_arithmetic<T>::value>
+            ::type>
         inline std::string to_string(T t)
         {
+            static_assert(!is_widechar<T>::value, "Wide character types are not supported");
+
             return std::to_string(t);
         }
 
@@ -55,8 +66,9 @@ namespace ppconsul { namespace http {
             std::string m_name, m_value;
         };
 
-    }
+    } // namespace detail
 
+    // TODO: add comparison operators
     class Parameters
     {
     public:
@@ -94,6 +106,9 @@ namespace ppconsul { namespace http {
     private:
         std::vector<Parameter> m_values;
     };
+
+
+    std::string createUrl(const std::string& host, const std::string& path, const Parameters& parameters = Parameters());
 
 
     class Status
@@ -149,19 +164,17 @@ namespace ppconsul { namespace http {
         explicit Client(const char *host = "http://localhost:8500");
         ~Client();
 
-        std::string get(const char *path, const Parameters& parameters = Parameters());
-        std::string get(Status& status, const char *path, const Parameters& parameters = Parameters());
+        std::string get(const std::string& path, const Parameters& parameters = Parameters());
+        std::string get(Status& status, const std::string& path, const Parameters& parameters = Parameters());
 
-        void put(const char *path, const std::string& body, const Parameters& parameters = Parameters());
-        void put(Status& status, const char *path, const std::string& body, const Parameters& parameters = Parameters());
+        void put(const std::string& path, const std::string& body, const Parameters& parameters = Parameters());
+        void put(Status& status, const std::string& path, const std::string& body, const Parameters& parameters = Parameters());
 
-        void  del(const char *path, const Parameters& parameters = Parameters());
-        void  del(Status& status, const char *path, const Parameters& parameters = Parameters());
+        void  del(const std::string& path, const Parameters& parameters = Parameters());
+        void  del(Status& status, const std::string& path, const Parameters& parameters = Parameters());
 
     private:
         class Impl;
-
-        std::string createUri(const char *path, const Parameters& parameters = Parameters()) const;
 
         std::unique_ptr<Impl> m_impl;
         std::string m_host;
@@ -170,7 +183,22 @@ namespace ppconsul { namespace http {
 
     // Implementation
 
-    inline std::string Client::get(const char *path, const Parameters& parameters)
+    inline std::string createUrl(const std::string& host, const std::string& path, const Parameters& parameters)
+    {
+        auto query = parameters.query();
+
+        std::string r;
+        r.reserve(host.size() + path.size() + query.size() + 1); // 1 is for query prefix '?'
+
+        r += host;
+        r += path;
+        r += '?';
+        r += query;
+
+        return r;
+    }
+
+    inline std::string Client::get(const std::string& path, const Parameters& parameters)
     {
         Status s;
         auto r = get(s, path, parameters);
@@ -179,7 +207,7 @@ namespace ppconsul { namespace http {
         return r;
     }
 
-    inline void Client::put(const char *path, const std::string& body, const Parameters& parameters)
+    inline void Client::put(const std::string& path, const std::string& body, const Parameters& parameters)
     {
         Status s;
         put(s, path, body, parameters);
@@ -187,27 +215,12 @@ namespace ppconsul { namespace http {
             throw BadStatus(std::move(s));
     }
 
-    inline void Client::del(const char *path, const Parameters& parameters)
+    inline void Client::del(const std::string& path, const Parameters& parameters)
     {
         Status s;
         del(s, path, parameters);
         if (!s)
             throw BadStatus(std::move(s));
-    }
-
-    inline std::string Client::createUri(const char *path, const Parameters& parameters) const
-    {
-        auto query = parameters.query();
-
-        std::string r;
-        r.reserve(m_host.size() + strlen(path) + query.size() + 1); // 1 is for query prefix '?'
-
-        r += m_host;
-        r += path;
-        r += '?';
-        r += query;
-
-        return r;
     }
 
 }}

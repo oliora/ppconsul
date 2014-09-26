@@ -1,4 +1,4 @@
-#include "http_client.h"
+#include "ppconsul/http_client.h"
 #include <boost/network/protocol/http/client.hpp>
 
 
@@ -25,7 +25,7 @@ namespace ppconsul { namespace http {
 
     std::string Parameters::query() const
     {
-        // TODO: encode parameters?
+        // TODO: encode parameters
 
         if (m_values.empty())
             return {};
@@ -44,6 +44,7 @@ namespace ppconsul { namespace http {
         r += it->m_name;
         r += '=';
         r += it->m_value;
+        ++it;
 
         for(;it != m_values.end(); ++it)
         {
@@ -70,26 +71,26 @@ namespace ppconsul { namespace http {
     Client::~Client()
     {}
 
-    std::string Client::get(Status& status, const char *path, const Parameters& parameters)
+    std::string Client::get(Status& status, const std::string& path, const Parameters& parameters)
     {
-        http::client::request request(createUri(path, parameters));
+        http::client::request request(createUrl(m_host, path, parameters));
         auto response = m_impl->m_client.get(request);
         status = Status(response.status(), response.status_message());
         return response.body();
     }
 
-    void Client::put(Status& status, const char *path, const std::string& body, const Parameters& parameters)
+    void Client::put(Status& status, const std::string& path, const std::string& body, const Parameters& parameters)
     {
-        http::client::request request(createUri(path, parameters));
+        http::client::request request(createUrl(m_host, path, parameters));
         // TODO: add content type header?
         request.body(body);
         auto response = m_impl->m_client.delete_(request);
         status = Status(response.status(), response.status_message());
     }
 
-    void Client::del(Status& status, const char *path, const Parameters& parameters)
+    void Client::del(Status& status, const std::string& path, const Parameters& parameters)
     {
-        http::client::request request(createUri(path, parameters));
+        http::client::request request(createUrl(m_host, path, parameters));
         auto response = m_impl->m_client.delete_(request);
         status = Status(response.status(), response.status_message());
     }
