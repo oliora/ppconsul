@@ -40,3 +40,7 @@ namespace ppconsul {
     namespace status;
 }
 
+TODO
+----
+
+# Add error message provided in response body into an exception throw

@@ -6,23 +6,13 @@ include_directories(${CPPNETLIB_INCLUDE_DIRS})
 
 set(SOURCES
     "${HEADER_DIR}/consul.h"
-    "${HEADER_DIR}/http_client.h"
-    "${HEADER_DIR}/ppconsul.h"
+    "${HEADER_DIR}/http_status.h"
     "${HEADER_DIR}/kv.h"
-    http_client.cpp
+    "${HEADER_DIR}/parameters.h"
+    "${HEADER_DIR}/ppconsul.h"
+    consul.cpp
+    parameters.cpp
 )
 
 project(ppconsul)
 add_library(${PROJECT_NAME} ${SOURCES})
-
-project(test-net)
-
-add_executable(${PROJECT_NAME} main.cpp)
-
-target_link_libraries(${PROJECT_NAME} ppconsul)
-target_link_libraries(${PROJECT_NAME} json11)
-
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} ${CPPNETLIB_LIBRARIES})
-
-

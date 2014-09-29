@@ -1,13 +1,19 @@
 #include <json11.hpp>
 #include <iostream>
-#include "ppconsul/http_client.h"
+#include "ppconsul/ppconsul.h"
 
 
 int main(int argc, char *argv[])
 {
+    if (argc < 2)
+    {
+        std::cout << "Usage: " << argv[0] << " url-to-fetch" << std::endl;
+        return 2;
+    }
+        
     try
     {
-        std::cout << ppconsul::http::Client("http://localhost:8500").get(argv[1], {{"pretty", 1}}) << std::endl;
+        std::cout << ppconsul::Consul().get(argv[1]) << std::endl;
     }
     catch (const std::exception& ex)
     {
