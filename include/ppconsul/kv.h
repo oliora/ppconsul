@@ -1,6 +1,6 @@
 #pragma once
 
-#include "client.h"
+#include "consul.h"
 
 
 namespace ppconsul { namespace kv {
@@ -26,8 +26,8 @@ namespace ppconsul { namespace kv {
     class Storage
     {
     public:
-        explicit Storage(Client& client, const std::string& separator = "/")
-        : m_client(client)
+        explicit Storage(Consul& consul, const std::string& separator = "/")
+        : m_consul(consul)
         , m_separator(separator)
         {}
 
@@ -69,7 +69,7 @@ namespace ppconsul { namespace kv {
         void eraseAll(const std::string& keyPrefix);
 
     private:
-        Client& m_client;
+        Consul& m_consul;
         std::string m_separator;
     };
 
