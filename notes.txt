@@ -43,4 +43,8 @@ namespace ppconsul {
 TODO
 ----
 
-# Add error message provided in response body into an exception throw
++ Add error message provided in response body into an exception throw
+# Consistency modes
+# check JSON parsing error
+# simplify JSON interface
+
