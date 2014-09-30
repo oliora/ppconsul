@@ -18,10 +18,12 @@ There is a vague plan to use [libCURL](http://curl.haxx.se/libcurl/) instead of 
 
 ## API Status
 
+The implementation status of different aspects of [Consul HTTP API](http://www.consul.io/docs/agent/http.html):
+
 In progress:
 * **kv**
 
-TBD:
+To do:
 * **agent**
 * **catalog**
 * **health**
@@ -50,7 +52,7 @@ TBD
 `cd workspace`  
 `cmake ..`  
 
-*Note about -G option of CMake to choose generator to generate build scripts/ project files for.*
+*Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 
 ### Build
 
@@ -64,7 +66,7 @@ TBD
 Use [issue tracker](https://github.com/oliora/ppconsul/issues).
 
 ## Contribute
-Fork it, commit changes and create a pull request. Thank you!
+Fork this repo, commit changes and create a pull request. Welcome on board!
 
 ## License
 The library released under [Boost Software License](http://www.boost.org/LICENSE_1_0.txt).
