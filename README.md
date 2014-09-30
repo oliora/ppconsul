@@ -45,7 +45,7 @@ TBD
 * Install [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
 
 ### Prepare Project
-Execute the following commands:
+Execute the following commands:  
 `git clone git@github.com:oliora/ppconsul.git`  
 `cd ppconsul`  
 `mkdir workspace`  
