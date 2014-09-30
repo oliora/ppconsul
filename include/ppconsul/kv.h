@@ -100,7 +100,7 @@ namespace ppconsul { namespace kv {
             throw BadStatus(std::move(s), std::move(r));
         }
 
-        // Get keys up to a separator provided in ctor. Returns empty vector if no keys found
+        // Get keys up to a separator provided to ctor. Returns empty vector if no keys found
         std::vector<std::string> getKeys(const std::string& keyPrefix, Consistency cons = Consistency::Default)
         {
             return detail::parseKeys(m_consul.get(keyPath(keyPrefix), { { "keys", true }, { "separator", m_separator } }));

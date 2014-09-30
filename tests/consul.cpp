@@ -7,6 +7,7 @@
 #include "ppconsul/consul.h"
 #include "catch.hpp"
 
+
 TEST_CASE( "Make URL", "[http, consul, url]" )
 {
     using ppconsul::impl::makeUrl;
