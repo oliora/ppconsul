@@ -4,7 +4,7 @@
 
 A C++ client library for [Consul](http://consul.io). Consul is a distributed tool for discovering and configuring services in your infrastructure.
 
-The goal of PPConsul is to fully cover version 1 of [Consul HTTP API](http://www.consul.io/docs/agent/http.html).
+The goal of PPConsul is to fully cover version 1 of Consul [HTTP API](http://www.consul.io/docs/agent/http.html).
 
 **Note that this project is just started so it is under active developing, doesn't have a stable interface and was not tested enough.
 So if you are looking for something stable and ready to be used in production then it's better to come back later or help me growing this project to the quality level you need.**
@@ -18,7 +18,7 @@ There is a vague plan to use [libCURL](http://curl.haxx.se/libcurl/) instead of 
 
 ## API Status
 
-The implementation status of different aspects of [Consul HTTP API](http://www.consul.io/docs/agent/http.html):
+The implementation status of HTTP API endpoints coverage:
 
 In progress:
 * **kv**
