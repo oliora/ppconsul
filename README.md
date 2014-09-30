@@ -35,12 +35,12 @@ TBD
 
 ## How To Build 
 
-### Install Prerequirements
-1. Get C++11 compatible compiler. Was tested with Visual Studio 2013 and Xcode 6.0 (Clang 3.5)
-2. Install [Git](http://git-scm.com/) client
-3. Install [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. **Note that CMake 3 not guaranteed to work.**
-4. Download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that this library depends on [Boost](http://www.boost.org/).
-5. Install [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
+### Install Prerequirements:
+* Get C++11 compatible compiler. Was tested with Visual Studio 2013 and Xcode 6.0 (Clang 3.5)
+* Install [Git](http://git-scm.com/) client
+* Install [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. **Note that CMake 3 not guaranteed to work.**
+* Download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that this library depends on [Boost](http://www.boost.org/).
+* Install [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
 
 ### Prepare Project
 
@@ -50,9 +50,11 @@ TBD
 `cd workspace`  
 `cmake ..`  
 
+*Note about -G option of CMake to choose IDE to generate project files for.*
+
 ### Build
 
-Linux/OSX: `make` 
+Linux/OSX: `make`  
 Windows: open generated solution file in MSVS (check `workspace` directory for it) or build from command line with `cmake --build . --config release`
 
 ## How To Run Tests
