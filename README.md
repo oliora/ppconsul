@@ -2,7 +2,7 @@
 
 *Version 0.1*
 
-A C++ client library for [Consul](http://consul.io). Consul is a *tool for discovering and configuring services in your infrastructure*.
+A C++ client library for [Consul](http://consul.io). Consul is a distributed tool for discovering and configuring services in your infrastructure.
 
 The goal of PPConsul is to fully cover version 1 of [Consul HTTP API](http://www.consul.io/docs/agent/http.html).
 
@@ -16,18 +16,30 @@ It uses [Catch unit test framework](https://github.com/philsquared/Catch) for te
 
 There is a vague plan to use [libCURL](http://curl.haxx.se/libcurl/) instead of cpp-netlib because the latter depends on (quite huge) Boost library and need to be build separately so this may prevent some persons from using PPConsul.
 
+## API Status
+
+In progress:
+* **kv**
+
+TBD:
+* **agent**
+* **catalog**
+* **health**
+* **session**
+* **acl** - 
+* **event**
+* **status**
+
 ## Documentation
 TBD
 
-## How To Build 
-
 ## Prerequirements
-1. **C++11 compatible** compiler. Was tested with Visual Studio 2013 and Xcode 6.0 (Clang 3.5)
+1. C++11 compatible compiler. Was tested with Visual Studio 2013 and Xcode 6.0 (Clang 3.5)
 2. [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. **Note that CMake 3 not guaranteed to work.**
 3. [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that this library depends on [Boost](http://www.boost.org/).
 4. [Consul](http://consul.io) 0.4.0 or above. It's optional and needed only to run some of the tests.
 
-
+## How To Build 
 * Install all the prerequirements specified
 * Build C++ Network Library as described in [documentation](http://cpp-netlib.org/0.11.0/getting_started.html)
 * `git clone git@github.com:oliora/ppconsul.git`
