@@ -22,7 +22,7 @@ The library uses [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) 
 [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
 It uses [Catch unit test framework](https://github.com/philsquared/Catch) for testing.
 
-There is a vague plan to use [libCURL](http://curl.haxx.se/libcurl/) instead of cpp-netlib because the latter depends on (quite huge) Boost library and need to be build separately so this may prevent some persons from using PPConsul.
+There is a vague plan to use [libCURL](http://curl.haxx.se/libcurl/) instead of cpp-netlib because the latter depends on (quite huge) Boost library and need to be build separately what can turn somebody away from taking PPConsul in use.
 
 ## API Status
 
