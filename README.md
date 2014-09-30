@@ -29,16 +29,16 @@ There is a vague plan to use [libCURL](http://curl.haxx.se/libcurl/) instead of 
 The implementation status of HTTP API endpoints coverage:
 
 In progress:
-* **kv**
+* kv
 
 To do:
-* **agent**
-* **catalog**
-* **health**
-* **session**
-* **acl** - 
-* **event**
-* **status**
+* agent
+* catalog
+* health
+* session
+* acl
+* event
+* status
 
 ## Documentation
 TBD
@@ -48,7 +48,7 @@ TBD
 ### Dependencies
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [Git](http://git-scm.com/) client.
-* Install [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. **Note that CMake 3 not guaranteed to work.**
+* Install [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. Note that CMake 3 not guaranteed to work.
 * Download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that this library depends on [Boost](http://www.boost.org/).
 * Install [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
 
