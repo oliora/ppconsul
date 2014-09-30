@@ -60,7 +60,8 @@ Linux/OSX:
 `make`  
 
 Windows:  
-open `workspace\ppconsul.sln` file in MSVS and build it there or build from command line with `cmake --build . --config release`.
+open `workspace\ppconsul.sln` file in MSVS and build it there or build from command line with  
+`cmake --build . --config release`.
 
 ## How To Run Tests
 TBD
