@@ -10,6 +10,7 @@ set(SOURCES
     "${HEADER_DIR}/kv.h"
     "${HEADER_DIR}/parameters.h"
     "${HEADER_DIR}/ppconsul.h"
+    http_client_impl_netlib.h
     consul.cpp
     parameters.cpp
 )

@@ -19,9 +19,6 @@ namespace ppconsul { namespace http {
         , m_message(std::move(message))
         {}
 
-        // Returns success()
-        explicit operator bool() const PPCONSUL_NOEXCEPT{ return success(); }
-
         // Returns true if code() is 2xx (i.e. success) and false otherwise
         bool success() const PPCONSUL_NOEXCEPT{ return 2 == m_code / 100; }
 

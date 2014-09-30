@@ -1,5 +1,6 @@
 #include "ppconsul/consul.h"
 #include "http_client_impl_netlib.h"
+#include <cstdio>
 
 
 namespace ppconsul {
@@ -14,10 +15,21 @@ namespace ppconsul {
             else
                 return "http://" + addr;
         }
-    
+
+        template<class... T>
+        std::string format(const char *fmt, const T&...t)
+        {
+            const auto len = snprintf(nullptr, 0, fmt, t...);
+            std::string r;
+            r.resize(static_cast<size_t>(len) + 1);
+            snprintf(&r.front(), len + 1, fmt, t...);  // Bad boy
+            r.resize(static_cast<size_t>(len));
+
+            return r;
+        }
     }
 
-    namespace impl {
+    namespace detail {
         inline std::string makeUrl(const std::string& addr, const std::string& path, const Parameters& parameters)
         {
             auto query = parameters.query();
@@ -39,16 +51,21 @@ namespace ppconsul {
 
     const char *BadStatus::what() const PPCONSUL_NOEXCEPT
     {
-        char prefix[] = "HTTP ";
-
         if (m_what.empty())
         {
-            // 3 is for status code + space - NULL of prefix
-            m_what.reserve((sizeof(prefix) / sizeof(prefix[0])) + m_status.message().size() + 3);
-            m_what = prefix;
-            m_what += std::to_string(m_status.code());
-            m_what += ' ';
-            m_what += m_status.message();
+            if (!m_message.empty())
+            {
+                m_what = format("%s [%03d %s]",
+                                m_message.c_str(),
+                                m_status.code(),
+                                m_status.message().c_str());
+            }
+            else
+            {
+                m_what = format("%03d %s",
+                                m_status.code(),
+                                m_status.message().c_str());
+            }
         }
 
         return m_what.c_str();
@@ -70,7 +87,7 @@ namespace ppconsul {
         Parameters p = m_defaultParams;
         p.update(params);
 
-        return impl::makeUrl(m_addr, path, params);
+        return detail::makeUrl(m_addr, path, params);
     }
 
     std::string Consul::get(http::Status& status, const std::string& path, const Parameters& params)
