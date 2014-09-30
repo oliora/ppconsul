@@ -34,15 +34,15 @@ TBD:
 TBD
 
 ## How To Build 
-Install prerequirements:
 
+### Install Prerequirements
 1. Get C++11 compatible compiler. Was tested with Visual Studio 2013 and Xcode 6.0 (Clang 3.5)
-2. [Git](http://git-scm.com/) client
-3. [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. **Note that CMake 3 not guaranteed to work.**
-4. [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that this library depends on [Boost](http://www.boost.org/).
-5. [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
+2. Install [Git](http://git-scm.com/) client
+3. Install [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. **Note that CMake 3 not guaranteed to work.**
+4. Download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that this library depends on [Boost](http://www.boost.org/).
+5. Install [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
 
-Build C++ Network Library as described in [documentation](http://cpp-netlib.org/0.11.0/getting_started.html)  
+### Prepare Project
 
 `git clone git@github.com:oliora/ppconsul.git`  
 `cd ppconsul`  
@@ -50,11 +50,10 @@ Build C++ Network Library as described in [documentation](http://cpp-netlib.org/
 `cd workspace`  
 `cmake ..`  
 
-### Linux/OSX
-`make` 
+### Build
 
-### Windows
-Open generated solution file in MSVS (check `workspace` directory for it) or build from command line with `cmake --build . --config release`
+Linux/OSX: `make` 
+Windows: open generated solution file in MSVS (check `workspace` directory for it) or build from command line with `cmake --build . --config release`
 
 ## How To Run Tests
 TBD
