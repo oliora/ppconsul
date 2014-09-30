@@ -14,6 +14,7 @@ set(HEADERS
     consul.h
     helpers.h
     http_status.h
+    json.h
     kv.h
     parameters.h
     ppconsul.h
@@ -22,6 +23,7 @@ set(HEADERS
 set(SOURCES
     http_client_impl_netlib.h
     consul.cpp
+    helpers.cpp
     parameters.cpp
 )
 

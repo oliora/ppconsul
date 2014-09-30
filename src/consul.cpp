@@ -23,7 +23,7 @@ namespace ppconsul {
         }
     }
 
-    namespace detail {
+    namespace impl {
         inline std::string makeUrl(const std::string& addr, const std::string& path, const Parameters& parameters)
         {
             auto query = parameters.query();
@@ -81,7 +81,7 @@ namespace ppconsul {
         Parameters p = m_defaultParams;
         p.update(params);
 
-        return detail::makeUrl(m_addr, path, params);
+        return impl::makeUrl(m_addr, path, params);
     }
 
     std::string Consul::get(http::Status& status, const std::string& path, const Parameters& params)

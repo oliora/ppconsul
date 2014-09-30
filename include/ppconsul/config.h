@@ -15,3 +15,9 @@
 #else
     #define PPCONSUL_NOEXCEPT
 #endif
+
+#if defined _WIN32 && ! defined PPCONSUL_SNPRINTF_DEFINED && ! defined snprintf
+    #define PPCONSUL_SNPRINTF_DEFINED
+    #define snprintf _snprintf
+#endif
+

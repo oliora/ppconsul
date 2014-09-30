@@ -9,7 +9,7 @@
 
 TEST_CASE( "Make URL", "[http, consul, url]" )
 {
-    using ppconsul::detail::makeUrl;
+    using ppconsul::impl::makeUrl;
 
     CHECK(makeUrl("http://www.example.com", "/something/interesting", { { "1stparam", "urgent" }, { "2ndparam", 2 } }) ==
         "http://www.example.com/something/interesting?1stparam=urgent&2ndparam=2");
@@ -40,10 +40,10 @@ TEST_CASE( "throwStatusError", "[http, consul, status, error]" )
 {
     using namespace ppconsul;
 
-    CHECK_THROWS_AS(detail::throwStatusError(http::Status(500, "Internal Server Error"), "No path to datacenter"), BadStatus);
-    CHECK_THROWS_AS(detail::throwStatusError(http::Status(500, "Internal Server Error")), BadStatus);
-    CHECK_THROWS_AS(detail::throwStatusError(http::Status(500)), BadStatus);
-    CHECK_THROWS_AS(detail::throwStatusError(http::Status(404, "Not Found"), "Something"), NotFoundError);
-    CHECK_THROWS_AS(detail::throwStatusError(http::Status(404, "Not Found")), NotFoundError);
-    CHECK_THROWS_AS(detail::throwStatusError(http::Status(404)), NotFoundError);
+    CHECK_THROWS_AS(throwStatusError(http::Status(500, "Internal Server Error"), "No path to datacenter"), BadStatus);
+    CHECK_THROWS_AS(throwStatusError(http::Status(500, "Internal Server Error")), BadStatus);
+    CHECK_THROWS_AS(throwStatusError(http::Status(500)), BadStatus);
+    CHECK_THROWS_AS(throwStatusError(http::Status(404, "Not Found"), "Something"), NotFoundError);
+    CHECK_THROWS_AS(throwStatusError(http::Status(404, "Not Found")), NotFoundError);
+    CHECK_THROWS_AS(throwStatusError(http::Status(404)), NotFoundError);
 }

@@ -6,15 +6,23 @@
 
 #pragma once
 
-#include "config.h"
-#include "parameters.h"
-#include "http_status.h"
+#include "ppconsul/config.h"
+#include "ppconsul/parameters.h"
+#include "ppconsul/http_status.h"
 #include <string>
 #include <memory>
 #include <stdexcept>
 
 
 namespace ppconsul {
+
+    namespace impl {
+        // Forward declaraion to use with PIMPL
+        class HttpClient;
+
+        // Declared in header to be available for tests
+        std::string makeUrl(const std::string& addr, const std::string& path, const Parameters& parameters = Parameters());
+    }
 
     class Error: public std::exception {};
 
@@ -53,6 +61,8 @@ namespace ppconsul {
         {}
     };
 
+    void throwStatusError(http::Status status, std::string body = "");
+
     enum class Consistency
     {
         Default,
@@ -60,16 +70,6 @@ namespace ppconsul {
         Stale
     };
 
-    namespace impl {
-        class HttpClient; // Forward declaraion to use with PIMPL
-    }
-
-    namespace detail {
-        std::string makeUrl(const std::string& addr, const std::string& path, const Parameters& parameters = Parameters());
-
-        void throwStatusError(http::Status status, std::string body = "");
-    }
-    
     const char Default_Server_Address[] = "localhost:8500";
 
     class Consul
@@ -95,10 +95,9 @@ namespace ppconsul {
         std::unique_ptr<impl::HttpClient> m_client; // PIMPL
     };
 
-
     // Implementation
 
-    inline void detail::throwStatusError(http::Status status, std::string body)
+    inline void throwStatusError(http::Status status, std::string body)
     {
         if (NotFoundError::Code == status.code())
         {
@@ -116,7 +115,7 @@ namespace ppconsul {
         http::Status s;
         auto r = get(s, path, parameters);
         if (!s.success())
-            detail::throwStatusError(std::move(s), std::move(r));
+            throwStatusError(std::move(s), std::move(r));
         return r;
     }
 
@@ -125,7 +124,7 @@ namespace ppconsul {
         http::Status s;
         auto r = put(s, path, body, parameters);
         if (!s.success())
-            detail::throwStatusError(std::move(s), std::move(r));
+            throwStatusError(std::move(s), std::move(r));
         return r;
     }
 
@@ -134,7 +133,7 @@ namespace ppconsul {
         http::Status s;
         auto r = del(s, path, parameters);
         if (!s.success())
-            detail::throwStatusError(std::move(s), std::move(r));
+            throwStatusError(std::move(s), std::move(r));
         return r;
     }
 

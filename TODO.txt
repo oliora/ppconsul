@@ -1,0 +1,30 @@
+# TODO
+
+
+### General
+
++ Add error message provided in response body into an exception throw
+- run integration tests manually
+- Consistency modes
+- Check JSON parsing errors
+- Simplify JSON interface
+
+
+### CI
+
+- build for 3 platforms (Windows, Linux, OSX)
+- run unit-tests
+- run integration tests
+
+
+### kv
+
++ Decode value from base64
+- Integration tests
+- acquire/release lock
+
+
+### services
+
+
+

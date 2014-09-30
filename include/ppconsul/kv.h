@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include "consul.h"
-#include <json11.hpp>
+#include "ppconsul/consul.h"
+#include "ppconsul/helpers.h"
+#include "ppconsul/json.h"
 #include <vector>
 #include <stdint.h>
 
@@ -44,17 +45,9 @@ namespace ppconsul { namespace kv {
 
 
     namespace detail {
-        inline uint64_t uint64_value(const json11::Json& v)
-        {
-            // TODO: support full precision of uint64_t
-            return static_cast<uint64_t>(v.number_value());
-        }
-
         std::vector<std::string> parseKeys(const std::string& resp);
 
         std::vector<KeyValue> parseValues(const std::string& resp);
-
-        using ppconsul::detail::throwStatusError;
     }
     
 
@@ -79,10 +72,9 @@ namespace ppconsul { namespace kv {
 
             if (s.success())
                 return detail::parseValues(r).at(0);
-
-            if (NotFoundError::Code != s.code())
-                detail::throwStatusError(std::move(s), std::move(r));
-            return {};
+            if (NotFoundError::Code == s.code())
+                return{};
+            throw BadStatus(std::move(s), std::move(r));
         }
 
         // Returns defaultValue if key does not exist
@@ -103,10 +95,9 @@ namespace ppconsul { namespace kv {
 
             if (s.success())
                 return detail::parseValues(r);
-
-            if (NotFoundError::Code != s.code())
-                detail::throwStatusError(std::move(s), std::move(r));
-            return {};
+            if (NotFoundError::Code == s.code())
+                return{};
+            throw BadStatus(std::move(s), std::move(r));
         }
 
         // Get keys up to a separator provided in ctor. Returns empty vector if no keys found
@@ -172,10 +163,7 @@ namespace ppconsul { namespace kv {
 
     inline std::vector<std::string> detail::parseKeys(const std::string& resp)
     {
-        std::string err;
-        auto obj = json11::Json::parse(resp, err);
-
-        // TODO check obj.is_null() and throw parsing error
+        auto obj = json::parse_json(resp);
 
         std::vector<std::string> r;
         r.reserve(obj.array_items().size());
@@ -187,29 +175,25 @@ namespace ppconsul { namespace kv {
 
     inline std::vector<KeyValue> detail::parseValues(const std::string& resp)
     {
-        std::string err;
-        auto obj = json11::Json::parse(resp, err);
-        // TODO check obj.is_null() and throw parsing error
+        using namespace json;
 
+        auto obj = parse_json(resp);
+ 
         std::vector<KeyValue> r;
         r.reserve(obj.array_items().size());
 
         for (const auto& i: obj.array_items())
         {
-            KeyValue kv;
-
             const auto& o = i.object_items();
 
+            KeyValue kv;
             kv.m_createIdx = uint64_value(o.at("CreateIndex"));
             kv.m_modifyIdx = uint64_value(o.at("ModifyIndex"));
-            kv.m_lockIdx   = uint64_value(o.at("LockIndex"));
-            kv.m_key       = o.at("Key").string_value();
-            kv.m_flags     = uint64_value(o.at("Flags"));
-            kv.m_value     = o.at("Value").string_value(); // TODO: decode from base64
-
-            // TODO: generalize
-            if (o.count("Session"))
-                kv.m_session = o.at("Session").string_value();
+            kv.m_lockIdx = uint64_value(o.at("LockIndex"));
+            kv.m_key = o.at("Key").string_value();
+            kv.m_flags = uint64_value(o.at("Flags"));
+            kv.m_value = helpers::decodeBase64(o.at("Value").string_value());
+            kv.m_session = o.at("Session").string_value();
 
             r.push_back(std::move(kv));
         }

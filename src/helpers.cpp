@@ -4,11 +4,15 @@
 //  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#pragma once
+#include "ppconsul/helpers.h"
+#include <boost/network/utils/base64/encode.hpp>
 
-// Meta header which includes all PPConsul headers needed to the library user
 
-#include "ppconsul/config.h"
+namespace ppconsul { namespace helpers {
 
-#include "ppconsul/consul.h"
-#include "ppconsul/kv.h"
+    std::string decodeBase64(const std::string& s)
+    {
+        return boost::network::utils::base64::encode<char>(s);
+    }
+
+}}

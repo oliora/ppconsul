@@ -6,12 +6,9 @@
 
 #pragma once
 
+#include "ppconsul/config.h"
 #include <cstdio>
-
-#if defined _WIN32 && ! defined PPCONSUL_SNPRINTF_DEFINED && ! defined snprintf
-    #define PPCONSUL_SNPRINTF_DEFINED
-    #define snprintf _snprintf
-#endif
+#include <string>
 
 
 namespace ppconsul { namespace helpers {
@@ -27,5 +24,7 @@ namespace ppconsul { namespace helpers {
 
         return r;
     }
+
+    std::string decodeBase64(const std::string& s);
 
 }}
