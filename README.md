@@ -13,10 +13,10 @@ The goal of PPConsul is to:
 Note that this project is just started so it is under active developing, doesn't have a stable interface and was not tested enough.
 So if you are looking for something stable and ready to be used in production then it's better to come back later or help me growing this project to the quality level you need.
 
-The library is written in C++11 and can not be compiled with old compilers. The compilers known to work are:
-* Visual Studio 2013
-* Xcode 6.0 (Clang 3.5)
-* GCC 4.8
+The library is written in C++11 and demands a quite modern compiler to be build. The list of officially supported compilers are:
+* Visual Studio 2013 or above
+* Xcode 6.0 (Clang 3.5) or above
+* g++ 4.8 or above
 
 The library uses [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP and
 [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
