@@ -14,7 +14,7 @@ endif ()
 
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 elseif (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ftemplate-depth=256 -std=c++11 -stdlib=libc++")
 elseif (MSVC)
