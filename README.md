@@ -50,12 +50,12 @@ TBD
 `cd workspace`  
 `cmake ..`  
 
-*Note about -G option of CMake to choose IDE to generate project files for.*
+*Note about -G option of CMake to choose generator to generate build scripts/ project files for.*
 
 ### Build
 
 Linux/OSX: `make`  
-Windows: open generated solution file in MSVS (check `workspace` directory for it) or build from command line with `cmake --build . --config release`
+Windows: open `workspace\ppconsul.sln` file in MSVS and build it there or build from command line with `cmake --build . --config release`.
 
 ## How To Run Tests
 TBD
