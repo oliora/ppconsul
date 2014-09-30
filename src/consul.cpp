@@ -1,6 +1,6 @@
 #include "ppconsul/consul.h"
+#include "ppconsul/helpers.h"
 #include "http_client_impl_netlib.h"
-#include <cstdio>
 
 
 namespace ppconsul {
@@ -14,18 +14,6 @@ namespace ppconsul {
                 return addr;
             else
                 return "http://" + addr;
-        }
-
-        template<class... T>
-        std::string format(const char *fmt, const T&...t)
-        {
-            const auto len = snprintf(nullptr, 0, fmt, t...);
-            std::string r;
-            r.resize(static_cast<size_t>(len) + 1);
-            snprintf(&r.front(), len + 1, fmt, t...);  // Bad boy
-            r.resize(static_cast<size_t>(len));
-
-            return r;
         }
     }
 
@@ -55,16 +43,16 @@ namespace ppconsul {
         {
             if (!m_message.empty())
             {
-                m_what = format("%s [%03d %s]",
-                                m_message.c_str(),
-                                m_status.code(),
-                                m_status.message().c_str());
+                m_what = helpers::format("%s [%03d %s]",
+                    m_message.c_str(),
+                    m_status.code(),
+                    m_status.message().c_str());
             }
             else
             {
-                m_what = format("%03d %s",
-                                m_status.code(),
-                                m_status.message().c_str());
+                m_what = helpers::format("%03d %s",
+                    m_status.code(),
+                    m_status.message().c_str());
             }
         }
 
