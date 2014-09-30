@@ -8,7 +8,8 @@ The goal of PPConsul is to:
 * Fully cover version 1 of Consul [HTTP API](http://www.consul.io/docs/agent/http.html).
 * Provide simple but modular and effective API based on modern C++ approaches. This includes to be C++11 aware.
 * Support different platforms. At the moment, Linux, Windows and OSX platforms supported.
-* Be fully covered with automated tests.
+* Cover all the code with automated tests.
+* Have documentation.
 
 Note that this project is just started so it is under active developing, doesn't have a stable interface and was not tested enough.
 So if you are looking for something stable and ready to be used in production then it's better to come back later or help me growing this project to the quality level you need.
