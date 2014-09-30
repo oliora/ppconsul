@@ -43,8 +43,7 @@ TEST_CASE("Parameters ctor", "[parameters]")
     CHECK(Parameters({ "long", long(2147483647ll) }).query() == "long=2147483647");
 
     CHECK(Parameters({ { "longlong", 9223372036854775807ll } }).query() == "longlong=9223372036854775807");
-    // TODO: use -9223372036854775808 when clang bug http://llvm.org/bugs/show_bug.cgi?id=21095 is fixed
-    CHECK(Parameters({ { "neglonglong", -9223372036854775807ll } }).query() == "neglonglong=-9223372036854775807");
+    CHECK(Parameters({ { "neglonglong", -9223372036854775807ll - 1 } }).query() == "neglonglong=-9223372036854775808");
     CHECK(Parameters({ { "ulonglong", 18446744073709551615ull } }).query() == "ulonglong=18446744073709551615");
     CHECK(Parameters({ "ulonglong", 18446744073709551615ull }).query() == "ulonglong=18446744073709551615");
 
