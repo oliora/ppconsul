@@ -11,7 +11,7 @@
 using ppconsul::Parameters;
 
 
-TEST_CASE("Parameters ctor", "[parameters]")
+TEST_CASE("parameters.Parameters ctor", "[parameters]")
 {
     CHECK(Parameters({ { "Do it", "Best as you can" } }).query() == "Do it=Best as you can");
     CHECK(Parameters({ "Do it", "Best as you can" }).query() == "Do it=Best as you can");
@@ -72,7 +72,7 @@ TEST_CASE("Parameters ctor", "[parameters]")
     CHECK(Parameters({ "false", false }).query() == "false=0");
 }
 
-TEST_CASE("Parameters ctor from reference", "[parameters]")
+TEST_CASE("parameters.Parameters ctor from reference", "[parameters]")
 {
     char chararr[] = "Best as you can";
     char *c_str = chararr;
@@ -138,13 +138,13 @@ TEST_CASE("Parameters ctor from reference", "[parameters]")
 
 }
 
-TEST_CASE("Multiple parameters ctor", "[parameters]")
+TEST_CASE("parameters.Multiple parameters ctor", "[parameters]")
 {
     auto p = Parameters({ { "intparam1", 1 }, { "strparam2", "value2" }, { "doubleparam3", 0.2 } });
     CHECK(p.query() == "doubleparam3=0.200000&intparam1=1&strparam2=value2");
 }
 
-TEST_CASE("Default constructed parameters", "[parameters]")
+TEST_CASE("parameters.Default constructed parameters", "[parameters]")
 {
     auto p = Parameters();
 
@@ -152,7 +152,7 @@ TEST_CASE("Default constructed parameters", "[parameters]")
     CHECK(p.query() == "");
 }
 
-TEST_CASE("Update parameters", "[parameters]")
+TEST_CASE("parameters.Update parameters", "[parameters]")
 {
     auto p = Parameters();
 
@@ -173,7 +173,7 @@ TEST_CASE("Update parameters", "[parameters]")
     REQUIRE(!p.empty());
 }
 
-TEST_CASE("Update parameters from reference", "[parameters]")
+TEST_CASE("parameters.Update parameters from reference", "[parameters]")
 {
     auto p1 = Parameters();
 
@@ -242,7 +242,7 @@ TEST_CASE("Update parameters from reference", "[parameters]")
     CHECK(p6.query() == "p1=-0.100000&p2=-0.100000");
 }
 
-TEST_CASE("Overwrite parameters", "[parameters]")
+TEST_CASE("parameters.Overwrite parameters", "[parameters]")
 {
     auto p = Parameters({ { "p1", 1 }, { "p2", "value2" } });
     REQUIRE(p.query() == "p1=1&p2=value2");
@@ -260,7 +260,7 @@ TEST_CASE("Overwrite parameters", "[parameters]")
     REQUIRE(!p.empty());
 }
 
-TEST_CASE("Ctor then update parameters", "[parameters]")
+TEST_CASE("parameters.Ctor then update parameters", "[parameters]")
 {
     auto p = Parameters({ { "intparam1", 1 }, { "strparam2", "value2" } });
     REQUIRE(p.query() == "intparam1=1&strparam2=value2");
@@ -275,7 +275,7 @@ TEST_CASE("Ctor then update parameters", "[parameters]")
     REQUIRE(!p.empty());
 }
 
-TEST_CASE("Clear and empty parameters", "[parameters]")
+TEST_CASE("parameters.Clear and empty parameters", "[parameters]")
 {
     auto p = Parameters({ { "param1", 1 }, { "param2", "value2" } });
     REQUIRE(!p.empty());
@@ -298,7 +298,7 @@ TEST_CASE("Clear and empty parameters", "[parameters]")
     REQUIRE(!p.empty());
 }
 
-TEST_CASE("Copy parameters", "[parameters]")
+TEST_CASE("parameters.Copy parameters", "[parameters]")
 {
     auto p = Parameters({ { "param1", 1 }, { "param2", "value2" } });
     REQUIRE(!p.empty());
@@ -311,7 +311,7 @@ TEST_CASE("Copy parameters", "[parameters]")
     CHECK(p2.query() == p.query());
 }
 
-TEST_CASE("Move parameters", "[parameters]")
+TEST_CASE("parameters.Move parameters", "[parameters]")
 {
     auto p = Parameters({ { "param1", 1 }, { "param2", "value2" } });
     REQUIRE(!p.empty());

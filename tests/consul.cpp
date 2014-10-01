@@ -8,7 +8,7 @@
 #include "catch.hpp"
 
 
-TEST_CASE( "Make URL", "[http, consul, url]" )
+TEST_CASE( "consul.makeUrl", "[http][consul][url]" )
 {
     using ppconsul::impl::makeUrl;
 
@@ -25,7 +25,7 @@ TEST_CASE( "Make URL", "[http, consul, url]" )
         "http://127.0.0.1:8090/something/interesting?p1=42");
 }
 
-TEST_CASE( "BadStatus", "[http, consul, status, error]" )
+TEST_CASE( "consul.BadStatus", "[http][consul][status][error]" )
 {
     using ppconsul::BadStatus;
     using ppconsul::http::Status;
@@ -37,7 +37,7 @@ TEST_CASE( "BadStatus", "[http, consul, status, error]" )
     CHECK(std::string(BadStatus(Status(1)).what()).find("001") == 0);
 }
 
-TEST_CASE( "throwStatusError", "[http, consul, status, error]" )
+TEST_CASE( "consul.throwStatusError", "[http][consul][status][error]" )
 {
     using namespace ppconsul;
 
