@@ -16,7 +16,7 @@ using ppconsul::kv::KeyValue;
 
 namespace 
 {
-    auto const Non_Existing_Key = "{6DD1E923-71E6-4448-A0B7-57B5F32690E7}";
+    auto const Non_Existing_Key = "6DD1E923-71E6-4448-A0B7-57B5F32690E7";
 }
 
 TEST_CASE("kv.invalid KeyValue", "[consul][kv]")

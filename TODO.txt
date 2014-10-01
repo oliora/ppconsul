@@ -8,7 +8,7 @@
 - Consistency modes
 - Check JSON parsing errors
 - Simplify JSON interface
-
+- Encode URL (don't encode special characters)
 
 ### CI
 
