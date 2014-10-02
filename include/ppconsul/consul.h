@@ -80,6 +80,9 @@ namespace ppconsul {
         Consul(Consul &&op);
         Consul& operator= (Consul &&op);
 
+        Consul(const Consul &op) = delete;
+        Consul& operator= (const Consul &op) = delete;
+
         std::string get(const std::string& path, const Parameters& params = Parameters());
         std::string get(http::Status& status, const std::string& path, const Parameters& params = Parameters());
 
