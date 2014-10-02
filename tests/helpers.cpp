@@ -12,8 +12,18 @@ TEST_CASE("helpers.base64decode", "[parameters]")
 {
     using ppconsul::helpers::decodeBase64;
 
-    CHECK(decodeBase64("YmxhLWJs") == "bla-bl");
-    CHECK(decodeBase64("YmxhLWJsYQ==") == "bla-bla");
-    //decodeBase64("\x0Awow\x10\x15""bla");
-    //decodeBase64("wow\x10\x15""bla");
+    CHECK("" == decodeBase64(""));
+    CHECK("sure." == decodeBase64("c3VyZS4="));
+    CHECK("sure." == decodeBase64("c3VyZS4"));
+    CHECK("sure" == decodeBase64("c3VyZQ=="));
+    CHECK("sure" == decodeBase64("c3VyZQ"));
+    CHECK("sur" == decodeBase64("c3Vy"));
+    CHECK("su" == decodeBase64("c3U="));
+    CHECK("s" == decodeBase64("cw=="));
+    CHECK("bla-bl" == decodeBase64("YmxhLWJs"));
+    CHECK("bla-bla" == decodeBase64("YmxhLWJsYQ=="));
+    CHECK("bla-bla" == decodeBase64("\x10YmxhLWJsYQ=="));
+
+    CHECK("bla-bla" == decodeBase64("YmxhLWJ\x10\x15sYQ=="));
+    CHECK_NOTHROW(decodeBase64("Ym\x15xhL\x0WJsYQ==")); // Not a real test, just be sure that it's not fail
 }

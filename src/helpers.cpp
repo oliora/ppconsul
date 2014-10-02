@@ -5,7 +5,6 @@
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "ppconsul/helpers.h"
-#include <boost/network/protocol/http/message.hpp>
 
 extern "C" {
     #include <b64/cdecode.h>
@@ -22,7 +21,6 @@ namespace ppconsul { namespace helpers {
         base64_decodestate state;
         base64_init_decodestate(&state);
         auto len = base64_decode_block(s.data(), s.size(), &r.front(), &state);
-        // TODO: check result and throw FormatError
         r.resize(static_cast<size_t>(len));
         return r;
     }

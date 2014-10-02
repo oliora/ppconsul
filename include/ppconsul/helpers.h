@@ -26,12 +26,14 @@ namespace ppconsul { namespace helpers {
         return r;
     }
 
-    class Base64Error: public ppconsul::Error
+    /*class Base64Error: public ppconsul::Error
     {
     public:
         virtual const char *what() const PPCONSUL_NOEXCEPT override { return "Wrong character in base64 string"; }
-    };
+    };*/
 
+    // Note that implementation used is liberal to the input: it allows characters outside the alphabete and
+    // incorrect padding.
     std::string decodeBase64(const std::string& s);
 
 }}
