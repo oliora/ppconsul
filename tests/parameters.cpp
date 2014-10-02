@@ -5,7 +5,7 @@
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "ppconsul/parameters.h"
-#include "catch.hpp"
+#include <catch/catch.hpp>
 
 
 using ppconsul::Parameters;

@@ -8,7 +8,7 @@
 
 #include "ppconsul/config.h"
 #include "ppconsul/error.h"
-#include <json11.hpp>
+#include <json11/json11.hpp>
 
 
 namespace ppconsul { namespace json {

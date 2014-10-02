@@ -5,7 +5,7 @@
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "ppconsul/consul.h"
-#include "catch.hpp"
+#include <catch/catch.hpp>
 
 
 TEST_CASE( "consul.makeUrl", "[http][consul][url]" )

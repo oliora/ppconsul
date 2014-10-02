@@ -36,7 +36,11 @@ find_package(Boost 1.55 REQUIRED COMPONENTS thread filesystem system date_time c
 
 find_package(cppnetlib 0.11.0 REQUIRED)
 
-set(JSON11_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/ext/json11")
+
+set(LIBB64_DIR "${CMAKE_SOURCE_DIR}/ext/b64")
+set(LIBB64_SOURCES "${LIBB64_DIR}/cdecode.h" "${LIBB64_DIR}/cdecode.c" "${LIBB64_DIR}/cencode.h" "${LIBB64_DIR}/cencode.c")
+
+#set(JSON11_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/ext/json11")
 set(CATCH_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/ext/catch")
 set(HEADERS_DIR "${CMAKE_SOURCE_DIR}/include/ppconsul")
 

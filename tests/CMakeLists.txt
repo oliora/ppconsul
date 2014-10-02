@@ -13,9 +13,10 @@ macro(link_test_libs project_name)
 endmacro()
 
 include_directories(../include)
-include_directories(${JSON11_INCLUDE_DIRS})
-include_directories(${CATCH_INCLUDE_DIRS})
+#include_directories(${JSON11_INCLUDE_DIRS})
+#include_directories(${CATCH_INCLUDE_DIRS})
 
+include_directories(../ext)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CPPNETLIB_INCLUDE_DIRS})
 
@@ -26,6 +27,7 @@ link_test_libs(${PROJECT_NAME})
 project(unittests)
 add_executable(${PROJECT_NAME} main.cpp
     consul.cpp
+    helpers.cpp
     parameters.cpp
 )
 link_test_libs(${PROJECT_NAME})

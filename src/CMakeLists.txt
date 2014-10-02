@@ -5,10 +5,13 @@
 #  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 include_directories(../include)
-include_directories(${JSON11_INCLUDE_DIRS})
+#include_directories(${JSON11_INCLUDE_DIRS})
+#include_directories(${LIBB64_INCLUDE_DIRS})
 
+include_directories(../ext)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CPPNETLIB_INCLUDE_DIRS})
+
 
 set(HEADERS
     consul.h
@@ -33,4 +36,10 @@ foreach(SRC ${HEADERS})
 endforeach()
 
 project(ppconsul)
-add_library(${PROJECT_NAME} ${SOURCES})
+
+add_library(${PROJECT_NAME}
+    ${SOURCES}
+    ${LIBB64_SOURCES}
+)
+
+source_group(libb64 FILES ${LIBB64_SOURCES})
