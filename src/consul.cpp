@@ -76,6 +76,24 @@ namespace ppconsul {
     Consul::~Consul()
     {}
 
+    Consul::Consul(Consul &&op)
+    : m_defaultParams(std::move(op.m_defaultParams))
+    , m_addr(std::move(op.m_addr))
+    , m_client(std::move(op.m_client))
+    {}
+
+    Consul& Consul::operator= (Consul &&op)
+    {
+        if (this != &op)
+        {
+            m_defaultParams = std::move(op.m_defaultParams);
+            m_addr = std::move(op.m_addr);
+            m_client = std::move(op.m_client);
+        }
+        
+        return *this;
+    }
+
     inline std::string Consul::makeUrl(const std::string& path, const Parameters& params) const
     {
         Parameters p = m_defaultParams;

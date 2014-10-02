@@ -77,6 +77,9 @@ namespace ppconsul {
         explicit Consul(const std::string& dataCenter = "", const std::string& addr = Default_Server_Address);
         ~Consul();
 
+        Consul(Consul &&op);
+        Consul& operator= (Consul &&op);
+
         std::string get(const std::string& path, const Parameters& params = Parameters());
         std::string get(http::Status& status, const std::string& path, const Parameters& params = Parameters());
 
