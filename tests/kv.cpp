@@ -451,6 +451,22 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
                 CHECK(v.session() == "");
             }
 
+            SECTION("change with put value only")
+            {
+                kv.put("key1", "value2");
+
+                KeyValue v = kv.get("key1");
+                REQUIRE(v.valid());
+                CHECK(v.value() == "value2");
+                CHECK(v.createIndex());
+                CHECK(v.modifyIndex());
+                CHECK(!v.lockIndex());
+                // Feature or bug of Consul: the flags are reseted after put without "?flags" specified
+                // CHECK(v.flags() == 0x87654321);
+                CHECK(v.key() == "key1");
+                CHECK(v.session() == "");
+            }
+
             SECTION("change with cas")
             {
                 auto cas = kv.get("key1").modifyIndex();
