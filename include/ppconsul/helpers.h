@@ -7,6 +7,7 @@
 #pragma once
 
 #include "ppconsul/config.h"
+#include "ppconsul/error.h"
 #include <cstdio>
 #include <string>
 
@@ -24,6 +25,12 @@ namespace ppconsul { namespace helpers {
 
         return r;
     }
+
+    class Base64Error: public ppconsul::Error
+    {
+    public:
+        virtual const char *what() const PPCONSUL_NOEXCEPT override { return "Wrong character in base64 string"; }
+    };
 
     std::string decodeBase64(const std::string& s);
 

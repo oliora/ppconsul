@@ -12,6 +12,7 @@ include_directories(${CPPNETLIB_INCLUDE_DIRS})
 
 set(HEADERS
     consul.h
+    error.h
     helpers.h
     http_status.h
     json.h

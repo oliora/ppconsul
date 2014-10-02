@@ -7,6 +7,7 @@
 #pragma once
 
 #include "ppconsul/config.h"
+#include "ppconsul/error.h"
 #include "ppconsul/parameters.h"
 #include "ppconsul/http_status.h"
 #include <string>
@@ -23,8 +24,6 @@ namespace ppconsul {
         // Declared in header to be available for tests
         std::string makeUrl(const std::string& addr, const std::string& path, const Parameters& parameters = Parameters());
     }
-
-    class Error: public std::exception {};
 
     class BadStatus: public Error
     {

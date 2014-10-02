@@ -7,6 +7,7 @@
 #pragma once
 
 #include "ppconsul/config.h"
+#include "ppconsul/error.h"
 #include <json11.hpp>
 
 

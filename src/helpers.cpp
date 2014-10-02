@@ -5,14 +5,17 @@
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "ppconsul/helpers.h"
-#include <boost/network/utils/base64/encode.hpp>
+#include <boost/network/protocol/http/message.hpp>
 
 
 namespace ppconsul { namespace helpers {
 
     std::string decodeBase64(const std::string& s)
     {
-        return boost::network::utils::base64::encode<char>(s);
+        std::string r;
+        if (!boost::network::http::message::base64_decode(s, r))
+            throw Base64Error();
+        return r;
     }
 
 }}
