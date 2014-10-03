@@ -1,6 +1,6 @@
 # HTTP API v1 Implementation Status
 
-The status of Consul HTTP API v1 coverage.
+The status of Consul HTTP API v1 coverage. Note that all implemented features are tested with automated integration tests.
 
 ### kv
 
