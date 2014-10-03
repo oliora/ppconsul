@@ -4,11 +4,15 @@
 ### General
 
 + Add error message provided in response body into an exception throw
-- run integration tests manually
++ run integration tests manually
++ Encode URL (don't encode special characters)
+
 - Consistency modes
+- Blocking queries
+
 - Check JSON parsing errors
 - Simplify JSON interface
-- Encode URL (don't encode special characters)
+
 
 ### CI
 
@@ -22,11 +26,15 @@
 + v1 interface except acquire/release lock and consistency modes
 + Decode value from base64
 + Integration tests
-+ URL encode keys
-- encode value to allow to use any char from 0 to 255
++ URL encode keys (key may contain any char from 0 to 255)
++ ensure value can contain any char from 0 to 255
+
+- Consistency modes
+- Blocking queries
+- Acquire/release lock
+
+- typed value access
 - Get flags as 64bit uint. Now it's treated as double due to json11 limitations
-- consistency modes
-- typed get/put/KeyValue::value
-- acquire/release lock
+
 
 ### services
