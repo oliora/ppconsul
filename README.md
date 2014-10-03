@@ -22,10 +22,10 @@ The library is written in C++11 and requires a quite modern compiler. Compilers 
 The newer versions of specified compilers should work fine but was not tested. The older versions most probably will fail to compile the project.
 
 The library uses
-* [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP
+* [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP.
 * [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
-* [Catch unit test framework](https://github.com/philsquared/Catch) for testing
-* [libb64](http://libb64.sourceforge.net/) library for base64 decoding
+* [Catch](https://github.com/philsquared/Catch) unit test framework.
+* [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
 
 ## API Status
 
