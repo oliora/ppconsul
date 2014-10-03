@@ -12,6 +12,11 @@ else ()
     cmake_minimum_required(VERSION 2.8)
 endif ()
 
+option(USE_CPPNETLIB "Use cpp-netlib as HTTP backend (CURL is used by default)" OFF)
+
+if (${USE_CPPNETLIB})
+    add_definitions(-DPPCONSUL_USE_CPPNETLIB)
+endif ()
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
@@ -34,15 +39,30 @@ enable_testing()
 
 find_package(Boost 1.55 REQUIRED COMPONENTS thread filesystem system date_time chrono regex)
 
-find_package(cppnetlib 0.11.0 REQUIRED)
+if (${USE_CPPNETLIB})
+    find_package(cppnetlib 0.11.0 REQUIRED)
+else ()
+    # Add user specified path to CURL headers/libraries into CMAKE_INCLUDE_PATH/CMAKE_LIBRARY_PATH variables.
+    # Otherwise CURL could not be found on Windows
+    if ("${CURL_ROOT}" STREQUAL "")
+        set (CURL_ROOT "$ENV{CURL_ROOT}")
+    endif ()
 
+    if (NOT ${CURL_ROOT} STREQUAL "")
+    	set (CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CURL_ROOT}/include")
+	   set (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CURL_ROOT}/lib")
+    endif ()
+    find_package(CURL REQUIRED)
+endif ()
 
 set(LIBB64_DIR "${CMAKE_SOURCE_DIR}/ext/b64")
 set(LIBB64_SOURCES "${LIBB64_DIR}/cdecode.h" "${LIBB64_DIR}/cdecode.c" "${LIBB64_DIR}/cencode.h" "${LIBB64_DIR}/cencode.c")
 
-#set(JSON11_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/ext/json11")
 set(CATCH_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/ext/catch")
 set(HEADERS_DIR "${CMAKE_SOURCE_DIR}/include/ppconsul")
+
+include_directories(include)
+include_directories(ext)
 
 add_subdirectory(ext/json11)
 add_subdirectory(src)

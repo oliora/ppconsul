@@ -24,7 +24,6 @@ namespace ppconsul { namespace impl {
         std::string put(http::Status& status, const std::string& url, const std::string& body)
         {
             boost::network::http::client::request request(url);
-            // TODO: add content type header?
             auto response = m_client.put(request, body);
             status = http::Status(response.status(), response.status_message());
             return response.body();

@@ -4,15 +4,6 @@
 #  Boost Software License, Version 1.0. (See accompanying file
 #  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-include_directories(../include)
-#include_directories(${JSON11_INCLUDE_DIRS})
-#include_directories(${LIBB64_INCLUDE_DIRS})
-
-include_directories(../ext)
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${CPPNETLIB_INCLUDE_DIRS})
-
-
 set(HEADERS
     consul.h
     error.h
@@ -25,7 +16,9 @@ set(HEADERS
 )
 
 set(SOURCES
-    http_client_impl_netlib.h
+    http_client_impl.inl
+    http_client_impl_netlib.inl
+    http_client_impl_curl.inl
     consul.cpp
     helpers.cpp
     parameters.cpp
@@ -34,6 +27,14 @@ set(SOURCES
 foreach(SRC ${HEADERS})
     list(APPEND SOURCES "${HEADERS_DIR}/${SRC}")
 endforeach()
+
+
+if (${USE_CPPNETLIB})
+    include_directories(${Boost_INCLUDE_DIRS})
+    include_directories(${CPPNETLIB_INCLUDE_DIRS})
+else ()
+    include_directories(${CURL_INCLUDE_DIR})
+endif ()
 
 project(ppconsul)
 

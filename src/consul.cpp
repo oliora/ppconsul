@@ -6,7 +6,8 @@
 
 #include "ppconsul/consul.h"
 #include "ppconsul/helpers.h"
-#include "http_client_impl_netlib.h"
+
+#include "http_client_impl.inl"
 
 
 namespace ppconsul {
