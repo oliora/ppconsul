@@ -130,7 +130,7 @@ namespace ppconsul { namespace kv {
         std::vector<std::string> getSubKeys(const std::string& keyPrefix, const std::string& separator, Consistency cons = Consistency::Default) const
         {
             http::Status s;
-            auto r = m_consul.get(s, keyPath(keyPrefix), { { "keys", true }, { "separator", separator } });
+            auto r = m_consul.get(s, keyPath(keyPrefix), { { "keys", true }, { "separator", helpers::encodeUrl(separator) } });
             if (s.success())
                 return detail::parseKeys(r);
             if (NotFoundError::Code == s.code())
@@ -194,7 +194,7 @@ namespace ppconsul { namespace kv {
     private:
         std::string keyPath(const std::string& key) const
         {
-            return "/v1/kv/" + key;
+            return "/v1/kv/" + helpers::encodeUrl(key);
         }
 
         Consul& m_consul;

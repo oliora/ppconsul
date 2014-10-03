@@ -504,3 +504,38 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
         }
     }
 }
+
+TEST_CASE("kv.key with special chars", "[consul][kv][key]")
+{
+    auto consul = create_test_consul();
+    Storage kv(consul);
+
+    // Start from blank KV storage
+    kv.clear();
+    REQUIRE(kv.empty());
+
+    SECTION("get")
+    {
+        kv.put("key{1}/&23\x03", "value1");
+        KeyValue v = kv.get("key{1}/&23\x03");
+        REQUIRE(v.valid());
+        CHECK(v.key() == "key{1}/&23\x03");
+        CHECK(v.value() == "value1");
+    }
+
+    SECTION("getSubKeys")
+    {
+        kv.put("key{1}\x2-1\x2&2-\x03", "value1");
+        kv.put("key{1}\x2-2\x2&2-\x04", "value2");
+        kv.put("key{1}\x2-3\x2&2-\x05", "value3");
+        kv.put("key{1}\x2-3\x2&2-\x06", "value4");
+        REQUIRE(kv.size() == 4);
+
+        auto keys = kv.getSubKeys("key{1}\x2", "\x2");
+        REQUIRE(keys.size() == 3);
+        CHECK(keys[0] == "key{1}\x2-1\x2");
+        CHECK(keys[1] == "key{1}\x2-2\x2");
+        CHECK(keys[2] == "key{1}\x2-3\x2");
+    }
+}
+
