@@ -19,12 +19,13 @@ namespace ppconsul {
 
         std::string r;
 
-        // 2 is for '=' and '&'. -1 is because first param has no '&'
+        // -1 is because first param has no '&'
         auto len = std::accumulate(m_values.begin(), m_values.end(), -1, [](int s, const Values::value_type& p) {
+            // 2 is for '=' and '&'
             return s + p.first.size() + p.second.size() + 2;
         });
 
-        r.reserve(len - 1);
+        r.reserve(len);
 
         auto it = m_values.begin();
 
