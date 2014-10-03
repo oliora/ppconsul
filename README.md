@@ -27,6 +27,9 @@ The library uses
 * [Catch](https://github.com/philsquared/Catch) unit test framework.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
 
+## Documentation
+TBD
+
 ## How To Build
 
 ### Dependencies
@@ -38,12 +41,19 @@ Otherwise download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above.
 * Install [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
 
 ### Prepare Project
+
 Execute the following commands:  
 `git clone git@github.com:oliora/ppconsul.git`  
 `cd ppconsul`  
 `mkdir workspace`  
 `cd workspace`  
 `cmake ..` if you want to use libCURL or `cmake .. -DUSE_CPPNETLIB=1` otherwise.
+
+If you are building on Windows you *probably* need to set up additional variables:
+* Path to libCURL headers and library.
+  Set environment variable `set CURL_ROOT=<path_to_curl>` or pass it to CMake as `cmake .. -DCURL_ROOT=<path_to_curl>`.
+* Path to Boost headers and library.
+  Set environment variable `set BOOST_ROOT=<path_to_boost>` or pass it to CMake as `cmake .. -DBOOST_ROOT=<path_to_boost>`.
 
 *Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 

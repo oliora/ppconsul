@@ -31,6 +31,3 @@ TBD
 
 ### status
 TBD
-
-## Documentation
-TBD
