@@ -19,7 +19,7 @@ The library is written in C++11 and requires a quite modern compiler. Compilers 
 * Xcode 6.0 (Clang 3.5)
 * g++ 4.8
 
-The newer versions of specified compilers should work fine but was not tested. The older versions most probably will fail to compile the project.
+The newer versions of specified compilers should work fine but was not tested. Older versions will likely give up.
 
 The library uses
 * [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP.
