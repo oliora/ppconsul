@@ -20,7 +20,11 @@ namespace ppconsul { namespace http {
         : m_code(200)
         {}
 
-        explicit Status(int code, std::string message = "")
+        explicit Status(int code)
+        : m_code(code)
+        {}
+
+        Status(int code, std::string message)
         : m_code(code)
         , m_message(std::move(message))
         {}
