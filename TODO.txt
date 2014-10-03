@@ -22,7 +22,8 @@
 + v1 interface except acquire/release lock and consistency modes
 + Decode value from base64
 + Integration tests
-- encode key and value to allow to use any char from 0 to 255
++ URL encode keys
+- encode value to allow to use any char from 0 to 255
 - Get flags as 64bit uint. Now it's treated as double due to json11 limitations
 - consistency modes
 - typed get/put/KeyValue::value
