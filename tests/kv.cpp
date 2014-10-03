@@ -505,7 +505,7 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
     }
 }
 
-TEST_CASE("kv.key with special chars", "[consul][kv][key]")
+TEST_CASE("kv.special chars", "[consul][kv][special chars]")
 {
     auto consul = create_test_consul();
     Storage kv(consul);
@@ -514,7 +514,7 @@ TEST_CASE("kv.key with special chars", "[consul][kv][key]")
     kv.clear();
     REQUIRE(kv.empty());
 
-    SECTION("get")
+    SECTION("get1")
     {
         kv.put("key{1}/&23\x03", "value1");
         KeyValue v = kv.get("key{1}/&23\x03");
@@ -522,8 +522,18 @@ TEST_CASE("kv.key with special chars", "[consul][kv][key]")
         CHECK(v.key() == "key{1}/&23\x03");
         CHECK(v.value() == "value1");
     }
+    
+    SECTION("get2")
+    {
+        const auto key = std::string("key\x0-1-\x0", 8);
+        kv.put(key, "value2");
+        KeyValue v = kv.get(key);
+        REQUIRE(v.valid());
+        CHECK(v.key() == key);
+        CHECK(v.value() == "value2");
+    }
 
-    SECTION("getSubKeys")
+    SECTION("getSubKeys1")
     {
         kv.put("key{1}\x2-1\x2&2-\x03", "value1");
         kv.put("key{1}\x2-2\x2&2-\x04", "value2");
@@ -536,6 +546,46 @@ TEST_CASE("kv.key with special chars", "[consul][kv][key]")
         CHECK(keys[0] == "key{1}\x2-1\x2");
         CHECK(keys[1] == "key{1}\x2-2\x2");
         CHECK(keys[2] == "key{1}\x2-3\x2");
+    }
+
+    SECTION("getSubKeys2")
+    {
+        const auto keyPart = std::string("key{1}\r\n\t\x0", 10);
+        const auto null = std::string("\x0", 1);
+
+        kv.put(keyPart + "-1\t" + null + "&2-\x03", "value1");
+        kv.put(keyPart + "-2" + null + "&2-\x04", "value2");
+        kv.put(keyPart + "-3" + null + "&2-\x05", "value3");
+        kv.put(keyPart + "-3" + null + "&2-\x06", "value4");
+        REQUIRE(kv.size() == 4);
+
+        auto keys = kv.getSubKeys(keyPart, null);
+        REQUIRE(keys.size() == 3);
+        CHECK(keys[0] == keyPart + "-1\t" + null);
+        CHECK(keys[1] == keyPart + "-2" + null);
+        CHECK(keys[2] == keyPart + "-3" + null);
+    }
+
+    SECTION("value1")
+    {
+        const auto value = std::string("\x2-1\x2&2-\x03", 8);
+
+        kv.put("key1", value);
+
+        auto v = kv.get("key1");
+        CHECK(v.valid());
+        CHECK(v.value() == value);
+    }
+
+    SECTION("value2")
+    {
+        const auto value = std::string("&=\r\n\t 1\x0 -2\x0", 12);
+
+        kv.put("key2", value);
+
+        auto v = kv.get("key2");
+        CHECK(v.valid());
+        CHECK(v.value() == value);
     }
 }
 
