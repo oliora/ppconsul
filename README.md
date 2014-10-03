@@ -21,11 +21,11 @@ The library is written in C++11 and requires a quite modern compiler. Compilers 
 
 The newer versions of specified compilers should work fine but was not tested. The older versions most probably will fail to compile the project.
 
-The library uses [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP and
-[my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
-It uses [Catch unit test framework](https://github.com/philsquared/Catch) for testing.
-
-There is a vague plan to use [libCURL](http://curl.haxx.se/libcurl/) instead of cpp-netlib because the latter depends on (quite huge) Boost library and need to be build separately what can turn somebody away from taking PPConsul in use.
+The library uses
+* [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP
+* [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
+* [Catch unit test framework](https://github.com/philsquared/Catch) for testing
+* [libb64](http://libb64.sourceforge.net/) library for base64 decoding
 
 ## API Status
 
@@ -52,7 +52,8 @@ TBD
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [Git](http://git-scm.com/) client.
 * Install [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. Note that CMake 3 not guaranteed to work.
-* Download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that this library depends on [Boost](http://www.boost.org/).
+* If you prefer to use libCURL then install libCURL (On Windows it's included in [CURL](http://curl.haxx.se/) installer).
+Otherwise download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that this library depends on [Boost](http://www.boost.org/).
 * Install [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
 
 ### Prepare Project
@@ -61,7 +62,7 @@ Execute the following commands:
 `cd ppconsul`  
 `mkdir workspace`  
 `cd workspace`  
-`cmake ..`  
+`cmake ..` if you want to use libCURL or `cmake .. -DUSE_CPPNETLIB=1` otherwise.
 
 *Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 
