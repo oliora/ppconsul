@@ -32,7 +32,8 @@ The library uses
 The implementation status of API endpoints.
 
 ### kv
-Implemented, except:
+
+Get value(s), put value, delete value(s), get keys operations supported. CAS and flags supported. The following is **NOT** supported:
 * Consistency modes
 * Blocking queries
 * Acquire/release locks
