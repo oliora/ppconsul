@@ -54,7 +54,7 @@ If you are building on Windows you *probably* need to set up additional variable
 * Path to libCURL headers and library.
   Set environment variable `set CURL_ROOT=<path_to_curl>` or pass it to CMake as `cmake .. -DCURL_ROOT=<path_to_curl>`.
 * Path to Boost headers and library.
-  Set environment variable `set BOOST_ROOT=<path_to_boost>` or pass it to CMake as `cmake .. -DBOOST_ROOT=<path_to_boost>`.
+  Set environment variable `set BOOST_ROOT=<path_to_boost>` or pass it to CMake as for libCURL.
 
 *Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 
