@@ -4,8 +4,8 @@
 
 A C++ client library for [Consul](http://consul.io). Consul is a distributed tool for discovering and configuring services in your infrastructure.
 
-The goal of PPConsul is to:  
-* Fully cover version 1 of Consul [HTTP API](http://www.consul.io/docs/agent/http.html).
+The goal of PPConsul is to:
+* Fully cover version 1 of Consul [HTTP API](http://www.consul.io/docs/agent/http.html). Please check the current [implementation status](status.md).
 * Provide simple but modular and effective API based on modern C++ approaches. This includes to be C++11 aware.
 * Support different platforms. At the moment, Linux, Windows and OSX platforms supported.
 * Cover all the code with automated tests.
@@ -26,44 +26,6 @@ The library uses
 * [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
 * [Catch](https://github.com/philsquared/Catch) unit test framework.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
-
-## API Status
-
-The implementation status of API endpoints.
-
-### kv
-
-Get value(s), put value, delete value(s), get keys operations supported. CAS and flags supported. The following is **NOT** supported:
-* Consistency modes
-* Blocking queries
-* Acquire/release locks
- 
-It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(some_double)` etc.
-
-### agent
-**In progress**
-
-
-### catalog
-TBD
-
-### health
-TBD
-
-### session
-TBD
-
-### acl
-TBD
-
-### event
-TBD
-
-### status
-TBD
-
-## Documentation
-TBD
 
 ## How To Build
 
