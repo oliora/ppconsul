@@ -37,9 +37,12 @@ Get value(s), put value, delete value(s), get keys operations supported. CAS and
 * Consistency modes
 * Blocking queries
 * Acquire/release locks
+ 
+It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(some_double)` etc.
 
 ### agent
-TBD
+**In progress**
+
 
 ### catalog
 TBD
