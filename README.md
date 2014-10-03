@@ -29,19 +29,34 @@ The library uses
 
 ## API Status
 
-The implementation status of HTTP API endpoints coverage:
+The implementation status of API endpoints.
 
-In progress:
-* kv
+### kv
+Implemented, except:
+* Consistency modes
+* Blocking queries
+* Acquire/release locks
 
-To do:
-* agent
-* catalog
-* health
-* session
-* acl
-* event
-* status
+### agent
+TBD
+
+### catalog
+TBD
+
+### health
+TBD
+
+### session
+TBD
+
+### acl
+TBD
+
+### event
+TBD
+
+### status
+TBD
 
 ## Documentation
 TBD
