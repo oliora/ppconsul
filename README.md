@@ -47,8 +47,10 @@ Execute the following commands:
 `cd ppconsul`  
 `mkdir workspace`  
 `cd workspace`  
-If you want to use libCURL: `cmake ..`  
-otherwise: `cmake .. -DUSE_CPPNETLIB=1`
+If you want to use libCURL:  
+`cmake ..`  
+Otherwise:  
+`cmake .. -DUSE_CPPNETLIB=1`
 
 If you are building on Windows you *probably* need to set up additional variables:
 * Path to libCURL headers and library.
