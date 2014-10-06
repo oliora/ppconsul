@@ -73,7 +73,7 @@ namespace ppconsul {
     };
 
     struct WithHeaders {};
-    const WithHeaders withHeaders;
+    const WithHeaders withHeaders{};
 
     const char Default_Server_Address[] = "localhost:8500";
 
