@@ -44,8 +44,9 @@ namespace ppconsul { namespace helpers {
     std::string decodeBase64(const std::string& s)
     {
         std::string r;
+        if (s.empty())
+            return r;
         r.resize((s.size() + 3) / 4 * 3);
-
         base64_decodestate state;
         base64_init_decodestate(&state);
         auto len = base64_decode_block(s.data(), s.size(), &r.front(), &state);
