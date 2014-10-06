@@ -15,12 +15,7 @@ namespace ppconsul { namespace http {
     class Status
     {
     public:
-        // Creates status with standard success code 200 and empty message
-        Status()
-        : m_code(200)
-        {}
-
-        explicit Status(int code)
+        explicit Status(int code = 0)
         : m_code(code)
         {}
 

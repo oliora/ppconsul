@@ -72,12 +72,12 @@ namespace ppconsul { namespace kv {
 
         size_t count(const std::string& key, Consistency cons = Consistency::Default) const
         {
-            return get(key, cons).valid() ? 1 : 0;
+            return get(withHeaders, key, cons).value().valid() ? 1 : 0;
         }
 
         size_t countAll(const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const
         {
-            return getAllKeys(keyPrefix).size();
+            return getAllKeys(withHeaders, keyPrefix).value().size();
         }
 
         size_t size() const
@@ -91,63 +91,83 @@ namespace ppconsul { namespace kv {
         }
 
         // Returns invalid KeyValue (i.e. !kv.valid()) if key does not exist
-        KeyValue get(const std::string& key, Consistency cons = Consistency::Default) const
+        Response<KeyValue> get(WithHeaders, const std::string& key, Consistency cons = Consistency::Default) const
         {
             http::Status s;
             auto r = m_consul.get(s, keyPath(key));
 
             if (s.success())
-                return detail::parseValues(r).at(0);
+                return makeResponse(r.headers(), std::move(detail::parseValues(r.value()).at(0)));
             if (NotFoundError::Code == s.code())
-                return{};
-            throw BadStatus(std::move(s), std::move(r));
+                return { r.headers() };
+            throw BadStatus(std::move(s), std::move(r.value()));
+        }
+
+        KeyValue get(const std::string& key, Consistency cons = Consistency::Default) const
+        {
+            return std::move(get(withHeaders, key, cons).value());
         }
 
         // Returns defaultValue if key does not exist
         std::string get(const std::string& key, const std::string& defaultValue, Consistency cons = Consistency::Default) const
         {
-            const auto kv = get(key, cons);
-            if (!kv.valid())
+            const auto kv = get(withHeaders, key, cons);
+            if (!kv.value().valid())
                 return defaultValue;
             else
-                return kv.m_value;
+                return std::move(kv.value().value());
         }
 
         // Get values recursively. Returns empty vector if no keys found
-        std::vector<KeyValue> getAll(const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const
+        Response<std::vector<KeyValue>> getAll(WithHeaders, const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const
         {
             http::Status s;
             auto r = m_consul.get(s, keyPath(keyPrefix), { { "recurse", true } });
 
             if (s.success())
-                return detail::parseValues(r);
+                return makeResponse(r.headers(), detail::parseValues(r.value()));
             if (NotFoundError::Code == s.code())
-                return{};
-            throw BadStatus(std::move(s), std::move(r));
+                return { r.headers() };
+            throw BadStatus(std::move(s), std::move(r.value()));
+        }
+
+        std::vector<KeyValue> getAll(const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const
+        {
+            return std::move(getAll(withHeaders, keyPrefix, cons).value());
         }
 
         // Get keys up to a separator provided. Returns empty vector if no keys found
-        std::vector<std::string> getSubKeys(const std::string& keyPrefix, const std::string& separator, Consistency cons = Consistency::Default) const
+        Response<std::vector<std::string>> getSubKeys(WithHeaders, const std::string& keyPrefix, const std::string& separator, Consistency cons = Consistency::Default) const
         {
             http::Status s;
             auto r = m_consul.get(s, keyPath(keyPrefix), { { "keys", true }, { "separator", helpers::encodeUrl(separator) } });
             if (s.success())
-                return detail::parseKeys(r);
+                return makeResponse(r.headers(), detail::parseKeys(r.value()));
             if (NotFoundError::Code == s.code())
-                return{};
-            throw BadStatus(std::move(s), std::move(r));
+                return { r.headers() };
+            throw BadStatus(std::move(s), std::move(r.value()));
+        }
+
+        std::vector<std::string> getSubKeys(const std::string& keyPrefix, const std::string& separator, Consistency cons = Consistency::Default) const
+        {
+            return std::move(getSubKeys(withHeaders, keyPrefix, separator, cons).value());
         }
 
         // Get all keys recursively. Returns empty vector if no keys found
-        std::vector<std::string> getAllKeys(const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const
+        Response<std::vector<std::string>> getAllKeys(WithHeaders, const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const
         {
             http::Status s;
             auto r = m_consul.get(s, keyPath(keyPrefix), { { "keys", true } });
             if (s.success())
-                return detail::parseKeys(r);
+                return makeResponse(r.headers(), detail::parseKeys(r.value()));
             if (NotFoundError::Code == s.code())
-                return{};
-            throw BadStatus(std::move(s), std::move(r));
+                return { r.headers() };
+            throw BadStatus(std::move(s), std::move(r.value()));
+        }
+
+        std::vector<std::string> getAllKeys(const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const
+        {
+            return std::move(getAllKeys(withHeaders, keyPrefix, cons).value());
         }
 
         void put(const std::string& key, const std::string& value)

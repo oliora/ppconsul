@@ -103,19 +103,25 @@ namespace ppconsul {
         return impl::makeUrl(m_addr, path, p);
     }
 
-    std::string Consul::get(http::Status& status, const std::string& path, const Parameters& params)
+    Response<std::string> Consul::get(http::Status& status, const std::string& path, const Parameters& params)
     {
-        return m_client->get(status, makeUrl(path, params));
+        Response<std::string> r;
+        std::tie(status, r.headers(), r.value()) = m_client->get(makeUrl(path, params));
+        return r;
     }
 
     std::string Consul::put(http::Status& status, const std::string& path, const std::string& body, const Parameters& params)
     {
-        return m_client->put(status, makeUrl(path, params), body);
+        std::string r;
+        std::tie(status, r) = m_client->put(makeUrl(path, params), body);
+        return r;
     }
 
     std::string Consul::del(http::Status& status, const std::string& path, const Parameters& params)
     {
-        return m_client->del(status, makeUrl(path, params));
+        std::string r;
+        std::tie(status, r) = m_client->del(makeUrl(path, params));
+        return r;
     }
 
 }

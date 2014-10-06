@@ -10,9 +10,12 @@
 #include "ppconsul/error.h"
 #include "ppconsul/parameters.h"
 #include "ppconsul/http_status.h"
+#include "ppconsul/response.h"
+#include <chrono>
 #include <string>
 #include <memory>
 #include <stdexcept>
+#include <limits>
 
 
 namespace ppconsul {
@@ -69,6 +72,9 @@ namespace ppconsul {
         Stale
     };
 
+    struct WithHeaders {};
+    const WithHeaders withHeaders;
+
     const char Default_Server_Address[] = "localhost:8500";
 
     class Consul
@@ -83,8 +89,8 @@ namespace ppconsul {
         Consul(const Consul &op) = delete;
         Consul& operator= (const Consul &op) = delete;
 
-        std::string get(const std::string& path, const Parameters& params = Parameters());
-        std::string get(http::Status& status, const std::string& path, const Parameters& params = Parameters());
+        //Response<std::string> get(const std::string& path, const Parameters& params = Parameters());
+        Response<std::string> get(http::Status& status, const std::string& path, const Parameters& params = Parameters());
 
         std::string put(const std::string& path, const std::string& body, const Parameters& params = Parameters());
         std::string put(http::Status& status, const std::string& path, const std::string& body, const Parameters& params = Parameters());
@@ -115,14 +121,14 @@ namespace ppconsul {
         }
     }
 
-    inline std::string Consul::get(const std::string& path, const Parameters& parameters)
+    /*inline Response<std::string> Consul::get(const std::string& path, const Parameters& parameters)
     {
         http::Status s;
         auto r = get(s, path, parameters);
         if (!s.success())
-            throwStatusError(std::move(s), std::move(r));
+            throwStatusError(std::move(s), std::move(r.first));
         return r;
-    }
+    }*/
 
     inline std::string Consul::put(const std::string& path, const std::string& body, const Parameters& parameters)
     {

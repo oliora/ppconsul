@@ -5,6 +5,7 @@
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "ppconsul/http_status.h"
+#include "ppconsul/response.h"
 #include <curl/curl.h>
 #include <algorithm>
 #include <cstdlib>
@@ -40,6 +41,19 @@ namespace ppconsul { namespace impl {
         const CurlInitializer g_initialized;
 
         const std::regex g_statusLineRegex(R"***(HTTP\/1\.1 +(\d\d\d) +(.*)\r\n)***");
+        const std::regex g_consulHeaderLineRegex(R"***(X-Consul-([^:]+): +(.+)\r\n)***");
+
+        template<class It>
+        inline uint64_t uint64_value(const std::sub_match<It>& sm)
+        {
+            return std::strtoull(sm.str().c_str(), nullptr, 10);
+        }
+
+        template<class It>
+        inline bool bool_value(const std::sub_match<It>& sm)
+        {
+            return 0 == sm.compare("true");
+        }
 
         inline bool parseStatus(http::Status& status, const char *buf, size_t size)
         {
@@ -58,6 +72,8 @@ namespace ppconsul { namespace impl {
         typedef std::pair<const std::string *, size_t> ReadContext;
 
     public:
+        typedef std::tuple<http::Status, ResponseHeaders, std::string> GetResponse;
+
         HttpClient()
         : m_handle(nullptr)
         {
@@ -73,7 +89,6 @@ namespace ppconsul { namespace impl {
             curl_easy_setopt(m_handle, CURLOPT_NOPROGRESS, 1l);
             curl_easy_setopt(m_handle, CURLOPT_WRITEFUNCTION, &HttpClient::writeCallback);
             curl_easy_setopt(m_handle, CURLOPT_READFUNCTION, &HttpClient::readCallback);
-            curl_easy_setopt(m_handle, CURLOPT_HEADERFUNCTION, &HttpClient::headerCallback);
         }
 
         ~HttpClient()
@@ -82,34 +97,36 @@ namespace ppconsul { namespace impl {
                 curl_easy_cleanup(m_handle);
         }
 
-        std::string get(http::Status& status, const std::string& url)
+        GetResponse get(const std::string& url)
         {
-            std::string r;
-            r.reserve(Buffer_Size);
+            GetResponse r;
+            std::get<2>(r).reserve(Buffer_Size);
 
             // TODO: check return codes
+            curl_easy_setopt(m_handle, CURLOPT_HEADERFUNCTION, &HttpClient::headerCallback);
             curl_easy_setopt(m_handle, CURLOPT_CUSTOMREQUEST, nullptr);
             curl_easy_setopt(m_handle, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(m_handle, CURLOPT_WRITEDATA, &r);
-            curl_easy_setopt(m_handle, CURLOPT_HEADERDATA, &status);
+            curl_easy_setopt(m_handle, CURLOPT_WRITEDATA, &std::get<2>(r));
+            curl_easy_setopt(m_handle, CURLOPT_HEADERDATA, &r);
             curl_easy_setopt(m_handle, CURLOPT_HTTPGET, 1l);
             curl_easy_perform(m_handle);
 
             return r;
         }
 
-        std::string put(http::Status& status, const std::string& url, const std::string& body)
+        std::pair<http::Status, std::string> put(const std::string& url, const std::string& body)
         {
             ReadContext ctx(&body, 0u);
             
-            std::string r;
-            r.reserve(Buffer_Size);
+            std::pair<http::Status, std::string> r;
+            r.second.reserve(Buffer_Size);
 
             // TODO: check return codes
+            curl_easy_setopt(m_handle, CURLOPT_HEADERFUNCTION, &HttpClient::headerStatusCallback);
             curl_easy_setopt(m_handle, CURLOPT_CUSTOMREQUEST, nullptr);
             curl_easy_setopt(m_handle, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(m_handle, CURLOPT_WRITEDATA, &r);
-            curl_easy_setopt(m_handle, CURLOPT_HEADERDATA, &status);
+            curl_easy_setopt(m_handle, CURLOPT_WRITEDATA, &r.second);
+            curl_easy_setopt(m_handle, CURLOPT_HEADERDATA, &r.first);
             curl_easy_setopt(m_handle, CURLOPT_UPLOAD, 1l);
             curl_easy_setopt(m_handle, CURLOPT_PUT, 1l);
             curl_easy_setopt(m_handle, CURLOPT_INFILESIZE_LARGE, static_cast<curl_off_t>(body.size()));
@@ -119,15 +136,16 @@ namespace ppconsul { namespace impl {
             return r;
         }
 
-        std::string del(http::Status& status, const std::string& url)
+        std::pair<http::Status, std::string> del(const std::string& url)
         {
-            std::string r;
-            r.reserve(Buffer_Size);
+            std::pair<http::Status, std::string> r;
+            r.second.reserve(Buffer_Size);
 
             // TODO: check return codes
+            curl_easy_setopt(m_handle, CURLOPT_HEADERFUNCTION, &HttpClient::headerStatusCallback);
             curl_easy_setopt(m_handle, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(m_handle, CURLOPT_WRITEDATA, &r);
-            curl_easy_setopt(m_handle, CURLOPT_HEADERDATA, &status);
+            curl_easy_setopt(m_handle, CURLOPT_WRITEDATA, &r.second);
+            curl_easy_setopt(m_handle, CURLOPT_HEADERDATA, &r.first);
             curl_easy_setopt(m_handle, CURLOPT_HTTPGET, 1l);
             curl_easy_setopt(m_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
             curl_easy_perform(m_handle);
@@ -136,10 +154,34 @@ namespace ppconsul { namespace impl {
         }
 
     private:
-        static size_t headerCallback(char *ptr, size_t size_, size_t nitems, void *outputStatus)
+        static size_t headerStatusCallback(char *ptr, size_t size_, size_t nitems, void *outputStatus)
         {
             const auto size = size_ * nitems;
             parseStatus(*static_cast<http::Status *>(outputStatus), ptr, size);
+            return size;
+        }
+
+        static size_t headerCallback(char *ptr, size_t size_, size_t nitems, void *outputResponse_)
+        {
+            const auto size = size_ * nitems;
+            auto outputResponse = reinterpret_cast<GetResponse *>(outputResponse_);
+
+            if (parseStatus(std::get<0>(*outputResponse), ptr, size))
+                return size;
+
+            std::cmatch match;
+            if (!std::regex_match(const_cast<const char *>(ptr), const_cast<const char *>(ptr) +size, match, g_consulHeaderLineRegex))
+                return size;
+
+            ResponseHeaders& headers = std::get<1>(*outputResponse);
+
+            if (0 == match[1].compare("Index"))
+                headers.m_index = uint64_value(match[2]);
+            else if (0 == match[1].compare("Lastcontact"))
+                headers.m_lastContact = std::chrono::milliseconds(uint64_value(match[2]));
+            else if (0 == match[1].compare("Knownleader"))
+                headers.m_knownLeader = bool_value(match[2]);
+
             return size;
         }
 

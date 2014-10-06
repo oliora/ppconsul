@@ -13,6 +13,7 @@ set(HEADERS
     kv.h
     parameters.h
     ppconsul.h
+    response_headers.h
 )
 
 set(SOURCES

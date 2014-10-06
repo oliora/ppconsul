@@ -173,6 +173,26 @@ TEST_CASE("kv.get", "[consul][kv]")
         CHECK(kv.get("key1", "some default value") == "value1");
     }
 
+    SECTION("get with headers")
+    {
+        ppconsul::Response<KeyValue> v = kv.get(ppconsul::withHeaders, "key1");
+
+        REQUIRE(v.value().valid());
+
+        CHECK(v.value().createIndex());
+        CHECK(v.value().modifyIndex());
+        CHECK(!v.value().lockIndex());
+        CHECK(!v.value().flags());
+        CHECK(v.value().key() == "key1");
+        CHECK(v.value().value() == "value1");
+        CHECK(v.value().session() == "");
+
+        CHECK(v.headers().valid());
+        CHECK(v.headers().index());
+        CHECK(v.headers().knownLeader());
+        CHECK(v.headers().lastContact() == std::chrono::milliseconds(0));
+    }
+
     SECTION("getAll")
     {
         CHECK(kv.getAll(Non_Existing_Key).size() == 0);
@@ -207,6 +227,8 @@ TEST_CASE("kv.get", "[consul][kv]")
         CHECK(v[2].value() == "value3");
         CHECK(v[2].session() == "");
     }
+
+    // TODO: getAll with headers and getAllKeys with headers
 
     SECTION("getAllKeys")
     {
