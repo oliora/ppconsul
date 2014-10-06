@@ -37,9 +37,9 @@ endif()
 
 enable_testing()
 
-find_package(Boost 1.55 REQUIRED COMPONENTS thread filesystem system date_time chrono regex)
-
 if (${USE_CPPNETLIB})
+    find_package(Boost 1.55 REQUIRED COMPONENTS thread filesystem system date_time chrono regex)
+
     find_package(cppnetlib 0.11.0 REQUIRED)
 else ()
     # Add user specified path to CURL headers/libraries into CMAKE_INCLUDE_PATH/CMAKE_LIBRARY_PATH variables.
