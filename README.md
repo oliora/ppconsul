@@ -16,7 +16,7 @@ So if you are looking for something stable and ready to be used in production th
 
 The library is written in C++11 and requires a quite modern compiler. Compilers officially supported at the moment:
 * Visual Studio 2013
-* Xcode 6.0 (Clang 3.5)
+* Clang 3.5 with libc++ stdlib (i.e. Xcode 6.0)
 * g++ 4.8
 
 The newer versions of specified compilers should work fine but was not tested. Older versions will likely give up.
