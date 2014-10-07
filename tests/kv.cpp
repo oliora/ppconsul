@@ -114,7 +114,7 @@ TEST_CASE("kv.erase and count", "[consul][kv]")
     }
 }
 
-TEST_CASE("kv.get", "[consul][kv]")
+TEST_CASE("kv.get", "[consul][kv][headers]")
 {
     auto consul = create_test_consul();
     Storage kv(consul);
@@ -175,22 +175,31 @@ TEST_CASE("kv.get", "[consul][kv]")
 
     SECTION("get with headers")
     {
-        ppconsul::Response<KeyValue> v = kv.get(ppconsul::withHeaders, "key1");
+        ppconsul::Response<KeyValue> v0 = kv.get(ppconsul::withHeaders, Non_Existing_Key);
 
-        REQUIRE(v.value().valid());
+        CHECK(!v0.value().valid());
+        CHECK(v0.headers().valid());
+        CHECK(v0.headers().index());
+        CHECK(v0.headers().knownLeader());
+        CHECK(v0.headers().lastContact() == std::chrono::milliseconds(0));
 
-        CHECK(v.value().createIndex());
-        CHECK(v.value().modifyIndex());
-        CHECK(!v.value().lockIndex());
-        CHECK(!v.value().flags());
-        CHECK(v.value().key() == "key1");
-        CHECK(v.value().value() == "value1");
-        CHECK(v.value().session() == "");
+        ppconsul::Response<KeyValue> v1 = kv.get(ppconsul::withHeaders, "key1");
 
-        CHECK(v.headers().valid());
-        CHECK(v.headers().index());
-        CHECK(v.headers().knownLeader());
-        CHECK(v.headers().lastContact() == std::chrono::milliseconds(0));
+        REQUIRE(v1.value().valid());
+
+        CHECK(v1.value().createIndex());
+        CHECK(v1.value().modifyIndex());
+        CHECK(!v1.value().lockIndex());
+        CHECK(!v1.value().flags());
+        CHECK(v1.value().key() == "key1");
+        CHECK(v1.value().value() == "value1");
+        CHECK(v1.value().session() == "");
+
+        CHECK(v1.headers().valid());
+        CHECK(v1.headers().index());
+        CHECK(v1.headers().knownLeader());
+        CHECK(v1.headers().index() == v1.value().modifyIndex());
+        CHECK(v1.headers().lastContact() == std::chrono::milliseconds(0));
     }
 
     SECTION("getAll")
@@ -228,15 +237,70 @@ TEST_CASE("kv.get", "[consul][kv]")
         CHECK(v[2].session() == "");
     }
 
-    // TODO: getAll with headers and getAllKeys with headers
+    SECTION("getAll with headers")
+    {
+        ppconsul::Response<std::vector<KeyValue>> v0 = kv.getAll(ppconsul::withHeaders, Non_Existing_Key);
+        
+        CHECK(!v0.value().size());
+        CHECK(v0.headers().valid());
+        CHECK(v0.headers().index());
+        CHECK(v0.headers().knownLeader());
+        CHECK(v0.headers().lastContact() == std::chrono::milliseconds(0));
+
+        ppconsul::Response<std::vector<KeyValue>> v1 = kv.getAll(ppconsul::withHeaders, "key");
+
+        REQUIRE(3 == v1.value().size());
+
+        const auto maxModifyIndex = std::max_element(v1.value().begin(), v1.value().end(), [](const KeyValue&l, const KeyValue& r) {
+            return l.modifyIndex() < r.modifyIndex();
+        })->modifyIndex();
+
+        CHECK(v1.headers().valid());
+        CHECK(v1.headers().index());
+        CHECK(v1.headers().knownLeader());
+        CHECK(v1.headers().index() == maxModifyIndex);
+        CHECK(v1.headers().lastContact() == std::chrono::milliseconds(0));
+    }
 
     SECTION("getAllKeys")
     {
         CHECK(kv.getAllKeys(Non_Existing_Key) == std::vector<std::string>());
+        CHECK(kv.getSubKeys(Non_Existing_Key, "/") == std::vector<std::string>());
         CHECK(kv.getAllKeys("key") == std::vector<std::string>({"key1", "key2", "key3"}));
         CHECK(kv.getAllKeys("other/Key") == std::vector<std::string>({ "other/Key1", "other/Key2" }));
         CHECK(kv.getSubKeys("", "/") == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
         CHECK(kv.getSubKeys("", "e") == std::vector<std::string>({ "ke", "othe" }));
+    }
+
+    SECTION("getAllKeys with headers")
+    {
+        ppconsul::Response<std::vector<std::string>> v0 = kv.getAllKeys(ppconsul::withHeaders, Non_Existing_Key);
+        CHECK(v0.value() == std::vector<std::string>());
+        CHECK(v0.headers().valid());
+        CHECK(v0.headers().index());
+        CHECK(v0.headers().knownLeader());
+        CHECK(v0.headers().lastContact() == std::chrono::milliseconds(0));
+
+        ppconsul::Response<std::vector<std::string>> v1 = kv.getAllKeys(ppconsul::withHeaders, "key");
+        CHECK(v1.value() == std::vector<std::string>({ "key1", "key2", "key3" }));
+        CHECK(v1.headers().valid());
+        CHECK(v1.headers().index());
+        CHECK(v1.headers().knownLeader());
+        CHECK(v1.headers().lastContact() == std::chrono::milliseconds(0));
+
+        ppconsul::Response<std::vector<std::string>> v2 = kv.getSubKeys(ppconsul::withHeaders, Non_Existing_Key, "/");
+        CHECK(v2.value() == std::vector<std::string>());
+        CHECK(v2.headers().valid());
+        CHECK(v2.headers().index());
+        CHECK(v2.headers().knownLeader());
+        CHECK(v2.headers().lastContact() == std::chrono::milliseconds(0));
+
+        ppconsul::Response<std::vector<std::string>> v3 = kv.getSubKeys(ppconsul::withHeaders, "", "/");
+        CHECK(v3.value() == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
+        CHECK(v3.headers().valid());
+        CHECK(v3.headers().index());
+        CHECK(v3.headers().knownLeader());
+        CHECK(v3.headers().lastContact() == std::chrono::milliseconds(0));
     }
 }
 
@@ -611,3 +675,22 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
     }
 }
 
+TEST_CASE("kv.index", "[consul][kv][headers]")
+{
+    auto consul = create_test_consul();
+    Storage kv(consul);
+
+    kv.erase("key1");
+    REQUIRE(!kv.count("key1"));
+
+    auto modifyIndex1 = kv.getAll(ppconsul::withHeaders).headers().index();
+    CHECK(kv.getAll(ppconsul::withHeaders).headers().index() == modifyIndex1);
+    
+    kv.put("key1", "value1");
+    auto modifyIndex2 = kv.getAll(ppconsul::withHeaders).headers().index();
+    CHECK(modifyIndex2 > modifyIndex1);
+    
+    kv.erase("key1");
+    CHECK(kv.getAll(ppconsul::withHeaders).headers().index() < modifyIndex2);
+    CHECK(kv.getAll(ppconsul::withHeaders).headers().index() == modifyIndex1);
+}
