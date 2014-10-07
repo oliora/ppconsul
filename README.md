@@ -15,11 +15,11 @@ Note that this project is just started so it is under active developing, doesn't
 So if you are looking for something stable and ready to be used in production then it's better to come back later or help me growing this project to the quality level you need.
 
 The library is written in C++11 and requires a quite modern compiler. Compilers officially supported at the moment:
-* Visual Studio 2013
-* Clang 3.5 with libc++ stdlib (i.e. Xcode 6.0)
-* g++ 4.8
+* Windows: Visual Studio 2013
+* OSX: Clang 6, libc++ (Xcode 6)
+* Linux: GCC 4.8.2
 
-The newer versions of specified compilers should work fine but was not tested. Older versions will likely give up.
+The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio 2012 or earlier will give up.
 
 The library uses
 * [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP.
