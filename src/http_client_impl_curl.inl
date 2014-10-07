@@ -41,19 +41,7 @@ namespace ppconsul { namespace impl {
         const CurlInitializer g_initialized;
 
         const std::regex g_statusLineRegex(R"***(HTTP\/1\.1 +(\d\d\d) +(.*)\r\n)***");
-        const std::regex g_consulHeaderLineRegex(R"***(X-Consul-([^:]+): +(.+)\r\n)***");
-
-        template<class It>
-        inline uint64_t uint64_value(const std::sub_match<It>& sm)
-        {
-            return std::strtoull(sm.str().c_str(), nullptr, 10);
-        }
-
-        template<class It>
-        inline bool bool_value(const std::sub_match<It>& sm)
-        {
-            return 0 == sm.compare("true");
-        }
+        const std::regex g_consulHeaderLineRegex(R"***(([^:]+): +(.+)\r\n)***");
 
         inline bool parseStatus(http::Status& status, const char *buf, size_t size)
         {
@@ -169,18 +157,19 @@ namespace ppconsul { namespace impl {
             if (parseStatus(std::get<0>(*outputResponse), ptr, size))
                 return size;
 
+            // Parse headers
             std::cmatch match;
             if (!std::regex_match(const_cast<const char *>(ptr), const_cast<const char *>(ptr) +size, match, g_consulHeaderLineRegex))
                 return size;
 
             ResponseHeaders& headers = std::get<1>(*outputResponse);
 
-            if (0 == match[1].compare("Index"))
-                headers.m_index = uint64_value(match[2]);
-            else if (0 == match[1].compare("Lastcontact"))
-                headers.m_lastContact = std::chrono::milliseconds(uint64_value(match[2]));
-            else if (0 == match[1].compare("Knownleader"))
-                headers.m_knownLeader = bool_value(match[2]);
+            if (0 == match[1].compare(Index_Header_Name))
+                headers.m_index = uint64_headerValue(match[2].str().c_str());
+            else if (0 == match[1].compare(LastContact_Headers_Name))
+                headers.m_lastContact = std::chrono::milliseconds(uint64_headerValue(match[2].str().c_str()));
+            else if (0 == match[1].compare(KnownLeader_Header_Name))
+                headers.m_knownLeader = bool_headerValue(match[2].str().c_str());
 
             return size;
         }
