@@ -133,18 +133,18 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
 
     SECTION("valid")
     {
-        CHECK(kv.get("key1").valid());
-        CHECK(kv.get("key2").valid());
-        CHECK(kv.get("key3").valid());
-        CHECK(kv.get("other/Key1").valid());
-        CHECK(kv.get("other/Key2").valid());
+        CHECK(kv.item("key1").valid());
+        CHECK(kv.item("key2").valid());
+        CHECK(kv.item("key3").valid());
+        CHECK(kv.item("other/Key1").valid());
+        CHECK(kv.item("other/Key2").valid());
     }
 
-    SECTION("get nonexisting")
+    SECTION("get nonexisting item")
     {
         REQUIRE(!kv.count(Non_Existing_Key));
 
-        KeyValue v = kv.get(Non_Existing_Key);
+        KeyValue v = kv.item(Non_Existing_Key);
         
         CHECK(!v.valid());
         CHECK(!v.createIndex());
@@ -158,7 +158,7 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
 
     SECTION("get")
     {
-        KeyValue v = kv.get("key1");
+        KeyValue v = kv.item("key1");
 
         REQUIRE(v.valid());
 
@@ -173,9 +173,9 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(kv.get("key1", "some default value") == "value1");
     }
 
-    SECTION("get with headers")
+    SECTION("get item with headers")
     {
-        ppconsul::Response<KeyValue> v0 = kv.get(ppconsul::withHeaders, Non_Existing_Key);
+        ppconsul::Response<KeyValue> v0 = kv.item(ppconsul::withHeaders, Non_Existing_Key);
 
         CHECK(!v0.value().valid());
         CHECK(v0.headers().valid());
@@ -183,7 +183,7 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(v0.headers().knownLeader());
         CHECK(v0.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<KeyValue> v1 = kv.get(ppconsul::withHeaders, "key1");
+        ppconsul::Response<KeyValue> v1 = kv.item(ppconsul::withHeaders, "key1");
 
         REQUIRE(v1.value().valid());
 
@@ -202,13 +202,13 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(v1.headers().lastContact() == std::chrono::milliseconds(0));
     }
 
-    SECTION("getAll")
+    SECTION("get items")
     {
-        CHECK(kv.getAll(Non_Existing_Key).size() == 0);
-        CHECK(kv.getAll().size() == 5);
-        CHECK(kv.getAll("other/Key").size() == 2);
+        CHECK(kv.items(Non_Existing_Key).size() == 0);
+        CHECK(kv.items().size() == 5);
+        CHECK(kv.items("other/Key").size() == 2);
 
-        std::vector<KeyValue> v = kv.getAll("key");
+        std::vector<KeyValue> v = kv.items("key");
 
         REQUIRE(3 == v.size());
 
@@ -237,9 +237,9 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(v[2].session() == "");
     }
 
-    SECTION("getAll with headers")
+    SECTION("get items with headers")
     {
-        ppconsul::Response<std::vector<KeyValue>> v0 = kv.getAll(ppconsul::withHeaders, Non_Existing_Key);
+        ppconsul::Response<std::vector<KeyValue>> v0 = kv.items(ppconsul::withHeaders, Non_Existing_Key);
         
         CHECK(!v0.value().size());
         CHECK(v0.headers().valid());
@@ -247,7 +247,7 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(v0.headers().knownLeader());
         CHECK(v0.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<KeyValue>> v1 = kv.getAll(ppconsul::withHeaders, "key");
+        ppconsul::Response<std::vector<KeyValue>> v1 = kv.items(ppconsul::withHeaders, "key");
 
         REQUIRE(3 == v1.value().size());
 
@@ -262,40 +262,40 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(v1.headers().lastContact() == std::chrono::milliseconds(0));
     }
 
-    SECTION("getAllKeys")
+    SECTION("get keys")
     {
-        CHECK(kv.getAllKeys(Non_Existing_Key) == std::vector<std::string>());
-        CHECK(kv.getSubKeys(Non_Existing_Key, "/") == std::vector<std::string>());
-        CHECK(kv.getAllKeys("key") == std::vector<std::string>({"key1", "key2", "key3"}));
-        CHECK(kv.getAllKeys("other/Key") == std::vector<std::string>({ "other/Key1", "other/Key2" }));
-        CHECK(kv.getSubKeys("", "/") == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
-        CHECK(kv.getSubKeys("", "e") == std::vector<std::string>({ "ke", "othe" }));
+        CHECK(kv.keys(Non_Existing_Key) == std::vector<std::string>());
+        CHECK(kv.keys(Non_Existing_Key, "/") == std::vector<std::string>());
+        CHECK(kv.keys("key") == std::vector<std::string>({"key1", "key2", "key3"}));
+        CHECK(kv.keys("other/Key") == std::vector<std::string>({ "other/Key1", "other/Key2" }));
+        CHECK(kv.keys("", "/") == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
+        CHECK(kv.keys("", "e") == std::vector<std::string>({ "ke", "othe" }));
     }
 
-    SECTION("getAllKeys with headers")
+    SECTION("get keys with headers")
     {
-        ppconsul::Response<std::vector<std::string>> v0 = kv.getAllKeys(ppconsul::withHeaders, Non_Existing_Key);
+        ppconsul::Response<std::vector<std::string>> v0 = kv.keys(ppconsul::withHeaders, Non_Existing_Key);
         CHECK(v0.value() == std::vector<std::string>());
         CHECK(v0.headers().valid());
         CHECK(v0.headers().index());
         CHECK(v0.headers().knownLeader());
         CHECK(v0.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v1 = kv.getAllKeys(ppconsul::withHeaders, "key");
+        ppconsul::Response<std::vector<std::string>> v1 = kv.keys(ppconsul::withHeaders, "key");
         CHECK(v1.value() == std::vector<std::string>({ "key1", "key2", "key3" }));
         CHECK(v1.headers().valid());
         CHECK(v1.headers().index());
         CHECK(v1.headers().knownLeader());
         CHECK(v1.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v2 = kv.getSubKeys(ppconsul::withHeaders, Non_Existing_Key, "/");
+        ppconsul::Response<std::vector<std::string>> v2 = kv.keys(ppconsul::withHeaders, Non_Existing_Key, "/");
         CHECK(v2.value() == std::vector<std::string>());
         CHECK(v2.headers().valid());
         CHECK(v2.headers().index());
         CHECK(v2.headers().knownLeader());
         CHECK(v2.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v3 = kv.getSubKeys(ppconsul::withHeaders, "", "/");
+        ppconsul::Response<std::vector<std::string>> v3 = kv.keys(ppconsul::withHeaders, "", "/");
         CHECK(v3.value() == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
         CHECK(v3.headers().valid());
         CHECK(v3.headers().index());
@@ -316,7 +316,7 @@ TEST_CASE("kv.put", "[consul][kv]")
     SECTION("put")
     {
         kv.put("key42", "value31");
-        KeyValue v = kv.get("key42");
+        KeyValue v = kv.item("key42");
         REQUIRE(v.valid());
         CHECK(v.createIndex());
         CHECK(v.modifyIndex());
@@ -332,7 +332,7 @@ TEST_CASE("kv.put", "[consul][kv]")
         kv.put("key24", "value13", 0x12345678);
 
         {
-            KeyValue v = kv.get("key24");
+            KeyValue v = kv.item("key24");
             REQUIRE(v.valid());
             CHECK(v.createIndex());
             CHECK(v.modifyIndex());
@@ -344,13 +344,13 @@ TEST_CASE("kv.put", "[consul][kv]")
         }
 
         kv.put("key24", "value14");
-        CHECK(kv.get("key24").value() == "value14");
+        CHECK(kv.item("key24").value() == "value14");
         // Feature or bug of Consul: the flags are reseted after put without "?flags" specified
-        //CHECK(kv.get("key24").flags() == 0x12345678);
+        //CHECK(kv.item("key24").flags() == 0x12345678);
     }
 }
 
-TEST_CASE("kv.checkAndSet", "[consul][kv]")
+TEST_CASE("kv.cas", "[consul][kv]")
 {
     auto consul = create_test_consul();
     Storage kv(consul);
@@ -359,13 +359,13 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
     kv.clear();
     REQUIRE(kv.empty());
 
-    SECTION("checkAndSet")
+    SECTION("cas")
     {
         SECTION("change nonexisting")
         {
-            REQUIRE(!kv.checkAndSet("key2", 1, "value2"));
+            REQUIRE(!kv.cas("key2", 1, "value2"));
             CHECK(!kv.count("key2"));
-            CHECK(!kv.get("key2").valid());
+            CHECK(!kv.item("key2").valid());
         }
 
         SECTION("init without cas")
@@ -373,7 +373,7 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
             kv.put("key1", "value1");
             
             {
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value1");
                 CHECK(v.createIndex());
@@ -384,25 +384,25 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
                 CHECK(v.session() == "");
             }
 
-            REQUIRE(kv.get("key1").valid());
-            REQUIRE(kv.get("key1").value() == "value1");
-            REQUIRE(kv.get("key1").flags() == 0);
+            REQUIRE(kv.item("key1").valid());
+            REQUIRE(kv.item("key1").value() == "value1");
+            REQUIRE(kv.item("key1").flags() == 0);
 
             SECTION("change with cas wrong")
             {
-                REQUIRE(!kv.checkAndSet("key1", 0, "value2"));
-                CHECK(kv.get("key1").valid());
-                CHECK(kv.get("key1").value() == "value1");
-                CHECK(kv.get("key1").flags() == 0);
+                REQUIRE(!kv.cas("key1", 0, "value2"));
+                CHECK(kv.item("key1").valid());
+                CHECK(kv.item("key1").value() == "value1");
+                CHECK(kv.item("key1").flags() == 0);
             }
 
             SECTION("change with cas right")
             {
-                auto cas = kv.get("key1").modifyIndex();
+                auto cas = kv.item("key1").modifyIndex();
 
-                REQUIRE(kv.checkAndSet("key1", cas, "value2"));
+                REQUIRE(kv.cas("key1", cas, "value2"));
 
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value2");
                 CHECK(v.createIndex());
@@ -416,16 +416,16 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
 
         SECTION("init with cas")
         {
-            REQUIRE(kv.checkAndSet("key1", 0, "value1"));
-            CHECK(kv.get("key1").value() == "value1");
-            CHECK(kv.get("key1").valid());
-            CHECK(kv.get("key1").flags() == 0);
+            REQUIRE(kv.cas("key1", 0, "value1"));
+            CHECK(kv.item("key1").value() == "value1");
+            CHECK(kv.item("key1").valid());
+            CHECK(kv.item("key1").flags() == 0);
 
             SECTION("change with put")
             {
                 kv.put("key1", "value2");
 
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value2");
                 CHECK(v.createIndex());
@@ -438,11 +438,11 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
 
             SECTION("change with cas")
             {
-                auto cas = kv.get("key1").modifyIndex();
+                auto cas = kv.item("key1").modifyIndex();
 
-                REQUIRE(kv.checkAndSet("key1", cas, "value2"));
+                REQUIRE(kv.cas("key1", cas, "value2"));
 
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value2");
                 CHECK(v.createIndex());
@@ -455,13 +455,13 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
         }
     }
 
-    SECTION("checkAndSet flags")
+    SECTION("cas flags")
     {
         SECTION("change nonexisting")
         {
-            REQUIRE(!kv.checkAndSet("key2", 1, "value2", 0x87654321));
+            REQUIRE(!kv.cas("key2", 1, "value2", 0x87654321));
             CHECK(!kv.count("key2"));
-            CHECK(!kv.get("key2").valid());
+            CHECK(!kv.item("key2").valid());
         }
 
         SECTION("init without cas")
@@ -469,7 +469,7 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
             kv.put("key1", "value1", 0x87654321);
 
             {
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value1");
                 CHECK(v.createIndex());
@@ -482,19 +482,19 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
 
             SECTION("change with cas wrong")
             {
-                REQUIRE(!kv.checkAndSet("key1", 0, "value2", 0xFC12DE56));
-                CHECK(kv.get("key1").valid());
-                CHECK(kv.get("key1").value() == "value1");
-                CHECK(kv.get("key1").flags() == 0x87654321);
+                REQUIRE(!kv.cas("key1", 0, "value2", 0xFC12DE56));
+                CHECK(kv.item("key1").valid());
+                CHECK(kv.item("key1").value() == "value1");
+                CHECK(kv.item("key1").flags() == 0x87654321);
             }
 
             SECTION("change with cas right")
             {
-                auto cas = kv.get("key1").modifyIndex();
+                auto cas = kv.item("key1").modifyIndex();
 
-                REQUIRE(kv.checkAndSet("key1", cas, "value2", 0xFC12DE56));
+                REQUIRE(kv.cas("key1", cas, "value2", 0xFC12DE56));
 
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value2");
                 CHECK(v.createIndex());
@@ -508,10 +508,10 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
 
         SECTION("init with cas")
         {
-            REQUIRE(kv.checkAndSet("key1", 0, "value1", 0x87654321));
+            REQUIRE(kv.cas("key1", 0, "value1", 0x87654321));
             
             {
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value1");
                 CHECK(v.createIndex());
@@ -526,7 +526,7 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
             {
                 kv.put("key1", "value2", 0xFC12DE56);
                 
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value2");
                 CHECK(v.createIndex());
@@ -541,7 +541,7 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
             {
                 kv.put("key1", "value2");
 
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value2");
                 CHECK(v.createIndex());
@@ -555,11 +555,11 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
 
             SECTION("change with cas")
             {
-                auto cas = kv.get("key1").modifyIndex();
+                auto cas = kv.item("key1").modifyIndex();
 
-                REQUIRE(kv.checkAndSet("key1", cas, "value2", 0xFC12DE56));
+                REQUIRE(kv.cas("key1", cas, "value2", 0xFC12DE56));
 
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value2");
                 CHECK(v.createIndex());
@@ -572,11 +572,11 @@ TEST_CASE("kv.checkAndSet", "[consul][kv]")
 
             SECTION("change with cas value only")
             {
-                auto cas = kv.get("key1").modifyIndex();
+                auto cas = kv.item("key1").modifyIndex();
 
-                REQUIRE(kv.checkAndSet("key1", cas, "value2"));
+                REQUIRE(kv.cas("key1", cas, "value2"));
 
-                KeyValue v = kv.get("key1");
+                KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
                 CHECK(v.value() == "value2");
                 CHECK(v.createIndex());
@@ -603,7 +603,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
     SECTION("get1")
     {
         kv.put("key{1}/&23\x03", "value1");
-        KeyValue v = kv.get("key{1}/&23\x03");
+        KeyValue v = kv.item("key{1}/&23\x03");
         REQUIRE(v.valid());
         CHECK(v.key() == "key{1}/&23\x03");
         CHECK(v.value() == "value1");
@@ -613,7 +613,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
     {
         const auto key = std::string("key\x0-1-\x0", 8);
         kv.put(key, "value2");
-        KeyValue v = kv.get(key);
+        KeyValue v = kv.item(key);
         REQUIRE(v.valid());
         CHECK(v.key() == key);
         CHECK(v.value() == "value2");
@@ -627,7 +627,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
         kv.put("key{1}\x2-3\x2&2-\x06", "value4");
         REQUIRE(kv.size() == 4);
 
-        auto keys = kv.getSubKeys("key{1}\x2", "\x2");
+        auto keys = kv.keys("key{1}\x2", "\x2");
         REQUIRE(keys.size() == 3);
         CHECK(keys[0] == "key{1}\x2-1\x2");
         CHECK(keys[1] == "key{1}\x2-2\x2");
@@ -645,7 +645,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
         kv.put(keyPart + "-3" + null + "&2-\x06", "value4");
         REQUIRE(kv.size() == 4);
 
-        auto keys = kv.getSubKeys(keyPart, null);
+        auto keys = kv.keys(keyPart, null);
         REQUIRE(keys.size() == 3);
         CHECK(keys[0] == keyPart + "-1\t" + null);
         CHECK(keys[1] == keyPart + "-2" + null);
@@ -658,7 +658,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
 
         kv.put("key1", value);
 
-        auto v = kv.get("key1");
+        auto v = kv.item("key1");
         CHECK(v.valid());
         CHECK(v.value() == value);
     }
@@ -669,7 +669,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
 
         kv.put("key2", value);
 
-        auto v = kv.get("key2");
+        auto v = kv.item("key2");
         CHECK(v.valid());
         CHECK(v.value() == value);
     }
@@ -683,14 +683,14 @@ TEST_CASE("kv.index", "[consul][kv][headers]")
     kv.erase("key1");
     REQUIRE(!kv.count("key1"));
 
-    auto modifyIndex1 = kv.getAll(ppconsul::withHeaders).headers().index();
-    CHECK(kv.getAll(ppconsul::withHeaders).headers().index() == modifyIndex1);
+    auto modifyIndex1 = kv.items(ppconsul::withHeaders).headers().index();
+    CHECK(kv.items(ppconsul::withHeaders).headers().index() == modifyIndex1);
     
     kv.put("key1", "value1");
-    auto modifyIndex2 = kv.getAll(ppconsul::withHeaders).headers().index();
+    auto modifyIndex2 = kv.items(ppconsul::withHeaders).headers().index();
     CHECK(modifyIndex2 > modifyIndex1);
     
     kv.erase("key1");
-    CHECK(kv.getAll(ppconsul::withHeaders).headers().index() < modifyIndex2);
-    CHECK(kv.getAll(ppconsul::withHeaders).headers().index() == modifyIndex1);
+    CHECK(kv.items(ppconsul::withHeaders).headers().index() < modifyIndex2);
+    CHECK(kv.items(ppconsul::withHeaders).headers().index() == modifyIndex1);
 }
