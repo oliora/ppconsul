@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <boost/mpl/pair.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/transform.hpp>
 #include <boost/mpl/fold.hpp>
@@ -14,7 +15,7 @@
 #include <boost/mpl/reverse_iter_fold.hpp>
 #include <boost/mpl/reverse.hpp>
 #include <boost/mpl/transform.hpp>
-#include <boost/mpl/as_sequence.hpp>
+#include <boost/mpl/is_sequence.hpp>
 #include <boost/mpl/set.hpp>
 #include <boost/mpl/distance.hpp>
 #include <boost/mpl/front.hpp>
@@ -24,6 +25,7 @@
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/is_sequence.hpp>
 #include <boost/fusion/include/vector.hpp>
+#include <boost/fusion/include/mpl.hpp>
 
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/preprocessor/cat.hpp>
@@ -32,13 +34,14 @@
 #include <utility>
 
 
-namespace ppconsul { namespace param {
+namespace kwargs {
+
+    template<typename K, typename V>
+    using KwArg = boost::fusion::pair<K, V>;
+
     namespace detail {
 
         using namespace boost::mpl;
-
-        template<typename P, typename V>
-        using Pair = boost::fusion::pair<P, V>;
 
         struct KeywordParameterTag {};
 
@@ -49,52 +52,51 @@ namespace ppconsul { namespace param {
             typedef K This;
             typedef V Value;
 
-            Pair<This, Value> operator= (Value&& v) { return{ std::move(v) }; }
-            Pair<This, const Value&> operator= (const Value& v) { return{ v }; }
+            KwArg<This, Value> operator= (Value&& v) { return{ std::move(v) }; }
+            KwArg<This, const Value&> operator= (const Value& v) { return{ v }; }
         };
 
-        struct get_parameter_type
+        struct get_keyword
         {
-            template <class T>
+            template <class Arg>
             struct apply
             {
-                typedef typename std::remove_reference<T>::type::first_type type;
+                typedef typename std::remove_reference<Arg>::type::first_type type;
             };
         };
 
-        template<class... Parameters>
-        using parameter_types_t = typename boost::mpl::transform<
-            boost::mpl::vector<Parameters...>,
-            get_parameter_type
+        template<class... Args>
+        using get_keywords_t = typename transform<
+            vector<Args...>,
+            get_keyword
         >::type;
 
-        template<class... Parameters>
-        using unique_parameter_types_t = typename boost::mpl::fold<
-            parameter_types_t<Parameters...>,
-            boost::mpl::set0<>,
-            boost::mpl::insert<boost::mpl::_1, boost::mpl::_2>
+        template<class... Args>
+        using get_unique_keywords_t = typename fold<
+            get_keywords_t<Args...>,
+            set0<>,
+            insert<_1, _2>
         >::type;
 
         template<class... Keywords>
-        using keyword_group_t = boost::mpl::set<Keywords...>;
+        using keyword_group_t = set<Keywords...>;
 
         template<class KeywordGroup>
-        struct check_parameter_in_group
+        struct check_keyword_in_group
         {
-            template <class T>
-            struct apply
-                : boost::mpl::has_key<KeywordGroup, T>
+            template <class Arg>
+            struct apply: has_key<KeywordGroup, Arg>
             {
-                BOOST_MPL_ASSERT_MSG(apply::value, WRONG_KEYWORD_PARAMETER_PASSED, (types<T, KeywordGroup>));
+                BOOST_MPL_ASSERT_MSG(apply::value, WRONG_KEYWORD_PARAMETER_PASSED, (types<Arg, KeywordGroup>));
             };
         };
 
         template<class KeywordGroup>
-        struct check_parameters_in_group
+        struct check_keywords_in_group
         {
-            template<class... Parameters>
+            template<class... Args>
             struct apply
-                : boost::mpl::transform<parameter_types_t<Parameters...>, check_parameter_in_group<KeywordGroup>> {};
+                : transform<get_keywords_t<Args...>, check_keyword_in_group<KeywordGroup>> {};
         };
 
         template<class... Keywords>
@@ -105,7 +107,7 @@ namespace ppconsul { namespace param {
         {
             typedef typename transform<
                 Sequence,
-                detail::get_parameter_type
+                detail::get_keyword
             >::type TypesVector_;
 
             typedef typename begin<TypesVector_>::type Begin_;
@@ -129,42 +131,42 @@ namespace ppconsul { namespace param {
             typedef typename reverse<ReversedIndexes>::type type;
         };
 
-        template<class... Ts>
-        struct as_sequence_impl
+        template<class... Keywords>
+        struct as_keywords_sequence
         {
-            typedef boost::mpl::vector<Ts...> type;
+            typedef boost::mpl::vector<Keywords...> type;
         };
 
-        template<class T>
-        struct as_sequence_impl<T>: boost::mpl::eval_if<
-            boost::mpl::is_sequence<T>,
-            boost::mpl::identity<T>,
-            boost::mpl::vector<T>
+        template<class KeywordOrSequence>
+        struct as_keywords_sequence<KeywordOrSequence>: boost::mpl::eval_if<
+            boost::mpl::is_sequence<KeywordOrSequence>,
+            boost::mpl::identity<KeywordOrSequence>,
+            boost::mpl::vector<KeywordOrSequence>
         > {};
 
-        template<class... Ts>
-        struct fusion_sequence_wrapper_storage
+        template<class... Args>
+        struct args_storage
         {
-            typedef boost::fusion::vector<Ts&...> type;
+            typedef boost::fusion::vector<Args&...> type;
         };
 
-        template<class T>
-        struct fusion_sequence_wrapper_storage<T>
+        template<class ArgOrSequence>
+        struct args_storage<ArgOrSequence>
         {
             typedef typename std::conditional<
-                boost::fusion::traits::is_sequence<T>::value,
-                typename std::add_lvalue_reference<T>::type,
-                boost::fusion::vector<T&>
+                boost::fusion::traits::is_sequence<ArgOrSequence>::value,
+                typename std::add_lvalue_reference<ArgOrSequence>::type,
+                boost::fusion::vector<ArgOrSequence&>
             >::type type;
         };
 
-        template<class... Ts>
-        struct fusion_sequence_wrapper
+        template<class... ArgsOrSequence>
+        struct args_sequence_wrapper
         {
-            typedef typename fusion_sequence_wrapper_storage<Ts...>::type Storage;
+            typedef typename args_storage<ArgsOrSequence...>::type Storage;
 
-            template<class... Ts2>
-            fusion_sequence_wrapper(Ts2&... ts): m_s(ts...) {}
+            template<class... T>
+            args_sequence_wrapper(T&... t): m_s(t...) {}
 
             template<class Index>
             auto operator()(Index) const -> decltype(boost::fusion::at<Index>(std::declval<const Storage&>()))
@@ -186,101 +188,93 @@ namespace ppconsul { namespace param {
     //struct is_parameter: std::false_type {};
     //
     //template<class P, class V>
-    //struct is_parameter<Pair<P, V>, typename std::enable_if<std::is_base_of<KeywordParameterTag, P>::value>::type>: std::true_type{};
+    //struct is_parameter<KeywordArgument<P, V>, typename std::enable_if<std::is_base_of<KeywordParameterTag, P>::value>::type>: std::true_type{};
 
-    template<class... Parameters>
-    struct as_sequence: detail::as_sequence_impl<Parameters...> {};
+    template<class... KeywordsOrSequence>
+    struct as_keywords_sequence: detail::as_keywords_sequence<KeywordsOrSequence...> {};
 
-    template<class Parameter>
-    using parameter_keyword_t = typename detail::get_parameter_type::apply<Parameter>::type;
+    template<class Arg>
+    struct keyword_of
+    {
+        typedef typename detail::get_keyword::apply<Arg>::type type;
+    };
 
-    template<class... Parameters>
-    struct is_parameters_unique: boost::mpl::bool_<
-        boost::mpl::size<detail::parameter_types_t<Parameters...>>::type::value ==
-        boost::mpl::size<detail::unique_parameter_types_t<Parameters...>>::type::value
+    template<class Arg>
+    using keyword_of_t = typename keyword_of<Arg>::type;
+
+    template<class... Args>
+    struct is_unique_keywords: boost::mpl::bool_<
+        boost::mpl::size<detail::get_keywords_t<Args...>>::type::value ==
+        boost::mpl::size<detail::get_unique_keywords_t<Args...>>::type::value
     > {};
 
-    template<class... Parameters>
-    struct unique_indexes: detail::unique_indexes_impl<typename as_sequence<Parameters...>::type> {};
+    template<class... ArgsOrSequence>
+    struct unique_indexes: detail::unique_indexes_impl<typename as_keywords_sequence<ArgsOrSequence...>::type> {};
 
-    template<class... Parameters>
-    using unique_indexes_t = typename unique_indexes<Parameters...>::type;
+    template<class... ArgsOrSequence>
+    using unique_indexes_t = typename unique_indexes<ArgsOrSequence...>::type;
 
-    template<class... Parameters>
-    auto unique_parameters(Parameters&... params) ->
+    template<class... Args>
+    auto unique_args(Args&... args) ->
         decltype(boost::fusion::transform(
-            unique_indexes_t<Parameters...>(),
-            detail::fusion_sequence_wrapper<Parameters...>(params...))
+            unique_indexes_t<Args...>(),
+            detail::args_sequence_wrapper<Args...>(args...))
         )
     {
         return boost::fusion::transform(
-            unique_indexes_t<Parameters...>(),
-            detail::fusion_sequence_wrapper<Parameters...>(params...));
+            unique_indexes_t<Args...>(),
+            detail::args_sequence_wrapper<Args...>(args...));
     }
 
-    template<typename P, typename V>
-    inline V parameter_value(detail::Pair<P, V>&& v)
+    template<typename K, typename V>
+    K get_keyword(const KwArg<K, V>& v)
     {
-        return std::forward<V>(v.second);
+        return K();
     }
 
-    template<typename P, typename V>
-    inline const V& parameter_value(const detail::Pair<P, V>& v)
+    template<typename K, typename V>
+    V& get_value(KwArg<K, V>&& v)
     {
         return v.second;
     }
-}}
 
-#define PPCONSUL_PARAM__UNFOLD(...) __VA_ARGS__
-#define PPCONSUL_PARAM__CLS_NAME(keyword) BOOST_PP_CAT(keyword, _keyword_)
+    template<typename K, typename V>
+    const V& get_value(const KwArg<K, V>& v)
+    {
+        return v.second;
+    }
+}
+
+#define KWARGS__UNFOLD(...) __VA_ARGS__
+#define KWARGS__CLS_NAME(keyword) BOOST_PP_CAT(keyword, _keyword_)
 
 // Define keyword parameter of specified type.
-// Ex: PPCONSUL_PARAM(url, std::string)
-#define PPCONSUL_PARAM(keyword, type)                                                   \
-struct PPCONSUL_PARAM__CLS_NAME(keyword)                                                \
-    : ppconsul::param::detail::KeywordBase<PPCONSUL_PARAM__CLS_NAME(keyword), type>{    \
-    using Base::operator=;                                                              \
+// Ex: KWARGS_KEYWORD(url, std::string)
+#define KWARGS_KEYWORD(keyword, type)                                   \
+struct KWARGS__CLS_NAME(keyword)                                        \
+    : kwargs::detail::KeywordBase<KWARGS__CLS_NAME(keyword), type> {    \
+    using Base::operator=;                                              \
 } keyword;
 
-// Define keyword parameter of specified type with specified string name attached.
-// Note that the name can be retrieved with PPCONSUL_PARAM_NAME(keyword) macro.
-// Ex: PPCONSUL_PARAM_NAMED(url, std::string, "addr")
-#define PPCONSUL_PARAM_NAMED(keyword, type, name_)  \
-    PPCONSUL_PARAM(keyword, type)                   \
-    inline const char *parameter_name(PPCONSUL_PARAM__CLS_NAME(keyword)) { return name_; }
+// Get unique type of keyword. `decltype(keyword)`
+#define KWARGS_KW_TAG(keyword) decltype(keyword)
 
-// Same as PPCONSUL_PARAM_NAMED(keyword, type "<keyword>")
-// Ex: PPCONSUL_PARAM_DEF_NAMED(url, std::string)
-#define PPCONSUL_PARAM_DEF_NAMED(keyword, type) PPCONSUL_PARAM_NAMED(keyword, type, BOOST_PP_STRINGIZE(keyword))
+// Define keywords group. Keywords must be specified in brackets.
+// Ex: KWARGS_KEYWORDS_GROUP(get_request, (url, seconds_to_wait))
+#define KWARGS_KEYWORDS_GROUP(group, keywords) \
+    typedef decltype(kwargs::detail::group_keywords(KWARGS__UNFOLD keywords)) group;
 
-// Get name of keyword parameter. Compilation error if parameter was defined without the name.
-// Ex: PPCONSUL_PARAM_NAME(url)
-#define PPCONSUL_PARAM_NAME(keyword_cls) \
-    parameter_name(keyword_cls)
+// Check arguments contain no duplicated keywords.
+// Ex: KWARGS_CHECK_UNIQUE(Args)
+#define KWARGS_CHECK_UNIQUE(args) \
+    BOOST_MPL_ASSERT_MSG(kwargs::is_unique_keywords<args...>::value, KEYWORD_PARAMETER_PASSED_MORE_THAN_ONCE, (types<args...>));
 
-// Get keyword type. Same as decltype(keyword)
-#define PPCONSUL_PARAM_KW_TYPE(keyword) \
-    decltype(keyword)
+// Check passed argument types are a subset of specified keywords group (previously defined with KWARGS_KEYWORDS_GROUP)
+// Ex: KWARGS_CHECK_IN_GROUP(Args, get_request);
+#define KWARGS_CHECK_IN_GROUP(args, group) \
+    { typename kwargs::detail::check_keywords_in_group<group>::apply<args...>::type t_; (void)t_; }
 
-// Define keyword parameters group. keywords must be specified in brackets.
-// Ex: PPCONSUL_PARAMETER_GROUP(get_request, (url, seconds_to_wait))
-#define PPCONSUL_PARAM_GROUP(group, keywords) \
-    typedef decltype(ppconsul::param::detail::group_keywords(PPCONSUL_PARAM__UNFOLD keywords)) group;
-
-// Check parameters contain no duplicated parameters.
-// Ex: PPCONSUL_PARAM_CHECK_UNIQUE(Parameters)
-#define PPCONSUL_PARAM_CHECK_UNIQUE(parameters)                      \
-    BOOST_MPL_ASSERT_MSG(                                            \
-        ppconsul::param::is_parameters_unique<parameters...>::value, \
-        KEYWORD_PARAMETER_PASSED_MORE_THAN_ONCE,                     \
-        (types<parameters...>));
-
-// Check parameters contains no duplicated parameters and is a subset of specified keyword parameters group (defined with PPCONSUL_PARAMETER_GROUP)
-// Ex: PPCONSUL_PARAMETER_CHECK_GROUP(Parameters, get_request);
-#define PPCONSUL_PARAM_CHECK_GROUP(parameters, keywords_group) \
-    { typename ppconsul::param::detail::check_parameters_in_group<keywords_group>::apply<parameters...>::type t_; (void)t_; }
-
-// Check parameters contains no duplicated parameters and is a subset of specified keywords set. keywords must be specified in brackets.
-// Ex: PPCONSUL_PARAMETER_CHECK(Parameters, (url, seconds_to_wait));
-#define PPCONSUL_PARAM_CHECK(parameters, keywords) \
-    PPCONSUL_PARAM_CHECK_GROUP(parameters, decltype(ppconsul::param::detail::group_keywords(PPCONSUL_PARAM__UNFOLD keywords)))
+// Check passed argument types are a subset of specified list of keywords. Keywords must be specified in brackets.
+// Ex: KWARGS_CHECK_IN_LIST(Args, (url, seconds_to_wait));
+#define KWARGS_CHECK_IN_LIST(args, keywords) \
+    KWARGS_CHECK_IN_GROUP(args, decltype(kwargs::detail::group_keywords(KWARGS__UNFOLD keywords)))
