@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <cstdlib>
+
+
 namespace ppconsul { namespace impl {
     namespace {
         const std::string Index_Header_Name("X-Consul-Index");

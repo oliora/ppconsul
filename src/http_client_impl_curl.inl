@@ -8,7 +8,6 @@
 #include "ppconsul/response.h"
 #include <curl/curl.h>
 #include <algorithm>
-#include <cstdlib>
 #include <tuple>
 #include <cassert>
 #include <regex>
