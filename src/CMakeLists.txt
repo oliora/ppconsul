@@ -11,6 +11,7 @@ set(HEADERS
     http_status.h
     json.h
     kv.h
+    param.h
     parameters.h
     ppconsul.h
     response.h
