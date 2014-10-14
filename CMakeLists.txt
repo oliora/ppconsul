@@ -18,6 +18,8 @@ if (${USE_CPPNETLIB})
     add_definitions(-DPPCONSUL_USE_CPPNETLIB)
 endif ()
 
+set(BOOST_MIN_VERSION 1.47) # The first Boost with Chrono
+
 if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 elseif (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
@@ -38,10 +40,12 @@ endif()
 enable_testing()
 
 if (${USE_CPPNETLIB})
-    find_package(Boost 1.55 REQUIRED COMPONENTS thread filesystem system date_time chrono regex)
+    find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS thread filesystem system date_time chrono regex)
 
     find_package(cppnetlib 0.11.0 REQUIRED)
 else ()
+    find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
+
     # Add user specified path to CURL headers/libraries into CMAKE_INCLUDE_PATH/CMAKE_LIBRARY_PATH variables.
     # Otherwise CURL could not be found on Windows
     if ("${CURL_ROOT}" STREQUAL "")

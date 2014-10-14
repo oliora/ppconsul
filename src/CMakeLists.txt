@@ -30,9 +30,9 @@ foreach(SRC ${HEADERS})
     list(APPEND SOURCES "${HEADERS_DIR}/${SRC}")
 endforeach()
 
+include_directories(${Boost_INCLUDE_DIRS})
 
 if (${USE_CPPNETLIB})
-    include_directories(${Boost_INCLUDE_DIRS})
     include_directories(${CPPNETLIB_INCLUDE_DIRS})
 else ()
     include_directories(${CURL_INCLUDE_DIR})

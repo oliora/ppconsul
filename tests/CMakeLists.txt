@@ -7,17 +7,18 @@
 macro(link_test_libs project_name)
     target_link_libraries(${project_name} ppconsul)
     target_link_libraries(${project_name} json11)
-    
+    target_link_libraries(${project_name} ${Boost_LIBRARIES})
+
     if (${USE_CPPNETLIB})
-        target_link_libraries(${project_name} ${Boost_LIBRARIES})
         target_link_libraries(${project_name} ${CPPNETLIB_LIBRARIES})
     else ()
         target_link_libraries(${PROJECT_NAME} ${CURL_LIBRARIES})
     endif ()
 endmacro()
 
+include_directories(${Boost_INCLUDE_DIRS})
+
 if (${USE_CPPNETLIB})
-    include_directories(${Boost_INCLUDE_DIRS})
     include_directories(${CPPNETLIB_INCLUDE_DIRS})
 else ()
     include_directories(${CURL_INCLUDE_DIR})
