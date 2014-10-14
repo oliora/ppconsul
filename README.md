@@ -26,6 +26,7 @@ The library uses
 * [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
 * [Catch](https://github.com/philsquared/Catch) unit test framework.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
+* [Boost](http://www.boost.org/) library. PPConsul needs headers only Boost libraries if libCURL is used.
 
 ## Documentation
 TBD
@@ -36,8 +37,9 @@ TBD
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [Git](http://git-scm.com/) client.
 * Install [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. Note that CMake 3 not guaranteed to work.
+* Download [Boost](http://www.boost.org/) library. Build it if you would use cpp-netlib instead of libCURL.
 * If you prefer to use libCURL then install libCURL (On Windows it's included in [CURL](http://curl.haxx.se/) installer).
-Otherwise download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that the latter depends on [Boost](http://www.boost.org/).
+Otherwise download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that the latter depends on compiled Boost libraries.
 * Install [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
 
 ### Prepare Project
@@ -52,11 +54,11 @@ If you want to use libCURL:
 Otherwise:  
 `cmake .. -DUSE_CPPNETLIB=1`
 
-If you are building on Windows you *probably* need to set up additional variables:
-* Path to libCURL headers and library.
-  Set environment variable `set CURL_ROOT=<path_to_curl>` or pass it to CMake as `cmake .. -DCURL_ROOT=<path_to_curl>`.
+**Note that** if you are building on Windows you need to set up additional variables:
 * Path to Boost headers and library.
-  Set environment variable `set BOOST_ROOT=<path_to_boost>` or pass it to CMake as for libCURL.
+  Set environment variable `set BOOST_ROOT=<path_to_boost>` or pass it to CMake `cmake .. -DBOOST_ROOT=<path_to_boost>`.
+* Path to libCURL headers and library.
+  Set environment variable `set CURL_ROOT=<path_to_curl>` or pass it to CMake as described above.
 
 *Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 
