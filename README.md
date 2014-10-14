@@ -26,7 +26,7 @@ The library uses
 * [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
 * [Catch](https://github.com/philsquared/Catch) unit test framework.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
-* [Boost](http://www.boost.org/) library. PPConsul needs headers only Boost libraries if libCURL is used.
+* [Boost](http://www.boost.org/) library. PPConsul needs only Boost headers if libCURL is used.
 
 ## Documentation
 TBD
