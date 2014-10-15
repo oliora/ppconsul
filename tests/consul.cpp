@@ -7,23 +7,6 @@
 #include "ppconsul/consul.h"
 #include <catch/catch.hpp>
 
-// TODO: restore
-/*TEST_CASE( "consul.makeUrl", "[http][consul][url]" )
-{
-    using ppconsul::impl::makeUrl;
-
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", { { "1stparam", "urgent" }, { "2ndparam", 2 } }) ==
-        "http://www.example.com/something/interesting?1stparam=urgent&2ndparam=2");
-
-    CHECK(makeUrl("https://127.0.0.1:8090", "/something/interesting") ==
-        "https://127.0.0.1:8090/something/interesting");
-
-    CHECK(makeUrl("http://127.0.0.1:8090", "/something/interesting", {"p1", 42}) ==
-        "http://127.0.0.1:8090/something/interesting?p1=42");
-
-    CHECK(makeUrl("http://127.0.0.1:8090", "/something/interesting?p1=42") ==
-        "http://127.0.0.1:8090/something/interesting?p1=42");
-}*/
 
 TEST_CASE( "consul.BadStatus", "[http][consul][status][error]" )
 {
