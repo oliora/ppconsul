@@ -71,6 +71,7 @@ namespace ppconsul {
 
     namespace params {
         PPCONSUL_PARAM(dc, std::string)
+        PPCONSUL_PARAM(token, std::string)
         PPCONSUL_PARAM_NO_NAME(consistency, Consistency)
 
         inline void printParameter(std::ostream& os, Consistency consistency, KWARGS_KW_TAG(consistency))
@@ -92,7 +93,25 @@ namespace ppconsul {
     class Consul
     {
     public:
-        explicit Consul(const std::string& dataCenter = "", const std::string& addr = Default_Server_Address);
+        // Allowed parameters:
+        // - dc - default dc for all client requests
+        // - token - default token for all client requests
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        explicit Consul(const std::string& addr, const Params&... params)
+            : Consul(kwargs::get(params::dc, "", params...),
+                kwargs::get(params::token, "", params...),
+                addr)
+        {}
+
+        // Same as Consul(Default_Server_Address, ...)
+        // Allowed parameters:
+        // - dc - default dc for all client requests
+        // - token - default token for all client requests
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        explicit Consul(const Params&... params)
+            : Consul(Default_Server_Address, params...)
+        {}
+
         ~Consul();
 
         Consul(Consul &&op);
@@ -126,11 +145,13 @@ namespace ppconsul {
         std::string del(const std::string& path, const Params&... params);
 
     private:
+        Consul(const std::string& dataCenter, const std::string& token, const std::string& addr);
+
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string makeUrl(const std::string& path, const Params&... params) const
         {
             using namespace params;
-            return parameters::makeUrl(m_addr, path, dc = m_dataCenter, params...);
+            return parameters::makeUrl(m_addr, path, dc = m_dataCenter, token = m_token, params...);
         }
 
         Response<std::string> get_impl(http::Status& status, const std::string& url);
@@ -142,6 +163,7 @@ namespace ppconsul {
 
         // Default params
         std::string m_dataCenter;
+        std::string m_token;
     };
 
     // Implementation

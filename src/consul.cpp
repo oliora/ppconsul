@@ -46,10 +46,11 @@ namespace ppconsul {
         return m_what.c_str();
     }
 
-    Consul::Consul(const std::string& dataCenter, const std::string& addr)
+    Consul::Consul(const std::string& dataCenter, const std::string& token, const std::string& addr)
     : m_addr(makeAddr(addr))
     , m_client(new impl::HttpClient())
     , m_dataCenter(dataCenter)
+    , m_token(token)
     {}
     
     Consul::~Consul()
