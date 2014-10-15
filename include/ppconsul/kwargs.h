@@ -18,6 +18,7 @@
 #include <boost/mpl/is_sequence.hpp>
 #include <boost/mpl/set.hpp>
 #include <boost/mpl/distance.hpp>
+#include <boost/mpl/contains.hpp>
 #include <boost/mpl/front.hpp>
 
 #include <boost/fusion/include/pair.hpp>
@@ -25,6 +26,7 @@
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/is_sequence.hpp>
 #include <boost/fusion/include/vector.hpp>
+#include <boost/fusion/include/vector_tie.hpp>
 #include <boost/fusion/include/mpl.hpp>
 
 #include <boost/preprocessor/stringize.hpp>
@@ -33,13 +35,6 @@
 #include <type_traits>
 #include <utility>
 
-
-/*
-    TODO:
-        - Allow perfect forwarding of passed arguments (access to passed rvalue as to rvalue not lvalue const reference).
-        - Check passed arguments are instances of KwArg template.
-
-*/
 
 namespace kwargs {
 
@@ -52,6 +47,7 @@ namespace kwargs {
         using boost::mpl::first;
         using boost::mpl::second;
         using boost::mpl::begin;
+        using boost::mpl::end;
         using boost::mpl::fold;
         using boost::mpl::transform;
         using boost::mpl::reverse_iter_fold;
@@ -73,6 +69,9 @@ namespace kwargs {
         using boost::mpl::eval_if;
         using boost::mpl::_1;
         using boost::mpl::_2;
+        using boost::mpl::contains;
+        using boost::mpl::find;
+        using boost::mpl::prior;
 
         struct KeywordParameterTag {};
 
@@ -84,7 +83,7 @@ namespace kwargs {
             typedef V Value;
 
             KwArg<This, Value> operator= (Value&& v) const { return{ std::move(v) }; }
-            KwArg<This, const Value&> operator= (const Value& v) const { return{ v }; }
+            const KwArg<This, const Value&> operator= (const Value& v) const { return{ v }; }
         };
 
         struct get_keyword
@@ -239,6 +238,21 @@ namespace kwargs {
 
         template<class... Args>
         struct is_kwargs: is_kwargs_impl<Args...>::type {};
+
+        template<class Keyword, class... Args>
+        struct has_keyword: contains<typename get_keywords<Args...>::type, Keyword>::type {};
+
+        template<class Keyword, class... Args>
+        struct keyword_index
+        {
+            typedef typename reverse<typename get_keywords<Args...>::type>::type TypesVector_;
+            typedef typename prior<
+                typename distance<
+                    typename find<TypesVector_, Keyword>::type,
+                    typename end<TypesVector_>::type
+                >::type
+            >::type type;
+        };
     }
 
     //template<class T, class Enabler = void>
@@ -272,7 +286,7 @@ namespace kwargs {
     using unique_indexes_t = typename unique_indexes<ArgsOrSequence...>::type;
 
     template<class... Args>
-    auto unique_args(Args&... args) ->
+    inline auto unique_args(Args&... args) ->
         decltype(boost::fusion::transform(
             unique_indexes_t<Args...>(),
             detail::args_sequence_wrapper<Args...>(args...))
@@ -284,30 +298,56 @@ namespace kwargs {
     }
 
     template<typename K, typename V>
-    K get_keyword(const KwArg<K, V>& v)
+    inline K get_keyword(const KwArg<K, V>& v)
     {
         return K();
     }
 
-    using detail::is_kwargs;
-
-    template<class... Args>
-    using enable_if_kwargs_t = typename std::enable_if<is_kwargs<Args...>::value>::type;
-
-    /*template<typename K, typename V>
-    typename std::remove_reference<V>::type& get_value(KwArg<K, V>&& v)
-    {
-        return v.second;
-    }*/
-
-    // TODO: allow access to the rvalue references and non-const lvalue references
-
     template<typename K, typename V>
-    typename std::add_const<
+    inline typename std::add_const<
         typename std::remove_reference<V>::type
     >::type& get_value(const KwArg<K, V>& v)
     {
         return v.second;
+    }
+
+    template<typename K, typename V>
+    inline typename std::remove_reference<V>::type& get_value(KwArg<K, V>& v)
+    {
+        return std::move(v.second);
+    }
+
+    using detail::is_kwargs;
+    using detail::has_keyword;
+
+    template<class... Args>
+    using enable_if_kwargs_t = typename std::enable_if<is_kwargs<Args...>::value>::type;
+
+    /*template<class Keyword, class... Args>
+    inline typename std::enable_if<is_kwargs<Args...>::value, typename Keyword::Value>::type
+        get(Keyword, Args&&... args)
+    {
+        auto a = boost::fusion::vector_tie(args...);
+        return std::move(get_value(boost::fusion::at<typename detail::keyword_index<Keyword, Args...>::type>(a)));
+    }*/
+
+    template<class Keyword, class Default, class... Args>
+    inline typename std::enable_if<
+        is_kwargs<Args...>::value && has_keyword<Keyword, Args...>::value,
+        typename Keyword::Value
+    >::type get(Keyword, Default&&, Args&&... args)
+    {
+        auto a = boost::fusion::vector_tie(args...);
+        return std::move(get_value(boost::fusion::at<typename detail::keyword_index<Keyword, Args...>::type>(a)));
+    }
+
+    template<class Keyword, class Default, class... Args>
+    inline typename std::enable_if<
+        is_kwargs<Args...>::value && !detail::has_keyword<Keyword, Args...>::value,
+        Default&&
+    >::type get(Keyword, Default&& d, Args&&...)
+    {
+        return std::forward<Default>(d);
     }
 }
 
