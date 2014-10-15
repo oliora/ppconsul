@@ -232,14 +232,18 @@ namespace kwargs {
         return K();
     }
 
-    template<typename K, typename V>
-    V& get_value(KwArg<K, V>&& v)
+    /*template<typename K, typename V>
+    typename std::remove_reference<V>::type& get_value(KwArg<K, V>&& v)
     {
         return v.second;
-    }
+    }*/
+
+    // TODO: allow access to the rvalue references and non-const lvalue references
 
     template<typename K, typename V>
-    const V& get_value(const KwArg<K, V>& v)
+    typename std::add_const<
+        typename std::remove_reference<V>::type
+    >::type& get_value(const KwArg<K, V>& v)
     {
         return v.second;
     }
