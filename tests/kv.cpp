@@ -13,6 +13,7 @@
 
 using ppconsul::kv::Storage;
 using ppconsul::kv::KeyValue;
+using namespace ppconsul::kv::params;
 
 namespace 
 {
@@ -113,7 +114,7 @@ TEST_CASE("kv.erase and count", "[consul][kv]")
         CHECK(kv.count("otherkey1"));
     }
 }
-
+/**/
 TEST_CASE("kv.get", "[consul][kv][headers]")
 {
     auto consul = create_test_consul();
@@ -329,7 +330,7 @@ TEST_CASE("kv.put", "[consul][kv]")
 
     SECTION("put flags")
     {
-        kv.put("key24", "value13", 0x12345678);
+        kv.put("key24", "value13", flags=0x12345678);
 
         {
             KeyValue v = kv.item("key24");
@@ -459,14 +460,14 @@ TEST_CASE("kv.cas", "[consul][kv]")
     {
         SECTION("change nonexisting")
         {
-            REQUIRE(!kv.cas("key2", 1, "value2", 0x87654321));
+            REQUIRE(!kv.cas("key2", 1, "value2", flags = 0x87654321));
             CHECK(!kv.count("key2"));
             CHECK(!kv.item("key2").valid());
         }
 
         SECTION("init without cas")
         {
-            kv.put("key1", "value1", 0x87654321);
+            kv.put("key1", "value1", flags = 0x87654321);
 
             {
                 KeyValue v = kv.item("key1");
@@ -482,7 +483,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
             SECTION("change with cas wrong")
             {
-                REQUIRE(!kv.cas("key1", 0, "value2", 0xFC12DE56));
+                REQUIRE(!kv.cas("key1", 0, "value2", flags = 0xFC12DE56));
                 CHECK(kv.item("key1").valid());
                 CHECK(kv.item("key1").value() == "value1");
                 CHECK(kv.item("key1").flags() == 0x87654321);
@@ -492,7 +493,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 auto cas = kv.item("key1").modifyIndex();
 
-                REQUIRE(kv.cas("key1", cas, "value2", 0xFC12DE56));
+                REQUIRE(kv.cas("key1", cas, "value2", flags = 0xFC12DE56));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -508,7 +509,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
         SECTION("init with cas")
         {
-            REQUIRE(kv.cas("key1", 0, "value1", 0x87654321));
+            REQUIRE(kv.cas("key1", 0, "value1", flags = 0x87654321));
             
             {
                 KeyValue v = kv.item("key1");
@@ -524,7 +525,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
             SECTION("change with put")
             {
-                kv.put("key1", "value2", 0xFC12DE56);
+                kv.put("key1", "value2", flags = 0xFC12DE56);
                 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -557,7 +558,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 auto cas = kv.item("key1").modifyIndex();
 
-                REQUIRE(kv.cas("key1", cas, "value2", 0xFC12DE56));
+                REQUIRE(kv.cas("key1", cas, "value2", flags = 0xFC12DE56));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());

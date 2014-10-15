@@ -24,26 +24,6 @@ namespace ppconsul {
         }
     }
 
-    namespace impl {
-        inline std::string makeUrl(const std::string& addr, const std::string& path, const Parameters& parameters)
-        {
-            auto query = parameters.query();
-
-            std::string r;
-            r.reserve(addr.size() + path.size() + query.size() + 1); // 1 is for query prefix '?'
-
-            r += addr;
-            r += path;
-            if (!query.empty())
-            {
-                r += '?';
-                r += query;
-            }
-
-            return r;
-        }
-    }
-
     const char *BadStatus::what() const PPCONSUL_NOEXCEPT
     {
         if (m_what.empty())
@@ -69,58 +49,48 @@ namespace ppconsul {
     Consul::Consul(const std::string& dataCenter, const std::string& addr)
     : m_addr(makeAddr(addr))
     , m_client(new impl::HttpClient())
-    {
-        if (!dataCenter.empty())
-            m_defaultParams.update("dc", dataCenter);
-    }
+    , m_dataCenter(dataCenter)
+    {}
     
     Consul::~Consul()
     {}
 
     Consul::Consul(Consul &&op)
-    : m_defaultParams(std::move(op.m_defaultParams))
-    , m_addr(std::move(op.m_addr))
+    : m_addr(std::move(op.m_addr))
     , m_client(std::move(op.m_client))
+    , m_dataCenter(std::move(op.m_dataCenter))
     {}
 
     Consul& Consul::operator= (Consul &&op)
     {
         if (this != &op)
         {
-            m_defaultParams = std::move(op.m_defaultParams);
             m_addr = std::move(op.m_addr);
             m_client = std::move(op.m_client);
+            m_dataCenter = std::move(op.m_dataCenter);
         }
         
         return *this;
     }
 
-    inline std::string Consul::makeUrl(const std::string& path, const Parameters& params) const
-    {
-        Parameters p = m_defaultParams;
-        p.update(params);
-
-        return impl::makeUrl(m_addr, path, p);
-    }
-
-    Response<std::string> Consul::get(http::Status& status, const std::string& path, const Parameters& params)
+    Response<std::string> Consul::get_impl(http::Status& status, const std::string& url)
     {
         Response<std::string> r;
-        std::tie(status, r.headers(), r.value()) = m_client->get(makeUrl(path, params));
+        std::tie(status, r.headers(), r.value()) = m_client->get(url);
         return r;
     }
 
-    std::string Consul::put(http::Status& status, const std::string& path, const std::string& body, const Parameters& params)
+    std::string Consul::put_impl(http::Status& status, const std::string& url, const std::string& body)
     {
         std::string r;
-        std::tie(status, r) = m_client->put(makeUrl(path, params), body);
+        std::tie(status, r) = m_client->put(url, body);
         return r;
     }
 
-    std::string Consul::del(http::Status& status, const std::string& path, const Parameters& params)
+    std::string Consul::del_impl(http::Status& status, const std::string& url)
     {
         std::string r;
-        std::tie(status, r) = m_client->del(makeUrl(path, params));
+        std::tie(status, r) = m_client->del(url);
         return r;
     }
 

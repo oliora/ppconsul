@@ -34,6 +34,13 @@
 #include <utility>
 
 
+/*
+    TODO:
+        - Allow perfect forwarding of passed arguments (access to passed rvalue as to rvalue not lvalue const reference).
+        - Check passed arguments are instances of KwArg template.
+
+*/
+
 namespace kwargs {
 
     template<typename K, typename V>
@@ -41,7 +48,31 @@ namespace kwargs {
 
     namespace detail {
 
-        using namespace boost::mpl;
+        using boost::mpl::pair;
+        using boost::mpl::first;
+        using boost::mpl::second;
+        using boost::mpl::begin;
+        using boost::mpl::fold;
+        using boost::mpl::transform;
+        using boost::mpl::reverse_iter_fold;
+        using boost::mpl::reverse;
+        using boost::mpl::set;
+        using boost::mpl::vector;
+        using boost::mpl::has_key;
+        using boost::mpl::insert;
+        using boost::mpl::is_sequence;
+        using boost::mpl::identity;
+        using boost::mpl::push_back;
+        using boost::mpl::deref;
+        using boost::mpl::distance;
+        using boost::mpl::bool_;
+        using boost::mpl::true_;
+        using boost::mpl::false_;
+        using boost::mpl::and_;
+        using boost::mpl::if_;
+        using boost::mpl::eval_if;
+        using boost::mpl::_1;
+        using boost::mpl::_2;
 
         struct KeywordParameterTag {};
 
@@ -52,8 +83,8 @@ namespace kwargs {
             typedef K This;
             typedef V Value;
 
-            KwArg<This, Value> operator= (Value&& v) { return{ std::move(v) }; }
-            KwArg<This, const Value&> operator= (const Value& v) { return{ v }; }
+            KwArg<This, Value> operator= (Value&& v) const { return{ std::move(v) }; }
+            KwArg<This, const Value&> operator= (const Value& v) const { return{ v }; }
         };
 
         struct get_keyword
@@ -66,17 +97,17 @@ namespace kwargs {
         };
 
         template<class... Args>
-        using get_keywords_t = typename transform<
+        struct get_keywords: transform<
             vector<Args...>,
             get_keyword
-        >::type;
+        > {};
 
         template<class... Args>
-        using get_unique_keywords_t = typename fold<
-            get_keywords_t<Args...>,
-            set0<>,
+        struct get_unique_keywords: fold<
+            typename get_keywords<Args...>::type,
+            set<>,
             insert<_1, _2>
-        >::type;
+        > {};
 
         template<class... Keywords>
         using keyword_group_t = set<Keywords...>;
@@ -96,7 +127,7 @@ namespace kwargs {
         {
             template<class... Args>
             struct apply
-                : transform<get_keywords_t<Args...>, check_keyword_in_group<KeywordGroup>> {};
+                : transform<typename get_keywords<Args...>::type, check_keyword_in_group<KeywordGroup>> {};
         };
 
         template<class... Keywords>
@@ -134,14 +165,14 @@ namespace kwargs {
         template<class... Keywords>
         struct as_keywords_sequence
         {
-            typedef boost::mpl::vector<Keywords...> type;
+            typedef vector<Keywords...> type;
         };
 
         template<class KeywordOrSequence>
-        struct as_keywords_sequence<KeywordOrSequence>: boost::mpl::eval_if<
-            boost::mpl::is_sequence<KeywordOrSequence>,
-            boost::mpl::identity<KeywordOrSequence>,
-            boost::mpl::vector<KeywordOrSequence>
+        struct as_keywords_sequence<KeywordOrSequence>: eval_if<
+            is_sequence<KeywordOrSequence>,
+            identity<KeywordOrSequence>,
+            vector<KeywordOrSequence>
         > {};
 
         template<class... Args>
@@ -182,6 +213,32 @@ namespace kwargs {
 
             Storage m_s;
         };
+
+        template<class T>
+        struct is_kwarg_impl: false_ {};
+
+        template<class K, class V>
+        struct is_kwarg_impl<KwArg<K, V>>: true_ {};
+
+        template<class T>
+        struct is_kwarg: is_kwarg_impl<
+            typename std::remove_cv<
+                typename std::remove_reference<T>::type
+            >::type
+        > {};
+
+        template<class... Args>
+        struct is_kwargs_impl: fold<
+            vector<Args...>,
+            true_,
+            and_<
+                is_kwarg<_2>,
+                _1
+            >
+        > {};
+
+        template<class... Args>
+        struct is_kwargs: is_kwargs_impl<Args...>::type {};
     }
 
     //template<class T, class Enabler = void>
@@ -204,8 +261,8 @@ namespace kwargs {
 
     template<class... Args>
     struct is_unique_keywords: boost::mpl::bool_<
-        boost::mpl::size<detail::get_keywords_t<Args...>>::type::value ==
-        boost::mpl::size<detail::get_unique_keywords_t<Args...>>::type::value
+        boost::mpl::size<typename detail::get_keywords<Args...>::type>::type::value ==
+        boost::mpl::size<typename detail::get_unique_keywords<Args...>::type>::type::value
     > {};
 
     template<class... ArgsOrSequence>
@@ -231,6 +288,11 @@ namespace kwargs {
     {
         return K();
     }
+
+    using detail::is_kwargs;
+
+    template<class... Args>
+    using enable_if_kwargs_t = typename std::enable_if<is_kwargs<Args...>::value>::type;
 
     /*template<typename K, typename V>
     typename std::remove_reference<V>::type& get_value(KwArg<K, V>&& v)
@@ -258,7 +320,7 @@ namespace kwargs {
 struct KWARGS__CLS_NAME(keyword)                                        \
     : kwargs::detail::KeywordBase<KWARGS__CLS_NAME(keyword), type> {    \
     using Base::operator=;                                              \
-} keyword;
+} const keyword;
 
 // Get unique type of keyword. `decltype(keyword)`
 #define KWARGS_KW_TAG(keyword) decltype(keyword)
@@ -271,14 +333,14 @@ struct KWARGS__CLS_NAME(keyword)                                        \
 // Check arguments contain no duplicated keywords.
 // Ex: KWARGS_CHECK_UNIQUE(Args)
 #define KWARGS_CHECK_UNIQUE(args) \
-    BOOST_MPL_ASSERT_MSG(kwargs::is_unique_keywords<args...>::value, KEYWORD_PARAMETER_PASSED_MORE_THAN_ONCE, (types<args...>));
+    BOOST_MPL_ASSERT_MSG(kwargs::is_unique_keywords<args...>::value, KEYWORD_PARAMETER_PASSED_MORE_THAN_ONCE, (args...));
 
 // Check passed argument types are a subset of specified keywords group (previously defined with KWARGS_KEYWORDS_GROUP)
-// Ex: KWARGS_CHECK_IN_GROUP(Args, get_request);
+// Ex: KWARGS_CHECK_IN_GROUP(Args, get_request)
 #define KWARGS_CHECK_IN_GROUP(args, group) \
     { typename kwargs::detail::check_keywords_in_group<group>::apply<args...>::type t_; (void)t_; }
 
 // Check passed argument types are a subset of specified list of keywords. Keywords must be specified in brackets.
-// Ex: KWARGS_CHECK_IN_LIST(Args, (url, seconds_to_wait));
+// Ex: KWARGS_CHECK_IN_LIST(Args, (url, seconds_to_wait))
 #define KWARGS_CHECK_IN_LIST(args, keywords) \
     KWARGS_CHECK_IN_GROUP(args, decltype(kwargs::detail::group_keywords(KWARGS__UNFOLD keywords)))

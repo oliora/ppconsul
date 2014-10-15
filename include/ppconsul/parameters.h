@@ -6,120 +6,94 @@
 
 #pragma once
 
+#include "kwargs.h"
 #include <type_traits>
 #include <string>
-#include <map>
+#include <sstream>
+#include <boost/fusion/include/for_each.hpp>
 
 
-namespace ppconsul {
+#define PPCONSUL_PARAM_NO_NAME KWARGS_KEYWORD
+#define PPCONSUL_PARAMS_GROUP KWARGS_KEYWORDS_GROUP
+
+#define PPCONSUL_PARAM_NAMED(keyword, type, name_)   \
+    KWARGS_KEYWORD(keyword, type)                    \
+    inline const char *parameter_name(KWARGS_KW_TAG(keyword)) { return name_; }
+
+#define PPCONSUL_PARAM(keyword, type) PPCONSUL_PARAM_NAMED(keyword, type, BOOST_PP_STRINGIZE(keyword))
+
+
+namespace ppconsul { namespace parameters {
 
     namespace detail {
-
-        template<class T> struct is_widechar_: public std::false_type {};
-        // If your compiler does not distinguish wchar_t and unsigned short, comment this line
-        // and report an issue.
-        template<> struct is_widechar_<wchar_t>: public std::true_type{};
-        // MSVS 2013 does not distinguish charXX_t and unsigned short/long types
-        // TODO: check for other compilers and probably disable only for MS
-        //template<> struct is_widechar_<char16_t>: public std::true_type{};
-        //template<> struct is_widechar_<char32_t>: public std::true_type{};
-
-        template<class T>
-        struct is_widechar: public is_widechar_<
-            typename std::remove_cv<T>::type>
-        {};
-
-
-        template<class T,
-        class Enabler = typename std::enable_if<
-            std::is_arithmetic<typename std::remove_reference<T>::type>::value>
-            ::type
-        >
-        inline std::string to_string_param(T&& t)
+        template<class Keyword, class Value>
+        void printParameter(std::ostream&os, const Value& v, Keyword k)
         {
-            static_assert(!is_widechar<typename std::remove_reference<T>::type>::value,
-                "Wide character types are not supported");
-
-            return std::to_string(std::forward<T>(t));
+            os << parameter_name(k) << "=" << v;
         }
 
-        inline std::string to_string_param(char c)
+        template<class Keyword>
+        void printParameter(std::ostream&os, const std::string& v, Keyword k)
         {
-            return std::string(1, c);
+            if (!v.empty())
+                os << parameter_name(k) << "=" << v;
         }
 
-        inline std::string to_string_param(std::string s)
+        struct ParameterPrinter
         {
-            return std::move(s);
-        }
+            ParameterPrinter(std::ostream& os): m_os(os) {}
 
-        class Parameter
-        {
-        public:
-            template<class V>
-            Parameter(std::string name, V&& value)
-                : m_name(std::move(name))
-                , m_value(to_string_param(std::forward<V>(value)))
-            {}
+            template<class T>
+            void operator() (const T& t) const
+            {
+                auto pos = m_os.tellp();
+                printParameter(m_os, kwargs::get_value(t), kwargs::get_keyword(t));
+                if (m_os.tellp() != pos)
+                    m_os << '&';
+            }
 
-            std::string m_name, m_value;
+        private:
+            std::ostream& m_os;
         };
+    }
 
-    } // namespace detail
-
-    // TODO: add comparison operators
-    class Parameters
+    inline std::string makeQuery()
     {
-    public:
-        Parameters()
-        {}
+        return{};
+    }
 
-        Parameters(std::initializer_list<detail::Parameter> values)
+    template<class... Parameters>
+    typename std::enable_if<sizeof...(Parameters) != 0, std::string>::type
+        makeQuery(const Parameters&... params)
+    {
+        std::ostringstream os;
+
+        const auto p = kwargs::unique_args(params...);
+        boost::fusion::for_each(p, detail::ParameterPrinter(os));
+
+        // Remove last '&' if exists
+        auto r = os.str();
+        if (!r.empty() && r.back() == '&')
+            r.resize(r.size() - 1);
+        return r;
+    }
+
+    template<class... Parameters>
+    std::string makeUrl(const std::string& addr, const std::string& path, const Parameters&... params)
+    {
+        auto query = makeQuery(params...);
+
+        std::string r;
+        r.reserve(addr.size() + path.size() + query.size() + 1); // 1 is for query prefix '?'
+
+        r += addr;
+        r += path;
+        if (!query.empty())
         {
-            for (const auto& p : values)
-                doUpdate(p.m_name, p.m_value);
+            r += '?';
+            r += query;
         }
 
-        template<class V>
-        Parameters(std::string name, V&& value)
-        {
-            doUpdate(std::move(name), detail::to_string_param(std::forward<V>(value)));
-        }
-
-        Parameters& update(const Parameters& values)
-        {
-            for (const auto& p : values.m_values)
-                doUpdate(p.first, p.second);
-            return *this;
-        }
-
-        Parameters& update(Parameters&& values)
-        {
-            for (auto& p : values.m_values)
-                doUpdate(std::move(p.first), std::move(p.second));
-            return *this;
-        }
-
-        template<class V>
-        Parameters& update(std::string name, V&& value)
-        {
-            doUpdate(std::move(name), detail::to_string_param(std::forward<V>(value)));
-            return *this;
-        }
-
-        bool empty() const { return m_values.empty(); }
-        void clear() { m_values.clear(); }
-
-        std::string query() const;
-
-    private:
-        void doUpdate(std::string name, std::string value)
-        {
-            m_values[std::move(name)] = std::move(value);
-        }
-
-        typedef std::map<std::string, std::string> Values;
-        Values m_values;
-    };
-
-}
+        return r;
+    }
+}}

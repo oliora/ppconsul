@@ -58,6 +58,21 @@ namespace ppconsul { namespace kv {
         mutable std::string m_what;
     };
 
+    namespace params {
+        using ppconsul::params::consistency;
+
+        PPCONSUL_PARAM(cas, uint64_t)
+        PPCONSUL_PARAM(flags, uint64_t)
+        PPCONSUL_PARAM(recurse, bool)
+        PPCONSUL_PARAM(keys, bool)
+        PPCONSUL_PARAM(separator, std::string)
+
+        namespace groups {
+            PPCONSUL_PARAMS_GROUP(get, (consistency))
+            PPCONSUL_PARAMS_GROUP(put, (flags))
+        }
+    }
+
     class Storage
     {
     public:
@@ -65,24 +80,32 @@ namespace ppconsul { namespace kv {
         : m_consul(consul)
         {}
 
-        size_t count(const std::string& key, Consistency cons = Consistency::Default) const
-        {
-            return item(key, cons).valid() ? 1 : 0;
-        }
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        size_t count(const std::string& key, const Params&... params) const { return item(key, params...).valid() ? 1 : 0; }
 
-        size_t countAll(const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const
-        {
-            return keys(keyPrefix, cons).size();
-        }
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        size_t countAll(const std::string& keyPrefix, const Params&... params) const { return keys(keyPrefix, params...).size(); }
 
-        size_t size(Consistency cons = Consistency::Default) const
-        {
-            return countAll("", cons);
-        }
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        size_t countAll(const Params&... params) const { return countAll(std::string(), params...); }
 
-        bool empty(Consistency cons = Consistency::Default) const
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        size_t size(const Params&... params) const { return countAll(std::string(), params...); }
+
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        bool empty(const Params&... params) const
         {
-            return 0 == countAll("", cons);
+            return 0 == countAll(std::string(), params...);
         }
 
         void erase(const std::string& key)
@@ -92,82 +115,155 @@ namespace ppconsul { namespace kv {
 
         void eraseAll(const std::string& keyPrefix)
         {
-            m_consul.del(keyPath(keyPrefix), { { "recurse", true } });
+            m_consul.del(keyPath(keyPrefix), params::recurse = true);
         }
 
         void clear()
         {
-            eraseAll("");
+            eraseAll(std::string());
         }
 
         // Returns value's value or defaultValue if key does not exist.
-        std::string get(const std::string& key, const std::string& defaultValue, Consistency cons = Consistency::Default) const;
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::string get(const std::string& key, const std::string& defaultValue, const Params&... params) const;
 
         // Returns invalid KeyValue (i.e. !kv.valid()) if key does not exist. Result contains both value and headers.
-        Response<KeyValue> item(WithHeaders, const std::string& key, Consistency cons = Consistency::Default) const;
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        Response<KeyValue> item(WithHeaders, const std::string& key, const Params&... params) const;
 
         // Returns invalid KeyValue (i.e. !kv.valid()) if key does not exist. Result contains value only.
-        KeyValue item(const std::string& key, Consistency cons = Consistency::Default) const
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        KeyValue item(const std::string& key, const Params&... params) const
         {
-            return std::move(item(withHeaders, key, cons).value());
+            return std::move(item(withHeaders, key, params...).value());
         }
 
-        // Get values recursively. Returns empty vector if no keys found. Result contains both value and headers.
-        Response<std::vector<KeyValue>> items(WithHeaders, const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const;
+        // Recursively get values which key starting with specified prefix. Returns empty vector if no keys found.
+        // Result contains both value and headers.
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        Response<std::vector<KeyValue>> items(WithHeaders, const std::string& keyPrefix, const Params&... params) const;
 
-        // Get values recursively. Returns empty vector if no keys found. Result contains value only.
-        std::vector<KeyValue> items(const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const
+        // Recursively get values which key starting with specified prefix. Returns empty vector if no keys found.
+        // Result contains value only.
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::vector<KeyValue> items(const std::string& keyPrefix, const Params&... params) const
         {
-            return std::move(items(withHeaders, keyPrefix, cons).value());
+            return std::move(items(withHeaders, keyPrefix, params...).value());
+        }
+
+        // Get all values. Returns empty vector if no keys found. Same as items(withHeader, "")
+        // Result contains both value and headers.
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        Response<std::vector<KeyValue>> items(WithHeaders, const Params&... params) const
+        {
+            return items(withHeaders, std::string(), params...);
+        }
+
+        // Get all values. Returns empty vector if no keys found. Same as items("")
+        // Result contains value only.
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::vector<KeyValue> items(const Params&... params) const
+        {
+            return items(std::string(), params...);
         }
 
         // Get keys up to a separator provided. Returns empty vector if no keys found. Result contains both value and headers.
-        Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const std::string& separator, Consistency cons = Consistency::Default) const;
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
+        {
+            KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::get)
+            return get_keys_impl(keyPrefix, kv::params::separator = helpers::encodeUrl(separator), params...);
+        }
 
         // Get keys up to a separator provided. Returns empty vector if no keys found. Result contains value only.
-        std::vector<std::string> keys(const std::string& keyPrefix, const std::string& separator, Consistency cons = Consistency::Default) const
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::vector<std::string> keys(const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
-            return std::move(keys(withHeaders, keyPrefix, separator, cons).value());
+            return std::move(keys(withHeaders, keyPrefix, separator, params...).value());
         }
 
-        // Get all keys recursively. Returns empty vector if no keys found. Result contains both value and headers.
-        Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const;
-
-        // Get all keys recursively. Returns empty vector if no keys found. Result contains value only.
-        std::vector<std::string> keys(const std::string& keyPrefix = "", Consistency cons = Consistency::Default) const
+        // Get all keys strarting with specified prefix. Returns empty vector if no keys found. Result contains both value and headers.
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const Params&... params) const
         {
-            return std::move(keys(withHeaders, keyPrefix, cons).value());
+            KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::get)
+            return get_keys_impl(keyPrefix, params...);
+        }
+
+        // Get all keys. Returns empty vector if no keys found. Result contains both value and headers.
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        Response<std::vector<std::string>> keys(WithHeaders, const Params&... params) const
+        {
+            return keys(withHeaders, std::string(), params...);
+        }
+
+        // Get all keys strarting with specified prefix. Returns empty vector if no keys found. Result contains value only.
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::vector<std::string> keys(const std::string& prefix, const Params&... params) const
+        {
+            return std::move(keys(withHeaders, prefix, params...).value());
+        }
+
+        // Get all keys. Returns empty vector if no keys found. Result contains value only.
+        // Allowed parameters:
+        // - group::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::vector<std::string> keys(const Params&... params) const
+        {
+            return keys(std::string(), params...);
         }
 
         // Throws UpdateError if value can not be set.
-        void put(const std::string& key, const std::string& value)
+        // Allowed parameters:
+        // - group::put
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        void put(const std::string& key, const std::string& value, const Params&... params)
         {
-            if ("true" != m_consul.put(keyPath(key), value))
-                throw UpdateError(key);
-        }
-
-        // Throws UpdateError if value can not be set.
-        void put(const std::string& key, const std::string& value, uint64_t flags)
-        {
-            if ("true" != m_consul.put(keyPath(key), value, { { "flags", flags } }))
+            KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::put)
+            if ("true" != m_consul.put(keyPath(key), value, params...))
                 throw UpdateError(key);
         }
 
         // Compare and set. Returns true if value was successfully set and false otherwise.
-        bool cas(const std::string& key, uint64_t cas, const std::string& value)
+        // Allowed parameters:
+        // - group::put
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        bool cas(const std::string& key, uint64_t cas, const std::string& value, const Params&... params)
         {
-            return "true" == m_consul.put(keyPath(key), value, { { "cas", cas } });
-        }
-
-        // Compare and set. Returns true if value was successfully set and false otherwise.
-        bool cas(const std::string& key, uint64_t cas, const std::string& value, uint64_t flags)
-        {
-            return "true" == m_consul.put(keyPath(key), value, { { "cas", cas }, { "flags", flags } });
+            KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::put)
+            return "true" == m_consul.put(keyPath(key), value, params::cas = cas, params...);
         }
 
         // TODO: acquire/release session
 
     private:
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        Response<std::vector<std::string>> get_keys_impl(const std::string& keyPrefix, const Params&... params) const;
+
         std::string keyPath(const std::string& key) const
         {
             return "/v1/kv/" + helpers::encodeUrl(key);
@@ -228,10 +324,12 @@ namespace ppconsul { namespace kv {
         return m_what.c_str();
     }
 
-    inline Response<KeyValue> Storage::item(WithHeaders, const std::string& key, Consistency cons) const
+    template<class... Params, class>
+    Response<KeyValue> Storage::item(WithHeaders, const std::string& key, const Params&... params) const
     {
+        KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::get)
         http::Status s;
-        auto r = m_consul.get(s, keyPath(key));
+        auto r = m_consul.get(s, keyPath(key), params...);
 
         if (s.success())
             return makeResponse(r.headers(), std::move(impl::parseValues(r.value()).at(0)));
@@ -240,19 +338,22 @@ namespace ppconsul { namespace kv {
         throw BadStatus(std::move(s), std::move(r.value()));
     }
 
-    inline std::string Storage::get(const std::string& key, const std::string& defaultValue, Consistency cons) const
+    template<class... Params, class>
+    std::string Storage::get(const std::string& key, const std::string& defaultValue, const Params&... params) const
     {
-        const auto kv = item(withHeaders, key, cons);
+        const auto kv = item(withHeaders, key, params...);
         if (!kv.value().valid())
             return defaultValue;
         else
             return std::move(kv.value().value());
     }
 
-    inline Response<std::vector<KeyValue>> Storage::items(WithHeaders, const std::string& keyPrefix, Consistency cons) const
+    template<class... Params, class>
+    Response<std::vector<KeyValue>> Storage::items(WithHeaders, const std::string& keyPrefix, const Params&... params) const
     {
+        KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::get)
         http::Status s;
-        auto r = m_consul.get(s, keyPath(keyPrefix), { { "recurse", true } });
+        auto r = m_consul.get(s, keyPath(keyPrefix), kv::params::recurse = true, params...);
 
         if (s.success())
             return makeResponse(r.headers(), impl::parseValues(r.value()));
@@ -261,21 +362,11 @@ namespace ppconsul { namespace kv {
         throw BadStatus(std::move(s), std::move(r.value()));
     }
 
-    inline Response<std::vector<std::string>> Storage::keys(WithHeaders, const std::string& keyPrefix, const std::string& separator, Consistency cons) const
+    template<class... Params, class>
+    Response<std::vector<std::string>> Storage::get_keys_impl(const std::string& keyPrefix, const Params&... params) const
     {
         http::Status s;
-        auto r = m_consul.get(s, keyPath(keyPrefix), { { "keys", true }, { "separator", helpers::encodeUrl(separator) } });
-        if (s.success())
-            return makeResponse(r.headers(), impl::parseKeys(r.value()));
-        if (NotFoundError::Code == s.code())
-            return{ r.headers() };
-        throw BadStatus(std::move(s), std::move(r.value()));
-    }
-
-    inline Response<std::vector<std::string>> Storage::keys(WithHeaders, const std::string& keyPrefix, Consistency cons) const
-    {
-        http::Status s;
-        auto r = m_consul.get(s, keyPath(keyPrefix), { { "keys", true } });
+        auto r = m_consul.get(s, keyPath(keyPrefix), kv::params::keys = true, params...);
         if (s.success())
             return makeResponse(r.headers(), impl::parseKeys(r.value()));
         if (NotFoundError::Code == s.code())

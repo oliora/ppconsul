@@ -23,9 +23,6 @@ namespace ppconsul {
     namespace impl {
         // Forward declaraion to use with PIMPL
         class HttpClient;
-
-        // Declared in header to be available for tests
-        std::string makeUrl(const std::string& addr, const std::string& path, const Parameters& parameters = Parameters());
     }
 
     class BadStatus: public Error
@@ -72,6 +69,21 @@ namespace ppconsul {
         Stale
     };
 
+    namespace params {
+        PPCONSUL_PARAM(dc, std::string)
+        PPCONSUL_PARAM_NO_NAME(consistency, Consistency)
+
+        inline void printParameter(std::ostream& os, Consistency consistency, KWARGS_KW_TAG(consistency))
+        {
+            switch (consistency)
+            {
+            case Consistency::Stale: os << "stale"; break;
+            case Consistency::Consistent: os << "consistent"; break;
+            default: break;
+            }
+        }
+    }
+
     struct WithHeaders {};
     const WithHeaders withHeaders{};
 
@@ -89,21 +101,47 @@ namespace ppconsul {
         Consul(const Consul &op) = delete;
         Consul& operator= (const Consul &op) = delete;
 
-        //Response<std::string> get(const std::string& path, const Parameters& params = Parameters());
-        Response<std::string> get(http::Status& status, const std::string& path, const Parameters& params = Parameters());
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        Response<std::string> get(http::Status& status, const std::string& path, const Params&... params)
+        {
+            return get_impl(status, makeUrl(path, params...));
+        }
 
-        std::string put(const std::string& path, const std::string& body, const Parameters& params = Parameters());
-        std::string put(http::Status& status, const std::string& path, const std::string& body, const Parameters& params = Parameters());
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::string put(http::Status& status, const std::string& path, const std::string& body, const Params&... params)
+        {
+            return put_impl(status, makeUrl(path, params...), body);
+        }
 
-        std::string del(const std::string& path, const Parameters& params = Parameters());
-        std::string del(http::Status& status, const std::string& path, const Parameters& params = Parameters());
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::string put(const std::string& path, const std::string& body, const Params&... params);
+
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::string del(http::Status& status, const std::string& path, const Params&... params)
+        {
+            return del_impl(status, makeUrl(path, params...));
+        }
+
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::string del(const std::string& path, const Params&... params);
 
     private:
-        std::string makeUrl(const std::string& path, const Parameters& params = Parameters()) const;
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::string makeUrl(const std::string& path, const Params&... params) const
+        {
+            using namespace params;
+            return parameters::makeUrl(m_addr, path, dc = m_dataCenter, params...);
+        }
 
-        Parameters m_defaultParams;
+        Response<std::string> get_impl(http::Status& status, const std::string& url);
+        std::string put_impl(http::Status& status, const std::string& url, const std::string& body);
+        std::string del_impl(http::Status& status, const std::string& url);
+
         std::string m_addr;
         std::unique_ptr<impl::HttpClient> m_client; // PIMPL
+
+        // Default params
+        std::string m_dataCenter;
     };
 
     // Implementation
@@ -121,31 +159,23 @@ namespace ppconsul {
         }
     }
 
-    /*inline Response<std::string> Consul::get(const std::string& path, const Parameters& parameters)
+    template<class... Params, class>
+    std::string Consul::put(const std::string& path, const std::string& body, const Params&... params)
     {
         http::Status s;
-        auto r = get(s, path, parameters);
-        if (!s.success())
-            throwStatusError(std::move(s), std::move(r.first));
-        return r;
-    }*/
-
-    inline std::string Consul::put(const std::string& path, const std::string& body, const Parameters& parameters)
-    {
-        http::Status s;
-        auto r = put(s, path, body, parameters);
+        auto r = put(s, path, body, params...);
         if (!s.success())
             throwStatusError(std::move(s), std::move(r));
         return r;
     }
 
-    inline std::string Consul::del(const std::string& path, const Parameters& parameters)
+    template<class... Params, class>
+    std::string Consul::del(const std::string& path, const Params&... params)
     {
         http::Status s;
-        auto r = del(s, path, parameters);
+        auto r = del(s, path, params...);
         if (!s.success())
             throwStatusError(std::move(s), std::move(r));
         return r;
     }
-
 }

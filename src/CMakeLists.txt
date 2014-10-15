@@ -23,7 +23,6 @@ set(SOURCES
     http_client_impl_curl.inl
     consul.cpp
     helpers.cpp
-    parameters.cpp
 )
 
 foreach(SRC ${HEADERS})
