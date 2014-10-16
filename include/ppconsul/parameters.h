@@ -62,9 +62,8 @@ namespace ppconsul { namespace parameters {
         return{};
     }
 
-    template<class... Parameters>
-    typename std::enable_if<sizeof...(Parameters) != 0, std::string>::type
-        makeQuery(const Parameters&... params)
+    template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+    std::string makeQuery(const Params&... params)
     {
         std::ostringstream os;
 
@@ -78,8 +77,8 @@ namespace ppconsul { namespace parameters {
         return r;
     }
 
-    template<class... Parameters>
-    std::string makeUrl(const std::string& addr, const std::string& path, const Parameters&... params)
+    template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+    std::string makeUrl(const std::string& addr, const std::string& path, const Params&... params)
     {
         auto query = makeQuery(params...);
 
