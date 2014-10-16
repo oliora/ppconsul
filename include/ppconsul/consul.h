@@ -13,6 +13,8 @@
 #include "ppconsul/response.h"
 #include <chrono>
 #include <string>
+#include <tuple>
+#include <chrono>
 #include <memory>
 #include <stdexcept>
 #include <limits>
@@ -69,10 +71,13 @@ namespace ppconsul {
         Stale
     };
 
+    typedef std::pair<std::chrono::seconds, uint64_t> BlockForValue;
+
     namespace params {
         PPCONSUL_PARAM(dc, std::string)
         PPCONSUL_PARAM(token, std::string)
         PPCONSUL_PARAM_NO_NAME(consistency, Consistency)
+        PPCONSUL_PARAM_NO_NAME(block_for, BlockForValue)
 
         inline void printParameter(std::ostream& os, const Consistency& v, KWARGS_KW_TAG(consistency))
         {
@@ -82,6 +87,11 @@ namespace ppconsul {
                 case Consistency::Consistent: os << "consistent"; break;
                 default: break;
             }
+        }
+
+        inline void printParameter(std::ostream& os, const BlockForValue& v, KWARGS_KW_TAG(block_for))
+        {
+            os << "wait=" << v.first.count() << "s&index=" << v.second;
         }
     }
 
@@ -99,8 +109,8 @@ namespace ppconsul {
         // - token - default token for all client requests (can be overloaded in every specific request)
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Consul(const std::string& addr, const Params&... params)
-            : Consul(kwargs::get(params::dc, "", params...),
-                kwargs::get(params::token, "", params...),
+        : Consul(kwargs::get(params::dc, std::string(), params...),
+                kwargs::get(params::token, std::string(), params...),
                 addr)
         {
             KWARGS_CHECK_IN_LIST(Params, (params::dc, params::token))

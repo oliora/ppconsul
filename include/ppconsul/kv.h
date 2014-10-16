@@ -61,6 +61,7 @@ namespace ppconsul { namespace kv {
     namespace params {
         using ppconsul::params::consistency;
         using ppconsul::params::token;
+        using ppconsul::params::block_for;
 
         PPCONSUL_PARAM(cas, uint64_t)
         PPCONSUL_PARAM(flags, uint64_t)
@@ -69,7 +70,7 @@ namespace ppconsul { namespace kv {
         PPCONSUL_PARAM(separator, std::string)
 
         namespace groups {
-            PPCONSUL_PARAMS_GROUP(get, (consistency, token))
+            PPCONSUL_PARAMS_GROUP(get, (consistency, token, block_for))
             PPCONSUL_PARAMS_GROUP(put, (flags, token))
         }
     }
@@ -83,7 +84,7 @@ namespace ppconsul { namespace kv {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Storage(Consul& consul, const Params&... params)
         : m_consul(consul)
-        , m_defaultToken(kwargs::get(params::token, "", params...))
+        , m_defaultToken(kwargs::get(params::token, std::string(), params...))
         , m_defaultConsistency(kwargs::get(params::consistency, Consistency::Default, params...))
         {
             KWARGS_CHECK_IN_LIST(Params, (params::consistency, params::token))

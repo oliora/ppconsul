@@ -9,6 +9,7 @@
 
 #include "ppconsul/kv.h"
 #include "test_consul.h"
+#include <chrono>
 
 
 using ppconsul::kv::Storage;
@@ -694,4 +695,28 @@ TEST_CASE("kv.index", "[consul][kv][headers]")
     kv.erase("key1");
     CHECK(kv.items(ppconsul::withHeaders).headers().index() < modifyIndex2);
     CHECK(kv.items(ppconsul::withHeaders).headers().index() == modifyIndex1);
+}
+
+TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
+{
+    using namespace ppconsul::kv::params;
+
+    auto consul = create_test_consul();
+    Storage kv(consul);
+
+    kv.put("key1", "value1");
+    auto index1 = kv.item(ppconsul::withHeaders, "key1").headers().index();
+
+    auto t1 = std::chrono::steady_clock::now();
+    auto resp1 = kv.item(ppconsul::withHeaders, "key1", block_for = {std::chrono::seconds(5), index1});
+    CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
+    CHECK(index1 == resp1.headers().index());
+    CHECK(resp1.value().value() == "value1");
+
+    kv.put("key1", "value2");
+    auto t2 = std::chrono::steady_clock::now();
+    auto resp2 = kv.item(ppconsul::withHeaders, "key1", block_for = {std::chrono::seconds(5), index1});
+    CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
+    CHECK(index1 != resp2.headers().index());
+    CHECK(resp2.value().value() == "value2");
 }
