@@ -1,17 +1,22 @@
 # TODO
 
+Releases:
+- Current version (in developing): 0.1
+- Next version: 0.2
+- ...
+
 
 ### General
 
 + Add error message provided in response body into an exception throw
 + run integration tests manually
 + Encode URL (don't encode special characters)
-
-- Consistency modes
-- Blocking queries
++ Consistency modes
++ Blocking queries (simple)
 
 - Check JSON parsing errors
-- Simplify JSON interface
+- Simplify JSON interface (?)
+- Support 64bit integers in JSON (postponed)
 
 
 ### CI
@@ -28,13 +33,12 @@
 + Integration tests
 + URL encode keys (key may contain any char from 0 to 255)
 + ensure value can contain any char from 0 to 255
++ Consistency modes
++ Blocking queries (simple)
 
-- Consistency modes
-- Blocking queries
-- Acquire/release lock
-
-- typed value access
-- Get flags as 64bit uint. Now it's treated as double due to json11 limitations
+- Acquire/release lock (postponed to 0.2)
+- typed value access (postponed)
+- Get flag as uin64_t. Now it extracted from JSON as double due to json11 limitations (postponed)
 
 
 ### services
