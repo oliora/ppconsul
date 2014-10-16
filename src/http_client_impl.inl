@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <cstring>
 
 
 namespace ppconsul { namespace impl {
