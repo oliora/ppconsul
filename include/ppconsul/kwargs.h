@@ -314,7 +314,7 @@ namespace kwargs {
     template<typename K, typename V>
     inline typename std::remove_reference<V>::type& get_value(KwArg<K, V>& v)
     {
-        return std::move(v.second);
+        return v.second;
     }
 
     using detail::is_kwargs;
