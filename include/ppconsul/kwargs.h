@@ -360,7 +360,7 @@ namespace kwargs {
 struct KWARGS__CLS_NAME(keyword)                                        \
     : kwargs::detail::KeywordBase<KWARGS__CLS_NAME(keyword), type> {    \
     using Base::operator=;                                              \
-} const keyword{};
+} const keyword = KWARGS__CLS_NAME(keyword){};
 
 // Get unique type of keyword. `decltype(keyword)`
 #define KWARGS_KW_TAG(keyword) decltype(keyword)
