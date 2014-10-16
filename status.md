@@ -4,9 +4,8 @@ The status of Consul HTTP API v1 coverage. Note that all implemented features ar
 
 ### kv
 
-Getting, putting, deleting of values and getting of keys operation supported. CAS, flags, consistency modes and ACL supported. The following is **NOT** supported:
-* Blocking queries
-* Acquire/release locks
+Getting, putting, deleting of values and getting of keys operation supported. CAS, flags, consistency modes, ACL and blocking queries are supported.
+The only thing is NOT supported at the moment is acquire/release locks.
  
 It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(some_double)` etc.
 
@@ -30,3 +29,9 @@ TBD
 
 ### status
 TBD
+
+### Note for Blocking Queries
+
+Blocking queries are supported in primitive way. If query is called with extra parameter specifying delay and index then the call will block.
+Background polling, async non-block handling and other smart things to work with blocking queries in a more effective way are in the far future plan.
+If you have any ideas/suggerstions of a convenient interface to work with blocking queries, you are more than welcome.
