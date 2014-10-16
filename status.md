@@ -32,6 +32,6 @@ TBD
 
 ### Note for Blocking Queries
 
-Blocking queries are supported in primitive way. If query is called with extra parameter specifying delay and index then the call will block.
+Blocking queries are supported in very primitive way: if query is called with extra parameter specifying wait timeout and index then the call blocks.
 Background polling, async non-block handling and other smart things to work with blocking queries in a more effective way are in the far future plan.
 If you have any ideas/suggerstions of a convenient interface to work with blocking queries, you are more than welcome.
