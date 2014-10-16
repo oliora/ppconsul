@@ -4,8 +4,7 @@ The status of Consul HTTP API v1 coverage. Note that all implemented features ar
 
 ### kv
 
-Get value(s), put value, delete value(s) and get keys operation supported. CAS and flags supported. The following is **NOT** supported:
-* Consistency modes
+Getting, putting, deleting of values and getting of keys operation supported. CAS, flags, consistency modes and ACL supported. The following is **NOT** supported:
 * Blocking queries
 * Acquire/release locks
  
