@@ -6,10 +6,12 @@
 
 #pragma once
 
-// Meta header which includes all PPConsul headers needed to the library user
-
-#include "ppconsul/config.h"
-
 #include "ppconsul/consul.h"
-#include "ppconsul/kv.h"
-#include "ppconsul/agent.h"
+#include "ppconsul/helpers.h"
+#include "ppconsul/json.h"
+#include <vector>
+#include <stdint.h>
+
+
+namespace ppconsul { namespace agent {
+}}
