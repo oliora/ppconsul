@@ -46,32 +46,33 @@ namespace ppconsul {
         {}
 
         Response(const ResponseHeaders& headers)
-        : m_data({}, headers)
+        : m_headers(headers)
         {}
 
         Response(const ResponseHeaders& headers, const Value& value)
-        : m_data(value, headers)
+        : m_value(value)
+        , m_headers(headers)
         {}
 
         Response(const ResponseHeaders& headers, Value&& value)
-        : m_data(std::move(value), headers)
+        : m_value(std::move(value))
+        , m_headers(headers)
         {}
 
-        ResponseHeaders& headers() { return m_data.second; }
-        const ResponseHeaders& headers() const { return m_data.second; }
+        ResponseHeaders& headers() { return m_headers; }
+        const ResponseHeaders& headers() const { return m_headers; }
 
-        void headers(const ResponseHeaders& headers) { m_data.second = headers; }
+        void headers(const ResponseHeaders& headers) { m_headers = headers; }
 
-        Value& value() { return m_data.first; }
-        const Value& value() const { return m_data.first; }
+        Value& value() { return m_value; }
+        const Value& value() const { return m_value; }
 
-        void value(const Value& value) { m_data.first = value; }
-        void value(Value&& value) { m_data.first = std::move(value); }
+        void value(const Value& value) { m_value = value; }
+        void value(Value&& value) { m_value = std::move(value); }
 
     private:
-        typedef std::pair<Value, ResponseHeaders> Pair;
-
-        Pair m_data;
+        Value m_value;
+        ResponseHeaders m_headers;
     };
 
     template<class Value>
