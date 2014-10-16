@@ -74,16 +74,17 @@ namespace ppconsul {
         PPCONSUL_PARAM(token, std::string)
         PPCONSUL_PARAM_NO_NAME(consistency, Consistency)
 
-        inline void printParameter(std::ostream& os, Consistency consistency, KWARGS_KW_TAG(consistency))
+        inline void printParameter(std::ostream& os, const Consistency& v, KWARGS_KW_TAG(consistency))
         {
-            switch (consistency)
+            switch (v)
             {
-            case Consistency::Stale: os << "stale"; break;
-            case Consistency::Consistent: os << "consistent"; break;
-            default: break;
+                case Consistency::Stale: os << "stale"; break;
+                case Consistency::Consistent: os << "consistent"; break;
+                default: break;
             }
         }
     }
+
 
     struct WithHeaders {};
     const WithHeaders withHeaders{};
@@ -94,19 +95,21 @@ namespace ppconsul {
     {
     public:
         // Allowed parameters:
-        // - dc - default dc for all client requests
-        // - token - default token for all client requests
+        // - dc - data center to use
+        // - token - default token for all client requests (can be overloaded in every specific request)
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Consul(const std::string& addr, const Params&... params)
             : Consul(kwargs::get(params::dc, "", params...),
                 kwargs::get(params::token, "", params...),
                 addr)
-        {}
+        {
+            KWARGS_CHECK_IN_LIST(Params, (params::dc, params::token))
+        }
 
         // Same as Consul(Default_Server_Address, ...)
         // Allowed parameters:
-        // - dc - default dc for all client requests
-        // - token - default token for all client requests
+        // - dc - data center to use
+        // - token - default token for all requests
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Consul(const Params&... params)
             : Consul(Default_Server_Address, params...)
@@ -145,25 +148,24 @@ namespace ppconsul {
         std::string del(const std::string& path, const Params&... params);
 
     private:
-        Consul(const std::string& dataCenter, const std::string& token, const std::string& addr);
+        Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& addr);
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string makeUrl(const std::string& path, const Params&... params) const
         {
             using namespace params;
-            return parameters::makeUrl(m_addr, path, dc = m_dataCenter, token = m_token, params...);
+            return parameters::makeUrl(m_addr, path, dc = m_dataCenter, token = m_defaultToken, params...);
         }
 
         Response<std::string> get_impl(http::Status& status, const std::string& url);
         std::string put_impl(http::Status& status, const std::string& url, const std::string& body);
         std::string del_impl(http::Status& status, const std::string& url);
 
-        std::string m_addr;
         std::unique_ptr<impl::HttpClient> m_client; // PIMPL
-
-        // Default params
+        std::string m_addr;
         std::string m_dataCenter;
-        std::string m_token;
+
+        std::string m_defaultToken;
     };
 
     // Implementation

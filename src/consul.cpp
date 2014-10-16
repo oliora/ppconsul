@@ -46,29 +46,31 @@ namespace ppconsul {
         return m_what.c_str();
     }
 
-    Consul::Consul(const std::string& dataCenter, const std::string& token, const std::string& addr)
-    : m_addr(makeAddr(addr))
-    , m_client(new impl::HttpClient())
+    Consul::Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& addr)
+    : m_client(new impl::HttpClient())
+    , m_addr(makeAddr(addr))
     , m_dataCenter(dataCenter)
-    , m_token(token)
+    , m_defaultToken(defaultToken)
     {}
     
     Consul::~Consul()
     {}
 
     Consul::Consul(Consul &&op)
-    : m_addr(std::move(op.m_addr))
-    , m_client(std::move(op.m_client))
+    : m_client(std::move(op.m_client))
+    , m_addr(std::move(op.m_addr))
     , m_dataCenter(std::move(op.m_dataCenter))
+    , m_defaultToken(std::move(op.m_defaultToken))
     {}
 
     Consul& Consul::operator= (Consul &&op)
     {
         if (this != &op)
         {
-            m_addr = std::move(op.m_addr);
             m_client = std::move(op.m_client);
+            m_addr = std::move(op.m_addr);
             m_dataCenter = std::move(op.m_dataCenter);
+            m_defaultToken = std::move(op.m_defaultToken);
         }
         
         return *this;
