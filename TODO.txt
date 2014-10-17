@@ -13,8 +13,8 @@ Releases:
 + Encode URL (don't encode special characters)
 + Consistency modes
 + Blocking queries (simple)
++ Don't expose json11 in headers
 
-- Don't expose json11 in headers
 - Check JSON parsing errors
 - Simplify JSON interface (?)
 - Support 64bit integers in JSON (postponed to 0.2)
