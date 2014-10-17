@@ -25,13 +25,13 @@ TEST_CASE("kv.invalid KeyValue", "[consul][kv]")
 {
     KeyValue v;
 
-    CHECK(!v.createIndex());
-    CHECK(!v.modifyIndex());
-    CHECK(!v.lockIndex());
-    CHECK(!v.flags());
-    CHECK(v.key() == "");
-    CHECK(v.value() == "");
-    CHECK(v.session() == "");
+    CHECK(!v.createIndex);
+    CHECK(!v.modifyIndex);
+    CHECK(!v.lockIndex);
+    CHECK(!v.flags);
+    CHECK(v.key == "");
+    CHECK(v.value == "");
+    CHECK(v.session == "");
     CHECK(!v.valid());
 }
 
@@ -40,24 +40,24 @@ TEST_CASE("kv.valid KeyValue", "[consul][kv]")
     KeyValue v;
     REQUIRE(!v.valid());
     
-    v.m_modifyIndex = 42;
+    v.modifyIndex = 42;
     CHECK(v.valid());
-    CHECK(v.modifyIndex() == 42);
+    CHECK(v.modifyIndex == 42);
 
-    v.m_createIndex = 43;
-    v.m_lockIndex = 44;
-    v.m_flags = 0xFF123456789;
-    v.m_key = "some key";
-    v.m_value = "some value";
-    v.m_session = "some session";
+    v.createIndex = 43;
+    v.lockIndex = 44;
+    v.flags = 0xFF123456789;
+    v.key = "some key";
+    v.value = "some value";
+    v.session = "some session";
 
-    CHECK(v.createIndex() == 43);
-    CHECK(v.modifyIndex() == 42);
-    CHECK(v.lockIndex() == 44);
-    CHECK(v.flags() == 0xFF123456789);
-    CHECK(v.key() == "some key");
-    CHECK(v.value() == "some value");
-    CHECK(v.session() == "some session");
+    CHECK(v.createIndex == 43);
+    CHECK(v.modifyIndex == 42);
+    CHECK(v.lockIndex == 44);
+    CHECK(v.flags == 0xFF123456789);
+    CHECK(v.key == "some key");
+    CHECK(v.value == "some value");
+    CHECK(v.session == "some session");
 }
     
 TEST_CASE("kv.erase and count", "[consul][kv]")
@@ -149,11 +149,11 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         KeyValue v = kv.item(Non_Existing_Key);
         
         CHECK(!v.valid());
-        CHECK(!v.createIndex());
-        CHECK(!v.modifyIndex());
-        CHECK(!v.lockIndex());
-        CHECK(!v.flags());
-        CHECK(v.value() == "");
+        CHECK(!v.createIndex);
+        CHECK(!v.modifyIndex);
+        CHECK(!v.lockIndex);
+        CHECK(!v.flags);
+        CHECK(v.value == "");
 
         CHECK(kv.get(Non_Existing_Key, "some default value") == "some default value");
     }
@@ -164,13 +164,13 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
 
         REQUIRE(v.valid());
 
-        CHECK(v.createIndex());
-        CHECK(v.modifyIndex());
-        CHECK(!v.lockIndex());
-        CHECK(!v.flags());
-        CHECK(v.key() == "key1");
-        CHECK(v.value() == "value1");
-        CHECK(v.session() == "");
+        CHECK(v.createIndex);
+        CHECK(v.modifyIndex);
+        CHECK(!v.lockIndex);
+        CHECK(!v.flags);
+        CHECK(v.key == "key1");
+        CHECK(v.value == "value1");
+        CHECK(v.session == "");
 
         CHECK(kv.get("key1", "some default value") == "value1");
     }
@@ -189,18 +189,18 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
 
         REQUIRE(v1.value().valid());
 
-        CHECK(v1.value().createIndex());
-        CHECK(v1.value().modifyIndex());
-        CHECK(!v1.value().lockIndex());
-        CHECK(!v1.value().flags());
-        CHECK(v1.value().key() == "key1");
-        CHECK(v1.value().value() == "value1");
-        CHECK(v1.value().session() == "");
+        CHECK(v1.value().createIndex);
+        CHECK(v1.value().modifyIndex);
+        CHECK(!v1.value().lockIndex);
+        CHECK(!v1.value().flags);
+        CHECK(v1.value().key == "key1");
+        CHECK(v1.value().value == "value1");
+        CHECK(v1.value().session == "");
 
         CHECK(v1.headers().valid());
         CHECK(v1.headers().index());
         CHECK(v1.headers().knownLeader());
-        CHECK(v1.headers().index() == v1.value().modifyIndex());
+        CHECK(v1.headers().index() == v1.value().modifyIndex);
         CHECK(v1.headers().lastContact() == std::chrono::milliseconds(0));
     }
 
@@ -214,29 +214,29 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
 
         REQUIRE(3 == v.size());
 
-        CHECK(v[0].createIndex());
-        CHECK(v[0].modifyIndex());
-        CHECK(!v[0].lockIndex());
-        CHECK(!v[0].flags());
-        CHECK(v[0].key() == "key1");
-        CHECK(v[0].value() == "value1");
-        CHECK(v[0].session() == "");
+        CHECK(v[0].createIndex);
+        CHECK(v[0].modifyIndex);
+        CHECK(!v[0].lockIndex);
+        CHECK(!v[0].flags);
+        CHECK(v[0].key == "key1");
+        CHECK(v[0].value == "value1");
+        CHECK(v[0].session == "");
 
-        CHECK(v[1].createIndex());
-        CHECK(v[1].modifyIndex());
-        CHECK(!v[1].lockIndex());
-        CHECK(!v[1].flags());
-        CHECK(v[1].key() == "key2");
-        CHECK(v[1].value() == "value2");
-        CHECK(v[1].session() == "");
+        CHECK(v[1].createIndex);
+        CHECK(v[1].modifyIndex);
+        CHECK(!v[1].lockIndex);
+        CHECK(!v[1].flags);
+        CHECK(v[1].key == "key2");
+        CHECK(v[1].value == "value2");
+        CHECK(v[1].session == "");
 
-        CHECK(v[2].createIndex());
-        CHECK(v[2].modifyIndex());
-        CHECK(!v[2].lockIndex());
-        CHECK(!v[2].flags());
-        CHECK(v[2].key() == "key3");
-        CHECK(v[2].value() == "value3");
-        CHECK(v[2].session() == "");
+        CHECK(v[2].createIndex);
+        CHECK(v[2].modifyIndex);
+        CHECK(!v[2].lockIndex);
+        CHECK(!v[2].flags);
+        CHECK(v[2].key == "key3");
+        CHECK(v[2].value == "value3");
+        CHECK(v[2].session == "");
     }
 
     SECTION("get items with headers")
@@ -254,8 +254,8 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         REQUIRE(3 == v1.value().size());
 
         const auto maxModifyIndex = std::max_element(v1.value().begin(), v1.value().end(), [](const KeyValue&l, const KeyValue& r) {
-            return l.modifyIndex() < r.modifyIndex();
-        })->modifyIndex();
+            return l.modifyIndex < r.modifyIndex;
+        })->modifyIndex;
 
         CHECK(v1.headers().valid());
         CHECK(v1.headers().index());
@@ -320,13 +320,13 @@ TEST_CASE("kv.put", "[consul][kv]")
         kv.put("key42", "value31");
         KeyValue v = kv.item("key42");
         REQUIRE(v.valid());
-        CHECK(v.createIndex());
-        CHECK(v.modifyIndex());
-        CHECK(!v.lockIndex());
-        CHECK(v.flags() == 0);
-        CHECK(v.key() == "key42");
-        CHECK(v.value() == "value31");
-        CHECK(v.session() == "");
+        CHECK(v.createIndex);
+        CHECK(v.modifyIndex);
+        CHECK(!v.lockIndex);
+        CHECK(v.flags == 0);
+        CHECK(v.key == "key42");
+        CHECK(v.value == "value31");
+        CHECK(v.session == "");
     }
 
     SECTION("put flags")
@@ -336,19 +336,19 @@ TEST_CASE("kv.put", "[consul][kv]")
         {
             KeyValue v = kv.item("key24");
             REQUIRE(v.valid());
-            CHECK(v.createIndex());
-            CHECK(v.modifyIndex());
-            CHECK(!v.lockIndex());
-            CHECK(v.flags() == 0x12345678);
-            CHECK(v.value() == "value13");
-            CHECK(v.key() == "key24");
-            CHECK(v.session() == "");
+            CHECK(v.createIndex);
+            CHECK(v.modifyIndex);
+            CHECK(!v.lockIndex);
+            CHECK(v.flags == 0x12345678);
+            CHECK(v.value == "value13");
+            CHECK(v.key == "key24");
+            CHECK(v.session == "");
         }
 
         kv.put("key24", "value14");
-        CHECK(kv.item("key24").value() == "value14");
+        CHECK(kv.item("key24").value == "value14");
         // Feature or bug of Consul: the flags are reseted after put without "?flags" specified
-        //CHECK(kv.item("key24").flags() == 0x12345678);
+        //CHECK(kv.item("key24").flags == 0x12345678);
     }
 }
 
@@ -377,51 +377,51 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value1");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
-                CHECK(v.flags() == 0);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == "");
+                CHECK(v.value == "value1");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
+                CHECK(v.flags == 0);
+                CHECK(v.key == "key1");
+                CHECK(v.session == "");
             }
 
             REQUIRE(kv.item("key1").valid());
-            REQUIRE(kv.item("key1").value() == "value1");
-            REQUIRE(kv.item("key1").flags() == 0);
+            REQUIRE(kv.item("key1").value == "value1");
+            REQUIRE(kv.item("key1").flags == 0);
 
             SECTION("change with cas wrong")
             {
                 REQUIRE(!kv.cas("key1", 0, "value2"));
                 CHECK(kv.item("key1").valid());
-                CHECK(kv.item("key1").value() == "value1");
-                CHECK(kv.item("key1").flags() == 0);
+                CHECK(kv.item("key1").value == "value1");
+                CHECK(kv.item("key1").flags == 0);
             }
 
             SECTION("change with cas right")
             {
-                auto cas = kv.item("key1").modifyIndex();
+                auto cas = kv.item("key1").modifyIndex;
 
                 REQUIRE(kv.cas("key1", cas, "value2"));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value2");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
-                CHECK(v.flags() == 0);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == "");
+                CHECK(v.value == "value2");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
+                CHECK(v.flags == 0);
+                CHECK(v.key == "key1");
+                CHECK(v.session == "");
             }
         }
 
         SECTION("init with cas")
         {
             REQUIRE(kv.cas("key1", 0, "value1"));
-            CHECK(kv.item("key1").value() == "value1");
+            CHECK(kv.item("key1").value == "value1");
             CHECK(kv.item("key1").valid());
-            CHECK(kv.item("key1").flags() == 0);
+            CHECK(kv.item("key1").flags == 0);
 
             SECTION("change with put")
             {
@@ -429,30 +429,30 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value2");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
-                CHECK(v.flags() == 0);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == "");
+                CHECK(v.value == "value2");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
+                CHECK(v.flags == 0);
+                CHECK(v.key == "key1");
+                CHECK(v.session == "");
             }
 
             SECTION("change with cas")
             {
-                auto cas = kv.item("key1").modifyIndex();
+                auto cas = kv.item("key1").modifyIndex;
 
                 REQUIRE(kv.cas("key1", cas, "value2"));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value2");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
-                CHECK(v.flags() == 0);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == "");
+                CHECK(v.value == "value2");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
+                CHECK(v.flags == 0);
+                CHECK(v.key == "key1");
+                CHECK(v.session == "");
             }
         }
     }
@@ -473,38 +473,38 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value1");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
-                CHECK(v.flags() == 0x87654321);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == "");
+                CHECK(v.value == "value1");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
+                CHECK(v.flags == 0x87654321);
+                CHECK(v.key == "key1");
+                CHECK(v.session == "");
             }
 
             SECTION("change with cas wrong")
             {
                 REQUIRE(!kv.cas("key1", 0, "value2", flags = 0xFC12DE56));
                 CHECK(kv.item("key1").valid());
-                CHECK(kv.item("key1").value() == "value1");
-                CHECK(kv.item("key1").flags() == 0x87654321);
+                CHECK(kv.item("key1").value == "value1");
+                CHECK(kv.item("key1").flags == 0x87654321);
             }
 
             SECTION("change with cas right")
             {
-                auto cas = kv.item("key1").modifyIndex();
+                auto cas = kv.item("key1").modifyIndex;
 
                 REQUIRE(kv.cas("key1", cas, "value2", flags = 0xFC12DE56));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value2");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
-                CHECK(v.flags() == 0xFC12DE56);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == "");
+                CHECK(v.value == "value2");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
+                CHECK(v.flags == 0xFC12DE56);
+                CHECK(v.key == "key1");
+                CHECK(v.session == "");
             }
         }
 
@@ -515,13 +515,13 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value1");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
-                CHECK(v.flags() == 0x87654321);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == ""); 
+                CHECK(v.value == "value1");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
+                CHECK(v.flags == 0x87654321);
+                CHECK(v.key == "key1");
+                CHECK(v.session == ""); 
             }
 
             SECTION("change with put")
@@ -530,13 +530,13 @@ TEST_CASE("kv.cas", "[consul][kv]")
                 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value2");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
-                CHECK(v.flags() == 0xFC12DE56);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == "");
+                CHECK(v.value == "value2");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
+                CHECK(v.flags == 0xFC12DE56);
+                CHECK(v.key == "key1");
+                CHECK(v.session == "");
             }
 
             SECTION("change with put value only")
@@ -545,49 +545,49 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value2");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
+                CHECK(v.value == "value2");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
                 // Feature or bug of Consul: the flags are reseted after put without "?flags" specified
-                // CHECK(v.flags() == 0x87654321);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == "");
+                // CHECK(v.flags == 0x87654321);
+                CHECK(v.key == "key1");
+                CHECK(v.session == "");
             }
 
             SECTION("change with cas")
             {
-                auto cas = kv.item("key1").modifyIndex();
+                auto cas = kv.item("key1").modifyIndex;
 
                 REQUIRE(kv.cas("key1", cas, "value2", flags = 0xFC12DE56));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value2");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
-                CHECK(v.flags() == 0xFC12DE56);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == "");
+                CHECK(v.value == "value2");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
+                CHECK(v.flags == 0xFC12DE56);
+                CHECK(v.key == "key1");
+                CHECK(v.session == "");
             }
 
             SECTION("change with cas value only")
             {
-                auto cas = kv.item("key1").modifyIndex();
+                auto cas = kv.item("key1").modifyIndex;
 
                 REQUIRE(kv.cas("key1", cas, "value2"));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
-                CHECK(v.value() == "value2");
-                CHECK(v.createIndex());
-                CHECK(v.modifyIndex());
-                CHECK(!v.lockIndex());
+                CHECK(v.value == "value2");
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
                 // Feature or bug of Consul: the flags are reseted after put without "?flags" specified
-                // CHECK(v.flags() == 0x87654321);
-                CHECK(v.key() == "key1");
-                CHECK(v.session() == "");
+                // CHECK(v.flags == 0x87654321);
+                CHECK(v.key == "key1");
+                CHECK(v.session == "");
             }
         }
     }
@@ -607,8 +607,8 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
         kv.put("key{1}/&23\x03", "value1");
         KeyValue v = kv.item("key{1}/&23\x03");
         REQUIRE(v.valid());
-        CHECK(v.key() == "key{1}/&23\x03");
-        CHECK(v.value() == "value1");
+        CHECK(v.key == "key{1}/&23\x03");
+        CHECK(v.value == "value1");
     }
     
     SECTION("get2")
@@ -617,8 +617,8 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
         kv.put(key, "value2");
         KeyValue v = kv.item(key);
         REQUIRE(v.valid());
-        CHECK(v.key() == key);
-        CHECK(v.value() == "value2");
+        CHECK(v.key == key);
+        CHECK(v.value == "value2");
     }
 
     SECTION("getSubKeys1")
@@ -662,7 +662,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
 
         auto v = kv.item("key1");
         CHECK(v.valid());
-        CHECK(v.value() == value);
+        CHECK(v.value == value);
     }
 
     SECTION("value2")
@@ -673,7 +673,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
 
         auto v = kv.item("key2");
         CHECK(v.valid());
-        CHECK(v.value() == value);
+        CHECK(v.value == value);
     }
 }
 
@@ -711,12 +711,12 @@ TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
     auto resp1 = kv.item(ppconsul::withHeaders, "key1", block_for = {std::chrono::seconds(5), index1});
     CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
     CHECK(index1 == resp1.headers().index());
-    CHECK(resp1.value().value() == "value1");
+    CHECK(resp1.value().value == "value1");
 
     kv.put("key1", "value2");
     auto t2 = std::chrono::steady_clock::now();
     auto resp2 = kv.item(ppconsul::withHeaders, "key1", block_for = {std::chrono::seconds(5), index1});
     CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
     CHECK(index1 != resp2.headers().index());
-    CHECK(resp2.value().value() == "value2");
+    CHECK(resp2.value().value == "value2");
 }

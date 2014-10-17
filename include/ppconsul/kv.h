@@ -17,28 +17,16 @@ namespace ppconsul { namespace kv {
 
     struct KeyValue
     {
-        // Creates invalid KeyValue
-        KeyValue()
-        : m_createIndex(0), m_modifyIndex(0), m_lockIndex(0), m_flags(0)
-        {}
+        bool valid() const { return 0 != modifyIndex; }
+        explicit operator bool() const { return valid(); }
 
-        bool valid() const { return 0 != m_modifyIndex; }
-
-        uint64_t createIndex() const { return m_createIndex; }
-        uint64_t modifyIndex() const { return m_modifyIndex; }
-        uint64_t lockIndex() const { return m_lockIndex; }
-        uint64_t flags() const { return m_flags; }
-        const std::string& key() const { return m_key; }
-        const std::string& value() const { return m_value; }
-        const std::string& session() const { return m_session; }
-
-        uint64_t m_createIndex;
-        uint64_t m_modifyIndex;
-        uint64_t m_lockIndex;
-        uint64_t m_flags;
-        std::string m_key;
-        std::string m_value;
-        std::string m_session;
+        uint64_t createIndex = 0;
+        uint64_t modifyIndex = 0;
+        uint64_t lockIndex = 0;
+        uint64_t flags = 0;
+        std::string key;
+        std::string value;
+        std::string session;
     };
 
     
@@ -322,13 +310,13 @@ namespace ppconsul { namespace kv {
                 const auto& o = i.object_items();
 
                 KeyValue kv;
-                kv.m_createIndex = uint64_value(o.at("CreateIndex"));
-                kv.m_modifyIndex = uint64_value(o.at("ModifyIndex"));
-                kv.m_lockIndex = uint64_value(o.at("LockIndex"));
-                kv.m_key = o.at("Key").string_value();
-                kv.m_flags = uint64_value(o.at("Flags"));
-                kv.m_value = helpers::decodeBase64(o.at("Value").string_value());
-                kv.m_session = i["Session"].string_value(); // generalize getting of optional values
+                kv.createIndex = uint64_value(o.at("CreateIndex"));
+                kv.modifyIndex = uint64_value(o.at("ModifyIndex"));
+                kv.lockIndex = uint64_value(o.at("LockIndex"));
+                kv.key = o.at("Key").string_value();
+                kv.flags = uint64_value(o.at("Flags"));
+                kv.value = helpers::decodeBase64(o.at("Value").string_value());
+                kv.session = i["Session"].string_value(); // generalize getting of optional values
 
                 r.push_back(std::move(kv));
             }
@@ -367,7 +355,7 @@ namespace ppconsul { namespace kv {
         if (!kv.value().valid())
             return defaultValue;
         else
-            return std::move(kv.value().value());
+            return std::move(kv.value().value);
     }
 
     template<class... Params, class>
