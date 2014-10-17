@@ -8,7 +8,6 @@
 
 #include "ppconsul/consul.h"
 #include "ppconsul/helpers.h"
-#include "ppconsul/json.h"
 #include <vector>
 #include <map>
 #include <chrono>
@@ -67,7 +66,7 @@ namespace ppconsul { namespace agent {
         int delegateCur;
     };
 
-    struct Config {}; // use boost::ptree or expose json11 object
+    struct Config {}; // use boost::ptree
 
     inline std::string serviceCheckId(const std::string& serviceId)
     {

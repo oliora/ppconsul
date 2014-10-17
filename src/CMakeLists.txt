@@ -10,7 +10,6 @@ set(HEADERS
     error.h
     helpers.h
     http_status.h
-    json.h
     kv.h
     kwargs.h
     parameters.h
@@ -19,11 +18,13 @@ set(HEADERS
 )
 
 set(SOURCES
+    json.h
     http_client_impl.inl
     http_client_impl_netlib.inl
     http_client_impl_curl.inl
     consul.cpp
     helpers.cpp
+    kv.cpp
 )
 
 foreach(SRC ${HEADERS})

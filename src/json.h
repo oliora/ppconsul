@@ -15,19 +15,6 @@ namespace ppconsul { namespace json {
 
     using namespace json11;
 
-    class FormatError: public ppconsul::Error
-    {
-    public:
-        FormatError(std::string message)
-        : m_message(std::move(message))
-        {}
-
-        virtual const char *what() const PPCONSUL_NOEXCEPT override { return m_message.c_str(); }
-
-    private:
-        std::string m_message;
-    };
-
     inline uint64_t uint64_value(const Json& v)
     {
         // TODO: support full precision of uint64_t in json11
