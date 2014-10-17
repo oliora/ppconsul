@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
             std::cout << '\n';
         }
 
-        std::cout << r.value() << std::endl;
+        std::cout << r.data() << std::endl;
     }
     catch (const std::exception& ex)
     {

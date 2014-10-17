@@ -38,10 +38,12 @@ namespace ppconsul {
         std::chrono::milliseconds m_lastContact;
     };
 
-    template<class Value>
+    template<class Data>
     struct Response
     {
     public:
+        typedef Data DataType;
+
         Response()
         {}
 
@@ -49,13 +51,13 @@ namespace ppconsul {
         : m_headers(headers)
         {}
 
-        Response(const ResponseHeaders& headers, const Value& value)
-        : m_value(value)
+        Response(const ResponseHeaders& headers, const DataType& data)
+        : m_value(data)
         , m_headers(headers)
         {}
 
-        Response(const ResponseHeaders& headers, Value&& value)
-        : m_value(std::move(value))
+        Response(const ResponseHeaders& headers, DataType&& data)
+        : m_value(std::move(data))
         , m_headers(headers)
         {}
 
@@ -64,20 +66,20 @@ namespace ppconsul {
 
         void headers(const ResponseHeaders& headers) { m_headers = headers; }
 
-        Value& value() { return m_value; }
-        const Value& value() const { return m_value; }
+        DataType& data() { return m_value; }
+        const DataType& data() const { return m_value; }
 
-        void value(const Value& value) { m_value = value; }
-        void value(Value&& value) { m_value = std::move(value); }
+        void data(const DataType& data) { m_value = data; }
+        void data(DataType&& data) { m_value = std::move(data); }
 
     private:
-        Value m_value;
+        DataType m_value;
         ResponseHeaders m_headers;
     };
 
-    template<class Value>
-    Response<Value> makeResponse(const ResponseHeaders& headers, Value&& value)
+    template<class DataType>
+    Response<DataType> makeResponse(const ResponseHeaders& headers, DataType&& data)
     {
-        return Response<Value>(headers, std::forward<Value>(value));
+        return Response<DataType>(headers, std::forward<DataType>(data));
     }
 }

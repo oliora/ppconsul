@@ -37,21 +37,21 @@ namespace ppconsul { namespace impl {
             boost::network::http::client::request request(url);
             auto response = m_client.get(request);
             return std::make_tuple(http::Status(response.status(), response.status_message()),
-                getHeaders(response), response.body());
+                getHeaders(response), response.data());
         }
 
-        std::pair<http::Status, std::string> put(const std::string& url, const std::string& body)
+        std::pair<http::Status, std::string> put(const std::string& url, const std::string& data)
         {
             boost::network::http::client::request request(url);
-            auto response = m_client.put(request, body);
-            return std::make_pair(http::Status(response.status(), response.status_message()), response.body());
+            auto response = m_client.put(request, data);
+            return std::make_pair(http::Status(response.status(), response.status_message()), response.data());
         }
 
         std::pair<http::Status, std::string> del(const std::string& url)
         {
             boost::network::http::client::request request(url);
             auto response = m_client.delete_(request);
-            return std::make_pair(http::Status(response.status(), response.status_message()), response.body());
+            return std::make_pair(http::Status(response.status(), response.status_message()), response.data());
         }
 
     private:

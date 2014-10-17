@@ -62,7 +62,7 @@ namespace ppconsul {
         {}
     };
 
-    void throwStatusError(http::Status status, std::string body = "");
+    void throwStatusError(http::Status status, std::string data = "");
 
     enum class Consistency
     {
@@ -140,13 +140,13 @@ namespace ppconsul {
         }
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string put(http::Status& status, const std::string& path, const std::string& body, const Params&... params)
+        std::string put(http::Status& status, const std::string& path, const std::string& data, const Params&... params)
         {
-            return put_impl(status, makeUrl(path, params...), body);
+            return put_impl(status, makeUrl(path, params...), data);
         }
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string put(const std::string& path, const std::string& body, const Params&... params);
+        std::string put(const std::string& path, const std::string& data, const Params&... params);
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string del(http::Status& status, const std::string& path, const Params&... params)
@@ -168,7 +168,7 @@ namespace ppconsul {
         }
 
         Response<std::string> get_impl(http::Status& status, const std::string& url);
-        std::string put_impl(http::Status& status, const std::string& url, const std::string& body);
+        std::string put_impl(http::Status& status, const std::string& url, const std::string& data);
         std::string del_impl(http::Status& status, const std::string& url);
 
         std::unique_ptr<impl::HttpClient> m_client; // PIMPL
@@ -180,24 +180,24 @@ namespace ppconsul {
 
     // Implementation
 
-    inline void throwStatusError(http::Status status, std::string body)
+    inline void throwStatusError(http::Status status, std::string data)
     {
         if (NotFoundError::Code == status.code())
         {
             throw NotFoundError{};
-            //throw NotFoundError(std::move(status), std::move(body));
+            //throw NotFoundError(std::move(status), std::move(data));
         }
         else
         {
-            throw BadStatus(std::move(status), std::move(body));
+            throw BadStatus(std::move(status), std::move(data));
         }
     }
 
     template<class... Params, class>
-    std::string Consul::put(const std::string& path, const std::string& body, const Params&... params)
+    std::string Consul::put(const std::string& path, const std::string& data, const Params&... params)
     {
         http::Status s;
-        auto r = put(s, path, body, params...);
+        auto r = put(s, path, data, params...);
         if (!s.success())
             throwStatusError(std::move(s), std::move(r));
         return r;

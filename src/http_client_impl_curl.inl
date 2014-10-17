@@ -101,9 +101,9 @@ namespace ppconsul { namespace impl {
             return r;
         }
 
-        std::pair<http::Status, std::string> put(const std::string& url, const std::string& body)
+        std::pair<http::Status, std::string> put(const std::string& url, const std::string& data)
         {
-            ReadContext ctx(&body, 0u);
+            ReadContext ctx(&data, 0u);
             
             std::pair<http::Status, std::string> r;
             r.second.reserve(Buffer_Size);
@@ -116,7 +116,7 @@ namespace ppconsul { namespace impl {
             curl_easy_setopt(m_handle, CURLOPT_HEADERDATA, &r.first);
             curl_easy_setopt(m_handle, CURLOPT_UPLOAD, 1l);
             curl_easy_setopt(m_handle, CURLOPT_PUT, 1l);
-            curl_easy_setopt(m_handle, CURLOPT_INFILESIZE_LARGE, static_cast<curl_off_t>(body.size()));
+            curl_easy_setopt(m_handle, CURLOPT_INFILESIZE_LARGE, static_cast<curl_off_t>(data.size()));
             curl_easy_setopt(m_handle, CURLOPT_READDATA, &ctx);
             curl_easy_perform(m_handle);
 

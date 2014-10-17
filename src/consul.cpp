@@ -79,14 +79,14 @@ namespace ppconsul {
     Response<std::string> Consul::get_impl(http::Status& status, const std::string& url)
     {
         Response<std::string> r;
-        std::tie(status, r.headers(), r.value()) = m_client->get(url);
+        std::tie(status, r.headers(), r.data()) = m_client->get(url);
         return r;
     }
 
-    std::string Consul::put_impl(http::Status& status, const std::string& url, const std::string& body)
+    std::string Consul::put_impl(http::Status& status, const std::string& url, const std::string& data)
     {
         std::string r;
-        std::tie(status, r) = m_client->put(url, body);
+        std::tie(status, r) = m_client->put(url, data);
         return r;
     }
 
