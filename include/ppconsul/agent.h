@@ -34,39 +34,37 @@ namespace ppconsul { namespace agent {
 
     struct Check
     {
-        std::string m_id;
-        std::string m_node;
-        std::string m_name;
-        CheckStatus m_status;
-        std::string m_notes;
-        std::string m_output;
-        std::string m_serviceId;
-        std::string m_serviceName;
+        std::string id;
+        std::string node;
+        std::string name;
+        CheckStatus status;
+        std::string notes;
+        std::string output;
+        std::string serviceId;
+        std::string serviceName;
     };
 
     struct Service
     {
-        Service() {}
-
-        explicit Service(std::string name, uint16_t port = 0, Tags tags = Tags(), std::string id = "")
-        : m_id(std::move(id)), m_name(std::move(name)), m_port(port), m_tags(std::move(tags))
-        {}
-
-        std::string m_id;
-        std::string m_name;
-        uint16_t m_port = 0;
-        Tags m_tags;
+        std::string name;
+        uint16_t port = 0;
+        Tags tags;
+        std::string id;
     };
 
     struct Member
     {
-        std::string m_name;
-        std::string m_addr;
-        uint16_t m_port;
-        Properties m_tags;
-        int m_status;
-        int m_protocolMin, m_protocolMax, m_protocolCur;
-        int m_delegateMin, m_delegateMax, m_delegateCur;
+        std::string name;
+        std::string addr;
+        uint16_t port;
+        Properties tags;
+        int status;
+        int protocolMin;
+        int protocolMax;
+        int protocolCur;
+        int delegateMin;
+        int delegateMax;
+        int delegateCur;
     };
 
     struct Config {}; // use boost::ptree or expose json11 object
