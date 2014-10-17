@@ -96,6 +96,10 @@ namespace ppconsul {
         Consul(const Consul &op) = delete;
         Consul& operator= (const Consul &op) = delete;
 
+        // Throws BadStatus if !response_status.success()
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::string get(const std::string& path, const Params&... params);
+
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::string> get(http::Status& status, const std::string& path, const Params&... params)
         {
@@ -108,6 +112,7 @@ namespace ppconsul {
             return put_impl(status, makeUrl(path, params...), data);
         }
 
+        // Throws BadStatus if !response_status.success()
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string put(const std::string& path, const std::string& data, const Params&... params);
 
@@ -117,6 +122,7 @@ namespace ppconsul {
             return del_impl(status, makeUrl(path, params...));
         }
 
+        // Throws BadStatus if !response_status.success()
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string del(const std::string& path, const Params&... params);
 
@@ -154,6 +160,16 @@ namespace ppconsul {
         {
             throw BadStatus(std::move(status), std::move(data));
         }
+    }
+
+    template<class... Params, class>
+    std::string Consul::get(const std::string& path, const Params&... params)
+    {
+        http::Status s;
+        auto r = std::move(get(s, path, params...).data());
+        if (!s.success())
+            throwStatusError(std::move(s), std::move(r));
+        return r;
     }
 
     template<class... Params, class>

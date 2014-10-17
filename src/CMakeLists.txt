@@ -22,6 +22,8 @@ set(SOURCES
     http_client_impl.inl
     http_client_impl_netlib.inl
     http_client_impl_curl.inl
+
+    agent.cpp
     consul.cpp
     helpers.cpp
     kv.cpp
