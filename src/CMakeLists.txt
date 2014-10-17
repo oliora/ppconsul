@@ -18,11 +18,10 @@ set(HEADERS
 )
 
 set(SOURCES
-    json.h
     http_client_impl.inl
     http_client_impl_netlib.inl
     http_client_impl_curl.inl
-
+    s11n.h
     agent.cpp
     consul.cpp
     helpers.cpp
