@@ -112,5 +112,11 @@ TEST_CASE("agent.join_and_leave", "[consul][agent][config][join][leave]")
     auto consul = create_test_consul();
     Agent agent(consul);
 
-
+    CHECK_NOTHROW(agent.forceLeave(agent.self().second.name));
+    CHECK_THROWS_AS(agent.join("127.0.0.1:21"), ppconsul::Error);
+    CHECK_THROWS_AS(agent.join("127.0.0.1:21", true), ppconsul::Error);
+    CHECK_THROWS_AS(agent.join("127.0.0.1:21", false), ppconsul::Error);
+    CHECK_NOTHROW(agent.join("127.0.0.1"));
+    CHECK_NOTHROW(agent.join("127.0.0.1", true));
+    CHECK_NOTHROW(agent.join("127.0.0.1", false));
 }
