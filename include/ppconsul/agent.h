@@ -156,14 +156,19 @@ namespace ppconsul { namespace agent {
             m_consul.get("/v1/agent/check/deregister/" + helpers::encodeUrl(id));
         }
 
-        void updateCheck(const std::string& id, CheckStatus newStatus, const std::string& note = "")
+        void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
         {
-            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(id), params::note = helpers::encodeUrl(note));
+            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), params::note = helpers::encodeUrl(note));
+        }
+
+        void updateServiceCheck(const std::string& serviceId, CheckStatus newStatus, const std::string& note = "")
+        {
+            updateCheck(serviceCheckId(serviceId), newStatus, note);
         }
 
         std::map<std::string, ServiceInfo> services() const
         {
-            impl::parseServices(m_consul.get("/v1/agent/services"));
+            return impl::parseServices(m_consul.get("/v1/agent/services"));
         }
 
         void registerService(const Service& service)
