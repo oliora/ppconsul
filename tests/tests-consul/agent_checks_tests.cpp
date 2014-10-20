@@ -114,7 +114,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
         CHECK(c.node == agent.self().second.name);
         CHECK(c.name == "check1");
         CHECK(c.notes.empty());
-        CHECK(c.status == CheckStatus::Warning);    // because of Non_Existing_Script_Name
+        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
         CHECK(!c.output.empty());                   //
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
@@ -133,7 +133,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
         CHECK(c.node == agent.self().second.name);
         CHECK(c.name == "check1");
         CHECK(c.notes == "the notes");
-        CHECK(c.status == CheckStatus::Warning);    // because of Non_Existing_Script_Name
+        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
         CHECK(!c.output.empty());                   //
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
@@ -152,7 +152,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
         CHECK(c.node == agent.self().second.name);
         CHECK(c.name == "check1");
         CHECK(c.notes == "the notes");
-        CHECK(c.status == CheckStatus::Warning);    // because of Non_Existing_Script_Name
+        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
         CHECK(!c.output.empty());                   //
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
@@ -192,7 +192,7 @@ TEST_CASE("agent.check_registration_special_chars", "[consul][agent][checks][spe
 
         CHECK(c.id == spec_name);
         CHECK(c.name == spec_name);
-        CHECK(c.status == CheckStatus::Warning);    // because of Non_Existing_Script_Name
+        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
         CHECK(c.notes == "");
     }
 }
@@ -231,7 +231,7 @@ TEST_CASE("agent.check_update", "[consul][agent][checks][health]")
 
     agent.updateCheck("check1", CheckStatus::Warning);
     c = agent.checks().at("check1");
-    REQUIRE(c.status == CheckStatus::Warning);
+    REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "");
 

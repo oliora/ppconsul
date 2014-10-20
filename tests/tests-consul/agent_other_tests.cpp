@@ -16,16 +16,11 @@ using ppconsul::agent::Agent;
 using ppconsul::agent::CheckStatus;
 
 
-namespace {
+/*namespace {
     auto const Non_Existing_Script_Name = "63E7A7B1-FDAC-4D49-9F8F-1479C866815D";
     auto const Unique_Id = "{16CA1AC9-72EE-451D-970E-E520B4EF874A}";
     auto const Non_Existing_Check_Name = "DE2F4D40-2664-472D-B0B7-EA0A47D92136";
-
-    inline void sleep(double seconds)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long long>(seconds * 1000.0)));
-    }
-}
+}*/
 
 TEST_CASE("agent.self", "[consul][agent][config][self]")
 {
