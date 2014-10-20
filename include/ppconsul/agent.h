@@ -67,7 +67,7 @@ namespace ppconsul { namespace agent {
         int delegateCur;
     };
 
-    struct Config {}; // use boost::ptree
+    struct Config {}; // TODO: use boost::ptree
 
     inline std::string serviceCheckId(const std::string& serviceId)
     {

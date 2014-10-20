@@ -84,6 +84,20 @@ namespace agent {
     }
 
 namespace impl {
+
+    namespace {
+        std::string to_json(const std::chrono::seconds& seconds)
+        {
+            std::ostringstream os;
+            os << seconds.count() << "s";
+            return os.str();
+        }
+
+        s11n::Json::array to_json(const Tags& tags)
+        {
+            return s11n::Json::array(tags.begin(), tags.end());
+        }
+    }
     
     std::vector<Member> parseMembers(const std::string& json)
     {
@@ -107,32 +121,105 @@ namespace impl {
 
     std::string checkRegistrationJson(const std::string& name, const std::chrono::seconds& ttl, const std::string& notes, const std::string& id)
     {
-        // TODO
-        return{};
+        using s11n::Json;
+
+        if (id.empty())
+            return Json(Json::object{
+                { "Name", name },
+                { "Notes", notes },
+                { "TTL", to_json(ttl) }
+            }).dump();
+        else
+            return Json(Json::object{
+                { "ID", id },
+                { "Name", name },
+                { "Notes", notes },
+                { "TTL", to_json(ttl) }
+            }).dump();
     }
 
     std::string checkRegistrationJson(const std::string& name, const std::string& script, const std::chrono::seconds& interval, const std::string& notes, const std::string& id)
     {
-        // TODO
-        return{};
+        using s11n::Json;
+
+        if (id.empty())
+            return Json(Json::object{
+                { "Name", name },
+                { "Notes", notes },
+                { "Script", script },
+                { "Interval", to_json(interval) }
+            }).dump();
+        else
+            return Json(Json::object{
+                { "ID", id },
+                { "Name", name },
+                { "Notes", notes },
+                { "Script", script },
+                { "Interval", to_json(interval) }
+            }).dump();
     }
 
     std::string serviceRegistrationJson(const Service& service)
     {
-        // TODO
-        return{};
+        using s11n::Json;
+
+        if (service.id.empty())
+            return Json(Json::object{
+                { "Name", service.name },
+                { "Port", service.port },
+                { "Tags", to_json(service.tags) }
+            }).dump();
+        else
+            return Json(Json::object{
+                { "ID", service.id },
+                { "Name", service.name },
+                { "Port", service.port },
+                { "Tags", to_json(service.tags) }
+            }).dump();
     }
 
     std::string serviceRegistrationJson(const Service& service, const std::chrono::seconds& ttl)
     {
-        // TODO
-        return{};
+        using s11n::Json;
+
+        if (service.id.empty())
+            return Json(Json::object{
+                { "Name", service.name },
+                { "Port", service.port },
+                { "Tags", to_json(service.tags) },
+                { "TTL", to_json(ttl) }
+            }).dump();
+        else
+            return Json(Json::object{
+                { "ID", service.id },
+                { "Name", service.name },
+                { "Port", service.port },
+                { "Tags", to_json(service.tags) },
+                { "TTL", to_json(ttl) }
+            }).dump();
     }
 
     std::string serviceRegistrationJson(const Service& service, const std::string& script, const std::chrono::seconds& interval)
     {
-        // TODO
-        return{};
+        using s11n::Json;
+
+        if (service.id.empty())
+            return Json(Json::object{
+                { "Name", service.name },
+                { "Port", service.port },
+                { "Tags", to_json(service.tags) },
+                { "Script", script },
+                { "Interval", to_json(interval) }
+            }).dump();
+        else
+            return Json(Json::object{
+                { "ID", service.id },
+                { "Name", service.name },
+                { "Port", service.port },
+                { "Tags", to_json(service.tags) },
+                { "Script", script },
+                { "Interval", to_json(interval) }
+            }).dump();
     }
 
 }
