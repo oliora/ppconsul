@@ -32,7 +32,7 @@ TBD
 ### /v1/status/
 TBD
 
-[1]: #Blocking-Queries-Note "Blocking Queries Note"
+[1]: #blocking-queries-note "Blocking Queries Note"
 
 #### Blocking Queries Note
 Blocking queries are supported in very primitive way: if query is called with extra parameter specifying wait timeout and index then the call blocks.
