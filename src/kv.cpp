@@ -15,12 +15,15 @@ namespace ppconsul { namespace kv {
     {
         using s11n::load;
 
+        std::string value;
+
         load(src, dst.createIndex, "CreateIndex");
         load(src, dst.modifyIndex, "ModifyIndex");
         load(src, dst.lockIndex, "LockIndex");
         load(src, dst.key, "Key");
         load(src, dst.flags, "Flags");
-        load(src, dst.value, "Value");
+        load(src, value, "Value");
+        dst.value = helpers::decodeBase64(value);
         load(src, dst.session, "Session");
     }
 

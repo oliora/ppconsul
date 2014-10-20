@@ -43,8 +43,7 @@ namespace ppconsul { namespace s11n {
     template<class T>
     void load(const Json& src, T& dst, const char *name)
     {
-        const auto& obj = src.object_items();
-        load(obj.at(name), dst);
+        load(src[name], dst);
     }
 
     inline void load(const Json& src, uint16_t& dst)
