@@ -24,23 +24,6 @@ else ()
     include_directories(${CURL_INCLUDE_DIR})
 endif ()
 
-project(consul-get)
-add_executable(${PROJECT_NAME} consul_get_app.cpp)
-link_test_libs(${PROJECT_NAME})
-
-project(unittests)
-add_executable(${PROJECT_NAME} main.cpp
-    consul.cpp
-    helpers.cpp
-    parameters.cpp
-)
-link_test_libs(${PROJECT_NAME})
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
-
-
-project(tests-kv)
-add_executable(${PROJECT_NAME}
-    kv.cpp
-)
-link_test_libs(${PROJECT_NAME})
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+add_subdirectory(consul-get-app)
+add_subdirectory(tests-consul)
+add_subdirectory(unittests)
