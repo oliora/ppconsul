@@ -7,7 +7,7 @@ The status of Consul HTTP API v1 coverage. Note that all implemented features ar
 Most features supported. Note that:
 - Lock acquiring / release is **not supported**.
 - Support of blocking queries is limited [[1]].
-- It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(some_double)` etc. 
+- It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(key, some_double)` etc. 
 
 ### /v1/agent/
 
@@ -32,9 +32,9 @@ TBD
 ### /v1/status/
 TBD
 
-[1]: #Blocking-Query-Note "Blocking Query Note"
+[1]: #Blocking-Queries-Note "Blocking Queries Note"
 
-#### Blocking Query Note
+#### Blocking Queries Note
 Blocking queries are supported in very primitive way: if query is called with extra parameter specifying wait timeout and index then the call blocks.
 Background polling, async non-block handling and other smart things to work with blocking queries in a more effective way are in the far future plan.
 If you have any ideas/suggerstions of a convenient interface to work with blocking queries, you are more than welcome.
