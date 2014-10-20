@@ -295,14 +295,6 @@ TEST_CASE("agent.check_update_special_chars", "[consul][agent][checks][health][s
 }
 
 /*
-TEST_CASE("agent.services", "[consul][agent][services]")
-{
-    auto consul = create_test_consul();
-    Agent agent(consul);
-
-
-}
-
 TEST_CASE("agent.members", "[consul][agent][config][members]")
 {
     auto consul = create_test_consul();
