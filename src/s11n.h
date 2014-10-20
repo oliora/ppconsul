@@ -27,12 +27,6 @@ namespace ppconsul { namespace s11n {
         }
     }
 
-    template<class T>
-    void load(const Json& src, T& dst, const char *name)
-    {
-        load(src[name], dst);
-    }
-
     inline void load(const Json& src, uint16_t& dst)
     {
         dst = static_cast<int>(src.int_value());
@@ -86,8 +80,16 @@ namespace ppconsul { namespace s11n {
     }
 
     template<class T>
+    void load(const Json& src, T& dst, const char *name)
+    {
+        load(src[name], dst);
+    }
+
+    template<class T>
     T parseJson(const std::string& jsonStr)
     {
+        using namespace s11n;
+        
         auto obj = detail::parse_json(jsonStr);
         T t;
         load(obj, t);

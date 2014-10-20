@@ -8,19 +8,19 @@
 #include "ppconsul/agent.h"
 #include "s11n.h"
 
-namespace ppconsul {
 
-namespace s11n {
-    void load(const Json& src, std::pair<agent::Config, agent::Member>& dst)
+namespace json11 {
+    inline void load(const json11::Json& src, std::pair<ppconsul::agent::Config, ppconsul::agent::Member>& dst)
     {
-        using s11n::load;
+        using ppconsul::s11n::load;
 
         load(src, dst.first, "Config");
         load(src, dst.second, "Member");
     }
 }
-    
-namespace agent {
+
+
+namespace ppconsul { namespace agent {
 
     void load(const s11n::Json& src, CheckStatus& dst)
     {
