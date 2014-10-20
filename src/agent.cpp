@@ -151,8 +151,8 @@ namespace impl {
         return Json(Json::object{
             { "ID", service.id },
             { "Name", service.name },
-            { "Port", service.port },
-            { "Tags", to_json(service.tags) }
+            { "Tags", to_json(service.tags) },
+            { "Port", service.port }
         }).dump();
     }
 
@@ -163,9 +163,11 @@ namespace impl {
         return Json(Json::object{
             { "ID", service.id },
             { "Name", service.name },
-            { "Port", service.port },
             { "Tags", to_json(service.tags) },
-            { "TTL", to_json(ttl) }
+            { "Port", service.port },
+            { "Check", Json::object{
+                { "TTL", to_json(ttl) }
+            }}
         }).dump();
     }
 
@@ -176,10 +178,12 @@ namespace impl {
         return Json(Json::object{
             { "ID", service.id },
             { "Name", service.name },
-            { "Port", service.port },
             { "Tags", to_json(service.tags) },
-            { "Script", script },
-            { "Interval", to_json(interval) }
+            { "Port", service.port },
+            { "Check", Json::object{
+                { "Script", script },
+                { "Interval", to_json(interval) }
+            } }
         }).dump();
     }
 
