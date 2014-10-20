@@ -72,8 +72,8 @@ namespace ppconsul {
         // - token - default token for all client requests (can be overloaded in every specific request)
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Consul(const std::string& addr, const Params&... params)
-        : Consul(kwargs::get(params::dc, std::string(), params...),
-                kwargs::get(params::token, std::string(), params...),
+        : Consul(kwargs::get(params::token, std::string(), params...),
+                kwargs::get(params::dc, std::string(), params...),
                 addr)
         {
             KWARGS_CHECK_IN_LIST(Params, (params::dc, params::token))
