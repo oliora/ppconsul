@@ -63,7 +63,7 @@ namespace agent {
     {
         using s11n::load;
 
-        load(src, dst.id, "CheckId");
+        load(src, dst.id, "CheckID");
         load(src, dst.node, "Node");
         load(src, dst.name, "Name");
         load(src, dst.status, "Status");
