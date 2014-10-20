@@ -12,7 +12,7 @@ Most features supported. Note that:
 ### Agent
 
 Most features supported. Note that:
-- Retriving of `"Config"` from `/v1/agent/self` endpoint is **not supported**.
+- Accessing to `"Config"` object received from `/v1/agent/self` endpoint is **not supported**.
 
 ### Catalog
 In progress
