@@ -59,7 +59,7 @@ namespace agent {
         load(src, dst.delegateCur, "DelegateCur");
     }
 
-    void load(const s11n::Json& src, Check& dst)
+    void load(const s11n::Json& src, CheckInfo& dst)
     {
         using s11n::load;
 
@@ -73,7 +73,7 @@ namespace agent {
         load(src, dst.serviceName, "ServiceName");
     }
 
-    void load(const s11n::Json& src, Service& dst)
+    void load(const s11n::Json& src, ServiceInfo& dst)
     {
         using s11n::load;
         
@@ -109,117 +109,78 @@ namespace impl {
         return s11n::parseJson<std::pair<Config, Member>>(json);
     }
 
-    std::map<std::string, Check> parseChecks(const std::string& json)
+    std::map<std::string, CheckInfo> parseChecks(const std::string& json)
     {
-        return s11n::parseJson<std::map<std::string, Check>>(json);
+        return s11n::parseJson<std::map<std::string, CheckInfo>>(json);
     }
 
-    std::map<std::string, Service> parseServices(const std::string& json)
+    std::map<std::string, ServiceInfo> parseServices(const std::string& json)
     {
-        return s11n::parseJson<std::map<std::string, Service>>(json);
+        return s11n::parseJson<std::map<std::string, ServiceInfo>>(json);
     }
 
-    std::string checkRegistrationJson(const std::string& name, const std::chrono::seconds& ttl, const std::string& notes, const std::string& id)
+    std::string checkRegistrationJson(const Check& check, const std::chrono::seconds& ttl)
     {
         using s11n::Json;
 
-        if (id.empty())
-            return Json(Json::object{
-                { "Name", name },
-                { "Notes", notes },
-                { "TTL", to_json(ttl) }
-            }).dump();
-        else
-            return Json(Json::object{
-                { "ID", id },
-                { "Name", name },
-                { "Notes", notes },
-                { "TTL", to_json(ttl) }
-            }).dump();
+        return Json(Json::object{
+            { "ID", check.id },
+            { "Name", check.name },
+            { "Notes", check.notes },
+            { "TTL", to_json(ttl) }
+        }).dump();
     }
 
-    std::string checkRegistrationJson(const std::string& name, const std::string& script, const std::chrono::seconds& interval, const std::string& notes, const std::string& id)
+    std::string checkRegistrationJson(const Check& check, const std::string& script, const std::chrono::seconds& interval)
     {
         using s11n::Json;
 
-        if (id.empty())
-            return Json(Json::object{
-                { "Name", name },
-                { "Notes", notes },
-                { "Script", script },
-                { "Interval", to_json(interval) }
-            }).dump();
-        else
-            return Json(Json::object{
-                { "ID", id },
-                { "Name", name },
-                { "Notes", notes },
-                { "Script", script },
-                { "Interval", to_json(interval) }
-            }).dump();
+        return Json(Json::object{
+            { "ID", check.id },
+            { "Name", check.name },
+            { "Notes", check.notes },
+            { "Script", script },
+            { "Interval", to_json(interval) }
+        }).dump();
     }
 
     std::string serviceRegistrationJson(const Service& service)
     {
         using s11n::Json;
 
-        if (service.id.empty())
-            return Json(Json::object{
-                { "Name", service.name },
-                { "Port", service.port },
-                { "Tags", to_json(service.tags) }
-            }).dump();
-        else
-            return Json(Json::object{
-                { "ID", service.id },
-                { "Name", service.name },
-                { "Port", service.port },
-                { "Tags", to_json(service.tags) }
-            }).dump();
+        return Json(Json::object{
+            { "ID", service.id },
+            { "Name", service.name },
+            { "Port", service.port },
+            { "Tags", to_json(service.tags) }
+        }).dump();
     }
 
     std::string serviceRegistrationJson(const Service& service, const std::chrono::seconds& ttl)
     {
         using s11n::Json;
 
-        if (service.id.empty())
-            return Json(Json::object{
-                { "Name", service.name },
-                { "Port", service.port },
-                { "Tags", to_json(service.tags) },
-                { "TTL", to_json(ttl) }
-            }).dump();
-        else
-            return Json(Json::object{
-                { "ID", service.id },
-                { "Name", service.name },
-                { "Port", service.port },
-                { "Tags", to_json(service.tags) },
-                { "TTL", to_json(ttl) }
-            }).dump();
+        return Json(Json::object{
+            { "ID", service.id },
+            { "Name", service.name },
+            { "Port", service.port },
+            { "Tags", to_json(service.tags) },
+            { "TTL", to_json(ttl) }
+        }).dump();
     }
 
     std::string serviceRegistrationJson(const Service& service, const std::string& script, const std::chrono::seconds& interval)
     {
         using s11n::Json;
 
-        if (service.id.empty())
-            return Json(Json::object{
-                { "Name", service.name },
-                { "Port", service.port },
-                { "Tags", to_json(service.tags) },
-                { "Script", script },
-                { "Interval", to_json(interval) }
-            }).dump();
-        else
-            return Json(Json::object{
-                { "ID", service.id },
-                { "Name", service.name },
-                { "Port", service.port },
-                { "Tags", to_json(service.tags) },
-                { "Script", script },
-                { "Interval", to_json(interval) }
-            }).dump();
+        return Json(Json::object{
+            { "ID", service.id },
+            { "Name", service.name },
+            { "Port", service.port },
+            { "Tags", to_json(service.tags) },
+            { "Script", script },
+            { "Interval", to_json(interval) }
+        }).dump();
     }
 
 }

@@ -32,13 +32,24 @@ namespace ppconsul { namespace agent {
     typedef std::vector<std::string> Tags;
     typedef std::map<std::string, std::string> Properties;
 
+
     struct Check
     {
-        std::string id;
-        std::string node;
+        // Otherwise MSVC crashes with internal error
+        // on code like `registerCheck({ "check_name" }, "script_name", std::chrono::seconds(interval))`
+        Check(std::string name = "", std::string notes = "", std::string id = "")
+        : name(std::move(name)), notes(std::move(notes)), id(std::move(id))
+        {}
+
         std::string name;
-        CheckStatus status;
         std::string notes;
+        std::string id;
+    };
+
+    struct CheckInfo: Check
+    {
+        std::string node;
+        CheckStatus status;
         std::string output;
         std::string serviceId;
         std::string serviceName;
@@ -46,25 +57,34 @@ namespace ppconsul { namespace agent {
 
     struct Service
     {
+        // Otherwise MSVC crashes with internal error
+        // on code like `registerService({ "check_name" }, "script_name", std::chrono::seconds(interval))`
+        Service(std::string name = "", uint16_t port = 0, Tags tags = Tags(), std::string id = "")
+        : name(std::move(name)), port(port), tags(std::move(tags)), id(std::move(id))
+        {}
+
         std::string name;
         uint16_t port = 0;
         Tags tags;
         std::string id;
     };
 
+    struct ServiceInfo: Service
+    {};
+
     struct Member
     {
         std::string name;
         std::string addr;
-        uint16_t port;
+        uint16_t port = 0;
         Properties tags;
-        int status;
-        int protocolMin;
-        int protocolMax;
-        int protocolCur;
-        int delegateMin;
-        int delegateMax;
-        int delegateCur;
+        int status = 0;
+        int protocolMin = 0;
+        int protocolMax = 0;
+        int protocolCur = 0;
+        int delegateMin = 0;
+        int delegateMax = 0;
+        int delegateCur = 0;
     };
 
     struct Config {}; // TODO: use boost::ptree
@@ -77,11 +97,11 @@ namespace ppconsul { namespace agent {
     namespace impl {
         std::vector<Member> parseMembers(const std::string& json);
         std::pair<Config, Member> parseSelf(const std::string& json);
-        std::map<std::string, Check> parseChecks(const std::string& json);
-        std::map<std::string, Service> parseServices(const std::string& json);
+        std::map<std::string, CheckInfo> parseChecks(const std::string& json);
+        std::map<std::string, ServiceInfo> parseServices(const std::string& json);
 
-        std::string checkRegistrationJson(const std::string& name, const std::chrono::seconds& ttl, const std::string& notes, const std::string& id);
-        std::string checkRegistrationJson(const std::string& name, const std::string& script, const std::chrono::seconds& interval, const std::string& notes, const std::string& id);
+        std::string checkRegistrationJson(const Check& check, const std::chrono::seconds& ttl);
+        std::string checkRegistrationJson(const Check& check, const std::string& script, const std::chrono::seconds& interval);
         std::string serviceRegistrationJson(const Service& service);
         std::string serviceRegistrationJson(const Service& service, const std::chrono::seconds& ttl);
         std::string serviceRegistrationJson(const Service& service, const std::string& script, const std::chrono::seconds& interval);
@@ -116,19 +136,19 @@ namespace ppconsul { namespace agent {
             m_consul.get("/v1/agent/force-leave/" + helpers::encodeUrl(node));
         }
 
-        std::map<std::string, Check> checks() const
+        std::map<std::string, CheckInfo> checks() const
         {
             return impl::parseChecks(m_consul.get("/v1/agent/checks"));
         }
 
-        void registerCheck(const std::string& name, const std::chrono::seconds& ttl, const std::string& notes = "", const std::string& id = "")
+        void registerCheck(const Check& check, const std::chrono::seconds& ttl)
         {
-            m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(name, ttl, notes, id));
+            m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(check, ttl));
         }
         
-        void registerCheck(const std::string& name, const std::string& script, const std::chrono::seconds& interval, const std::string& notes = "", const std::string& id = "")
+        void registerCheck(const Check& check, const std::string& script, const std::chrono::seconds& interval)
         {
-            m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(name, script, interval, notes, id));
+            m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(check, script, interval));
         }
         
         void deregisterCheck(const std::string& id)
@@ -141,7 +161,7 @@ namespace ppconsul { namespace agent {
             m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(id), params::note = helpers::encodeUrl(note));
         }
 
-        std::map<std::string, Service> services() const
+        std::map<std::string, ServiceInfo> services() const
         {
             impl::parseServices(m_consul.get("/v1/agent/services"));
         }
