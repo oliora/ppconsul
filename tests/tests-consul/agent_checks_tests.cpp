@@ -293,28 +293,3 @@ TEST_CASE("agent.check_update_special_chars", "[consul][agent][checks][health][s
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "status:\neverything passing!!!\n");
 }
-
-/*
-TEST_CASE("agent.members", "[consul][agent][config][members]")
-{
-    auto consul = create_test_consul();
-    Agent agent(consul);
-
-
-}
-
-TEST_CASE("agent.self", "[consul][agent][config][self]")
-{
-    auto consul = create_test_consul();
-    Agent agent(consul);
-
-
-}
-
-TEST_CASE("agent.join_and_leave", "[consul][agent][config][join][leave]")
-{
-    auto consul = create_test_consul();
-    Agent agent(consul);
-
-
-}*/
