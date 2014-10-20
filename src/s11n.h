@@ -27,19 +27,6 @@ namespace ppconsul { namespace s11n {
         }
     }
 
-    /*template<class T>
-    struct nvp
-    {
-        const char *name;
-        T& value;
-    };
-
-    template<class T>
-    nvp<T> make_nvp(const char *name, T& value)
-    {
-        return nvp < T > {name, value};
-    }*/
-
     template<class T>
     void load(const Json& src, T& dst, const char *name)
     {
