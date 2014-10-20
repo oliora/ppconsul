@@ -4,13 +4,17 @@ The status of Consul HTTP API v1 coverage. Note that all implemented features ar
 
 ### kv
 
-Getting, putting, deleting of values and getting of keys operation supported. CAS, flags, consistency modes, ACL and blocking queries<sup>[1]</sup> are supported.
-The only thing NOT supported at the moment is acquire/release locks.
- 
-It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(some_double)` etc.
+Implemented, except:
+- acquire/release locks
+
+Notes:
+- Blocking queries are supported <sup>[1]</sup>.
+- It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(some_double)` etc. 
 
 ### agent
-**In progress**
+
+Implemented, except:
+- Retriving of config from /v1/agent/self
 
 ### catalog
 TBD
