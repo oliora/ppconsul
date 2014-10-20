@@ -56,7 +56,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
         const auto & c = checks.at("check1");
 
         CHECK(c.id == "check1");
-        CHECK(!c.node.empty());
+        CHECK(c.node == agent.self().second.name);
         CHECK(c.name == "check1");
         CHECK(c.status == CheckStatus::Unknown);
         CHECK(c.notes.empty());
@@ -74,7 +74,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
         const auto & c = checks.at("check1");
 
         CHECK(c.id == "check1");
-        CHECK(!c.node.empty());
+        CHECK(c.node == agent.self().second.name);
         CHECK(c.name == "check1");
         CHECK(c.status == CheckStatus::Unknown);
         CHECK(c.notes == "some notes");
@@ -92,7 +92,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
         const auto & c = checks.at(Unique_Id);
 
         CHECK(c.id == Unique_Id);
-        CHECK(!c.node.empty());
+        CHECK(c.node == agent.self().second.name);
         CHECK(c.name == "check1");
         CHECK(c.status == CheckStatus::Unknown);
         CHECK(c.notes == "other notes");
@@ -111,7 +111,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
         const auto & c = checks.at("check1");
 
         CHECK(c.id == "check1");
-        CHECK(!c.node.empty());
+        CHECK(c.node == agent.self().second.name);
         CHECK(c.name == "check1");
         CHECK(c.notes.empty());
         CHECK(c.status == CheckStatus::Warning);    // because of Non_Existing_Script_Name
@@ -130,7 +130,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
         const auto & c = checks.at("check1");
 
         CHECK(c.id == "check1");
-        CHECK(!c.node.empty());
+        CHECK(c.node == agent.self().second.name);
         CHECK(c.name == "check1");
         CHECK(c.notes == "the notes");
         CHECK(c.status == CheckStatus::Warning);    // because of Non_Existing_Script_Name
@@ -149,7 +149,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
         const auto & c = checks.at(Unique_Id);
 
         CHECK(c.id == Unique_Id);
-        CHECK(!c.node.empty());
+        CHECK(c.node == agent.self().second.name);
         CHECK(c.name == "check1");
         CHECK(c.notes == "the notes");
         CHECK(c.status == CheckStatus::Warning);    // because of Non_Existing_Script_Name
