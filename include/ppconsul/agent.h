@@ -19,6 +19,12 @@ namespace ppconsul { namespace agent {
     namespace params {
         PPCONSUL_PARAM(wan, bool)
         PPCONSUL_PARAM(note, std::string)
+
+        inline void printParameter(std::ostream& os, bool v, KWARGS_KW_TAG(wan))
+        {
+            if (v)
+                os << "wan=1";
+        }
     }
 
     enum class CheckStatus
