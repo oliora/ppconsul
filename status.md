@@ -2,34 +2,34 @@
 
 The status of Consul HTTP API v1 coverage. Note that all implemented features are tested with automated integration tests.
 
-### /v1/kv/
+### KV
 
 Most features supported. Note that:
 - Lock acquiring / release is **not supported**.
 - Support of blocking queries is limited [[1]].
 - It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(key, some_double)` etc. 
 
-### /v1/agent/
+### Agent
 
 Most features supported. Note that:
 - Retriving of `"Config"` from `/v1/agent/self` endpoint is **not supported**.
 
-### /v1/catalog/
+### Catalog
 In progress
 
-### /v1/health/
+### Health
 TBD
 
-### /v1/session/
+### Session
 TBD
 
-### /v1/acl/
+### ACL
 TBD
 
-### /v1/event/
+### Event
 TBD
 
-### /v1/status/
+### Status
 TBD
 
 [1]: #blocking-queries-note "Blocking Queries Note"
