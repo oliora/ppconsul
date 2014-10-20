@@ -5,8 +5,8 @@ The status of Consul HTTP API v1 coverage. Note that all implemented features ar
 ### /v1/kv/
 
 Most features supported. Note that:
-- Lock acquiring / release is **not supported**
-- Support of blocking queries is limited <sup>[1]</sup>.
+- Lock acquiring / release is **not supported**.
+- Support of blocking queries is limited [[1]].
 - It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(some_double)` etc. 
 
 ### /v1/agent/
