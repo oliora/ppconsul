@@ -18,7 +18,7 @@ namespace ppconsul { namespace agent {
 
     enum class CheckStatus
     {
-        Unknown,
+        Unknown, // Not used since Consul 0.4.1
         Passing,
         Warning,
         Failed
@@ -100,6 +100,8 @@ namespace ppconsul { namespace agent {
                 os << "wan=1";
         }
     }
+
+    std::ostream& operator<< (std::ostream& os, const CheckStatus& s);
 
     inline std::string serviceCheckId(const std::string& serviceId)
     {
@@ -209,6 +211,30 @@ namespace ppconsul { namespace agent {
 
 
     // Implementation
+
+    inline std::ostream& operator<< (std::ostream& os, const CheckStatus& s)
+    {
+        switch (s)
+        {
+        case CheckStatus::Passing:
+            os << "Passing";
+            break;
+        case CheckStatus::Warning:
+            os << "Warning";
+            break;
+        case CheckStatus::Failed:
+            os << "Failed";
+            break;
+        case CheckStatus::Unknown:
+            os << "Unknown";
+            break;
+        default:
+            os << "?";
+            break;
+        }
+
+        return os;
+    }
 
     namespace impl {
         inline std::string updateCheckUrl(CheckStatus newStatus)
