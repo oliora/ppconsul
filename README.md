@@ -37,7 +37,7 @@ TBD
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [Git](http://git-scm.com/) client.
 * Install [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. Note that CMake 3 not guaranteed to work.
-* Download [Boost](http://www.boost.org/) library. Build it if you would use cpp-netlib instead of libCURL.
+* Download [Boost](http://www.boost.org/) library. Build it if you going to use cpp-netlib instead of libCURL or GCC 4.8.
 * If you prefer to use libCURL then install libCURL (any version should be OK). Note that on Windows it is included in [CURL installer](http://curl.haxx.se/download.html).
 Otherwise download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that the latter depends on compiled Boost libraries.
 * Install [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
