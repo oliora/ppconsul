@@ -110,7 +110,7 @@ namespace ppconsul { namespace catalog {
             KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
             return impl::parseService(m_consul.get("/v1/catalog/service/" + helpers::encodeUrl(name),
                 params::consistency = m_defaultConsistency,
-                params::tags = helpers::encodeUrl(tag),
+                params::tag = helpers::encodeUrl(tag),
                 params...));
         }
 
