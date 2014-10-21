@@ -46,12 +46,14 @@ TEST_CASE("agent.self", "[consul][agent][config][self]")
 
 TEST_CASE("agent.members", "[consul][agent][config][members]")
 {
+    using ppconsul::agent::Pool;
+
     auto consul = create_test_consul();
     Agent agent(consul);
 
     SECTION("wan")
     {
-        const auto members = agent.members(true);
+        const auto members = agent.members(Pool::Wan);
         const auto selfMember = agent.self().second;
 
         auto it1 = std::find_if(members.begin(), members.end(), [&](const ppconsul::agent::Member& op){
@@ -103,20 +105,22 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
         CHECK(selfMember.delegateCur == m.delegateCur);
 
         // Useful only if the wan farm present
-        CHECK(agent.members().size() == agent.members(false).size());
+        CHECK(agent.members().size() == agent.members(Pool::Lan).size());
     }
 }
 
 TEST_CASE("agent.join_and_leave", "[consul][agent][config][join][leave]")
 {
+    using ppconsul::agent::Pool;
+
     auto consul = create_test_consul();
     Agent agent(consul);
 
     CHECK_NOTHROW(agent.forceLeave(agent.self().second.name));
     CHECK_THROWS_AS(agent.join("127.0.0.1:21"), ppconsul::Error);
-    CHECK_THROWS_AS(agent.join("127.0.0.1:21", true), ppconsul::Error);
-    CHECK_THROWS_AS(agent.join("127.0.0.1:21", false), ppconsul::Error);
+    CHECK_THROWS_AS(agent.join("127.0.0.1:21", Pool::Wan), ppconsul::Error);
+    CHECK_THROWS_AS(agent.join("127.0.0.1:21", Pool::Lan), ppconsul::Error);
     CHECK_NOTHROW(agent.join("127.0.0.1"));
-    CHECK_NOTHROW(agent.join("127.0.0.1", true));
-    CHECK_NOTHROW(agent.join("127.0.0.1", false));
+    CHECK_NOTHROW(agent.join("127.0.0.1", Pool::Wan));
+    CHECK_NOTHROW(agent.join("127.0.0.1", Pool::Lan));
 }

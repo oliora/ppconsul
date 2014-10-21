@@ -16,17 +16,6 @@
 
 namespace ppconsul { namespace agent {
 
-    namespace params {
-        PPCONSUL_PARAM(wan, bool)
-        PPCONSUL_PARAM(note, std::string)
-
-        inline void printParameter(std::ostream& os, bool v, KWARGS_KW_TAG(wan))
-        {
-            if (v)
-                os << "wan=1";
-        }
-    }
-
     enum class CheckStatus
     {
         Unknown,
@@ -37,6 +26,12 @@ namespace ppconsul { namespace agent {
 
     typedef std::vector<std::string> Tags;
     typedef std::map<std::string, std::string> Properties;
+
+    enum class Pool
+    {
+        Lan,
+        Wan
+    };
 
 
     struct Check
@@ -95,6 +90,17 @@ namespace ppconsul { namespace agent {
 
     struct Config {}; // TODO: use boost::ptree
 
+    namespace params {
+        PPCONSUL_PARAM(pool, Pool)
+        PPCONSUL_PARAM(note, std::string)
+
+        inline void printParameter(std::ostream& os, Pool v, KWARGS_KW_TAG(pool))
+        {
+            if (Pool::Wan == v)
+                os << "wan=1";
+        }
+    }
+
     inline std::string serviceCheckId(const std::string& serviceId)
     {
         return "service:" + serviceId;
@@ -122,9 +128,9 @@ namespace ppconsul { namespace agent {
         : m_consul(consul)
         {}
 
-        std::vector<Member> members(bool wan = false) const
+        std::vector<Member> members(Pool pool = Pool::Lan) const
         {
-            return impl::parseMembers(m_consul.get("/v1/agent/members", params::wan = wan));
+            return impl::parseMembers(m_consul.get("/v1/agent/members", params::pool = pool));
         }
         
         std::pair<Config, Member> self() const
@@ -132,9 +138,9 @@ namespace ppconsul { namespace agent {
             return impl::parseSelf(m_consul.get("/v1/agent/self"));
         }
 
-        void join(const std::string& addr, bool wan = false)
+        void join(const std::string& addr, Pool pool = Pool::Lan)
         {
-            m_consul.get("/v1/agent/join/" + helpers::encodeUrl(addr), params::wan = wan);
+            m_consul.get("/v1/agent/join/" + helpers::encodeUrl(addr), params::pool = pool);
         }
 
         void forceLeave(const std::string& node)
