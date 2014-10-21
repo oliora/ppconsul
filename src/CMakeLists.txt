@@ -6,6 +6,7 @@
 
 set(HEADERS
     agent.h
+    catalog.h
     consul.h
     error.h
     helpers.h
@@ -25,6 +26,7 @@ set(SOURCES
     s11n.h
     s11n_types.h
     agent.cpp
+    catalog.cpp
     consul.cpp
     helpers.cpp
     kv.cpp
