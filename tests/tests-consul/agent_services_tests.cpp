@@ -117,7 +117,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(c.id == serviceCheckId("service1"));
         CHECK(c.node == agent.self().second.name);
         CHECK(!c.name.empty());
-        CHECK(c.status == CheckStatus::Unknown);
+        CHECK(c.status != CheckStatus::Passing);
         CHECK(c.notes.empty());
         CHECK(c.output.empty());
         CHECK(c.serviceId == "service1");
@@ -144,7 +144,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(c.id == serviceCheckId(Unique_Id));
         CHECK(c.node == agent.self().second.name);
         CHECK(!c.name.empty());
-        CHECK(c.status == CheckStatus::Unknown);
+        CHECK(c.status != CheckStatus::Passing);
         CHECK(c.notes.empty());
         CHECK(c.output.empty());
         CHECK(c.serviceId == Unique_Id);
@@ -164,7 +164,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.port == 0);
         CHECK(s.tags == ppconsul::agent::Tags());
 
-        sleep(0.5); // To get warning state
+        sleep(0.5); // To get updated state and output
 
         const auto checks = agent.checks();
         REQUIRE(checks.count(serviceCheckId("service1")));
@@ -193,7 +193,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.port == 9876);
         CHECK(s.tags == ppconsul::agent::Tags({ "udp", "printer" }));
 
-        sleep(0.5); // To get warning state
+        sleep(0.5); // To get updated state and output
 
         const auto checks = agent.checks();
         REQUIRE(checks.count(serviceCheckId(Unique_Id)));
@@ -257,7 +257,7 @@ TEST_CASE("agent.service_registration_special_chars", "[consul][agent][service][
         CHECK(c.id == serviceCheckId(spec_name));
         CHECK(c.node == agent.self().second.name);
         CHECK(!c.name.empty());
-        CHECK(c.status == CheckStatus::Unknown);
+        CHECK(c.status != CheckStatus::Passing);
         CHECK(c.notes.empty());
         CHECK(c.output.empty());
         CHECK(c.serviceId == spec_name);
@@ -277,7 +277,7 @@ TEST_CASE("agent.service_registration_special_chars", "[consul][agent][service][
         CHECK(s.port == 0);
         CHECK(s.tags == ppconsul::agent::Tags());
 
-        sleep(0.5); // To get warning state
+        sleep(0.5); // To get updated state and output
 
         const auto checks = agent.checks();
         REQUIRE(checks.count(serviceCheckId(spec_name)));
@@ -303,7 +303,7 @@ TEST_CASE("agent.service_check_update", "[consul][agent][service][health]")
 
     agent.registerService({ "service1" }, std::chrono::minutes(5));
     ppconsul::agent::CheckInfo c = agent.checks().at(serviceCheckId("service1"));
-    REQUIRE(c.status == CheckStatus::Unknown);
+    REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.output == "");
 
     agent.updateServiceCheck("service1", CheckStatus::Failed, "it's failed :(");

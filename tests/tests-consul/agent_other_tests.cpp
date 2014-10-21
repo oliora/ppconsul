@@ -91,7 +91,8 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
 
         const auto& m = *it1;
 
-        CHECK(m.name.find(selfMember.name + ".") == 0);
+        CHECK((m.name == selfMember.name
+            || m.name.find(selfMember.name + ".") == 0));
         CHECK(selfMember.addr == m.addr);
         CHECK(m.port);
         CHECK(selfMember.tags == m.tags);
