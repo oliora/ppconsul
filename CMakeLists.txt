@@ -19,9 +19,16 @@ if (${USE_CPPNETLIB})
 endif ()
 
 set(BOOST_MIN_VERSION 1.47) # The first Boost with Chrono
+set(USE_BOOST_REGEX OFF)
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
+
+    execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (GCC_VERSION VERSION_LESS 4.9)
+        set(USE_BOOST_REGEX ON)
+        message(STATUS "GCC ${GCC_VERSION} found. Note that using of GCC version less then 4.9 requires to link with Boost.Regex library")
+    endif()
 elseif (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ftemplate-depth=256 -std=c++11 -stdlib=libc++")
 elseif (MSVC)
@@ -44,7 +51,12 @@ if (${USE_CPPNETLIB})
 
     find_package(cppnetlib 0.11.0 REQUIRED)
 else ()
-    find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
+    if (NOT ${USE_BOOST_REGEX})
+        find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
+    else ()
+        find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS regex)
+        add_definitions(-DPPCONSUL_USE_BOOST_REGEX)
+    endif ()
 
     # Add user specified path to CURL headers/libraries into CMAKE_INCLUDE_PATH/CMAKE_LIBRARY_PATH variables.
     # Otherwise CURL could not be found on Windows

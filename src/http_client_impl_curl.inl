@@ -10,8 +10,12 @@
 #include <algorithm>
 #include <tuple>
 #include <cassert>
-#include <regex>
 
+#if !defined PPCONSUL_USE_BOOST_REGEX
+#include <regex>
+#else
+#include <boost/regex.hpp>
+#endif
 
 namespace ppconsul { namespace impl {
 
@@ -39,17 +43,29 @@ namespace ppconsul { namespace impl {
 
         const CurlInitializer g_initialized;
 
-        const std::regex g_statusLineRegex(R"***(HTTP\/1\.1 +(\d\d\d) +(.*)\r\n)***");
-        const std::regex g_consulHeaderLineRegex(R"***(([^:]+): +(.+)\r\n)***");
+#if !defined PPCONSUL_USE_BOOST_REGEX
+        using std::regex;
+        using std::regex_match;
+        using std::cmatch;
+#else
+        using boost::regex;
+        using boost::regex_match;
+        using boost::cmatch;
+#endif
+
+        const regex g_statusLineRegex(R"***(HTTP\/1\.1 +(\d\d\d) +(.*)\r\n)***");
+        const regex g_consulHeaderLineRegex(R"***(([^:]+): +(.+)\r\n)***");
 
         inline bool parseStatus(http::Status& status, const char *buf, size_t size)
         {
-            std::cmatch match;
-            if (!std::regex_match(buf, buf + size, match, g_statusLineRegex))
+            cmatch match;
+            if (!regex_match(buf, buf + size, match, g_statusLineRegex))
                 return false;
             status = http::Status(std::atol(match[1].str().c_str()), match[2].str());
             return true;
         }
+
+
     }
 
     class HttpClient
@@ -157,8 +173,8 @@ namespace ppconsul { namespace impl {
                 return size;
 
             // Parse headers
-            std::cmatch match;
-            if (!std::regex_match(const_cast<const char *>(ptr), const_cast<const char *>(ptr) +size, match, g_consulHeaderLineRegex))
+            cmatch match;
+            if (!regex_match(const_cast<const char *>(ptr), const_cast<const char *>(ptr) +size, match, g_consulHeaderLineRegex))
                 return size;
 
             ResponseHeaders& headers = std::get<1>(*outputResponse);
