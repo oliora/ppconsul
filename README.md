@@ -33,7 +33,7 @@ TBD
 
 ## How To Build
 
-### Dependencies
+### Get Dependencies
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [Git](http://git-scm.com/) client.
 * Install [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. Note that CMake 3 not guaranteed to work.
