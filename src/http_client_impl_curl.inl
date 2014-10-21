@@ -65,7 +65,10 @@ namespace ppconsul { namespace impl {
             return true;
         }
 
-
+        void throwCurlError(CURLcode code, const char *err)
+        {
+            throw std::runtime_error(std::string(err) + " (" + std::to_string(code) + ")");
+        }
     }
 
     class HttpClient
@@ -87,11 +90,13 @@ namespace ppconsul { namespace impl {
             if (!m_handle)
                 throw std::runtime_error("CURL handle creation failed");
 
-            // TODO: check return codes
+            if (auto err = curl_easy_setopt(m_handle, CURLOPT_ERRORBUFFER, m_errBuffer))
+                throwCurlError(err, "");
+
             // TODO: CURLOPT_NOSIGNAL?
-            curl_easy_setopt(m_handle, CURLOPT_NOPROGRESS, 1l);
-            curl_easy_setopt(m_handle, CURLOPT_WRITEFUNCTION, &HttpClient::writeCallback);
-            curl_easy_setopt(m_handle, CURLOPT_READFUNCTION, &HttpClient::readCallback);
+            setopt(CURLOPT_NOPROGRESS, 1l);
+            setopt(CURLOPT_WRITEFUNCTION, &HttpClient::writeCallback);
+            setopt(CURLOPT_READFUNCTION, &HttpClient::readCallback);
         }
 
         ~HttpClient()
@@ -105,14 +110,13 @@ namespace ppconsul { namespace impl {
             GetResponse r;
             std::get<2>(r).reserve(Buffer_Size);
 
-            // TODO: check return codes
-            curl_easy_setopt(m_handle, CURLOPT_HEADERFUNCTION, &HttpClient::headerCallback);
-            curl_easy_setopt(m_handle, CURLOPT_CUSTOMREQUEST, nullptr);
-            curl_easy_setopt(m_handle, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(m_handle, CURLOPT_WRITEDATA, &std::get<2>(r));
-            curl_easy_setopt(m_handle, CURLOPT_HEADERDATA, &r);
-            curl_easy_setopt(m_handle, CURLOPT_HTTPGET, 1l);
-            curl_easy_perform(m_handle);
+            setopt(CURLOPT_HEADERFUNCTION, &HttpClient::headerCallback);
+            setopt(CURLOPT_CUSTOMREQUEST, nullptr);
+            setopt(CURLOPT_URL, url.c_str());
+            setopt(CURLOPT_WRITEDATA, &std::get<2>(r));
+            setopt(CURLOPT_HEADERDATA, &r);
+            setopt(CURLOPT_HTTPGET, 1l);
+            perform();
 
             return r;
         }
@@ -124,17 +128,16 @@ namespace ppconsul { namespace impl {
             std::pair<http::Status, std::string> r;
             r.second.reserve(Buffer_Size);
 
-            // TODO: check return codes
-            curl_easy_setopt(m_handle, CURLOPT_HEADERFUNCTION, &HttpClient::headerStatusCallback);
-            curl_easy_setopt(m_handle, CURLOPT_CUSTOMREQUEST, nullptr);
-            curl_easy_setopt(m_handle, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(m_handle, CURLOPT_WRITEDATA, &r.second);
-            curl_easy_setopt(m_handle, CURLOPT_HEADERDATA, &r.first);
-            curl_easy_setopt(m_handle, CURLOPT_UPLOAD, 1l);
-            curl_easy_setopt(m_handle, CURLOPT_PUT, 1l);
-            curl_easy_setopt(m_handle, CURLOPT_INFILESIZE_LARGE, static_cast<curl_off_t>(data.size()));
-            curl_easy_setopt(m_handle, CURLOPT_READDATA, &ctx);
-            curl_easy_perform(m_handle);
+            setopt(CURLOPT_HEADERFUNCTION, &HttpClient::headerStatusCallback);
+            setopt(CURLOPT_CUSTOMREQUEST, nullptr);
+            setopt(CURLOPT_URL, url.c_str());
+            setopt(CURLOPT_WRITEDATA, &r.second);
+            setopt(CURLOPT_HEADERDATA, &r.first);
+            setopt(CURLOPT_UPLOAD, 1l);
+            setopt(CURLOPT_PUT, 1l);
+            setopt(CURLOPT_INFILESIZE_LARGE, static_cast<curl_off_t>(data.size()));
+            setopt(CURLOPT_READDATA, &ctx);
+            perform();
 
             return r;
         }
@@ -144,14 +147,13 @@ namespace ppconsul { namespace impl {
             std::pair<http::Status, std::string> r;
             r.second.reserve(Buffer_Size);
 
-            // TODO: check return codes
-            curl_easy_setopt(m_handle, CURLOPT_HEADERFUNCTION, &HttpClient::headerStatusCallback);
-            curl_easy_setopt(m_handle, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(m_handle, CURLOPT_WRITEDATA, &r.second);
-            curl_easy_setopt(m_handle, CURLOPT_HEADERDATA, &r.first);
-            curl_easy_setopt(m_handle, CURLOPT_HTTPGET, 1l);
-            curl_easy_setopt(m_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
-            curl_easy_perform(m_handle);
+            setopt(CURLOPT_HEADERFUNCTION, &HttpClient::headerStatusCallback);
+            setopt(CURLOPT_URL, url.c_str());
+            setopt(CURLOPT_WRITEDATA, &r.second);
+            setopt(CURLOPT_HEADERDATA, &r.first);
+            setopt(CURLOPT_HTTPGET, 1l);
+            setopt(CURLOPT_CUSTOMREQUEST, "DELETE");
+            perform();
 
             return r;
         }
@@ -210,7 +212,23 @@ namespace ppconsul { namespace impl {
             return size;
         }
 
+        template<class T>
+        void setopt(CURLoption opt, T&& t)
+        {
+            const auto err = curl_easy_setopt(m_handle, opt, t);
+            if (err)
+                throwCurlError(err, m_errBuffer);
+        }
+
+        void perform()
+        {
+            const auto err = curl_easy_perform(m_handle);
+            if (err)
+                throwCurlError(err, m_errBuffer);
+        }
+
         CURL *m_handle;
+        char m_errBuffer[CURL_ERROR_SIZE];
     };
 
 }}
