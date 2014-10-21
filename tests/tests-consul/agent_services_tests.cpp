@@ -65,7 +65,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.id == "service1");
         CHECK(s.name == "service1");
         CHECK(s.port == 0);
-        CHECK(s.tags == ppconsul::agent::Tags());
+        CHECK(s.tags == ppconsul::Tags());
     }
 
     SECTION("no check simple")
@@ -79,7 +79,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.id == Unique_Id);
         CHECK(s.name == Unique_Id);
         CHECK(s.port == 1357);
-        CHECK(s.tags == ppconsul::agent::Tags({ "tag1" }));
+        CHECK(s.tags == ppconsul::Tags({ "tag1" }));
     }
 
 
@@ -94,7 +94,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.id == Unique_Id);
         CHECK(s.name == "service1");
         CHECK(s.port == 9876);
-        CHECK(s.tags == ppconsul::agent::Tags({ "udp", "printer" }));
+        CHECK(s.tags == ppconsul::Tags({ "udp", "printer" }));
     }
 
     SECTION("ttl simple")
@@ -108,7 +108,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.id == "service1");
         CHECK(s.name == "service1");
         CHECK(s.port == 0);
-        CHECK(s.tags == ppconsul::agent::Tags());
+        CHECK(s.tags == ppconsul::Tags());
 
         const auto checks = agent.checks();
         REQUIRE(checks.count(serviceCheckId("service1")));
@@ -135,7 +135,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.id == Unique_Id);
         CHECK(s.name == "service1");
         CHECK(s.port == 9876);
-        CHECK(s.tags == ppconsul::agent::Tags({ "udp", "printer" }));
+        CHECK(s.tags == ppconsul::Tags({ "udp", "printer" }));
 
         const auto checks = agent.checks();
         REQUIRE(checks.count(serviceCheckId(Unique_Id)));
@@ -162,7 +162,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.id == "service1");
         CHECK(s.name == "service1");
         CHECK(s.port == 0);
-        CHECK(s.tags == ppconsul::agent::Tags());
+        CHECK(s.tags == ppconsul::Tags());
 
         sleep(0.5); // To get updated state and output
 
@@ -191,7 +191,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.id == Unique_Id);
         CHECK(s.name == "service1");
         CHECK(s.port == 9876);
-        CHECK(s.tags == ppconsul::agent::Tags({ "udp", "printer" }));
+        CHECK(s.tags == ppconsul::Tags({ "udp", "printer" }));
 
         sleep(0.5); // To get updated state and output
 
@@ -248,7 +248,7 @@ TEST_CASE("agent.service_registration_special_chars", "[consul][agent][service][
         CHECK(s.id == spec_name);
         CHECK(s.name == spec_name);
         CHECK(s.port == 0);
-        CHECK(s.tags == ppconsul::agent::Tags());
+        CHECK(s.tags == ppconsul::Tags());
 
         const auto checks = agent.checks();
         REQUIRE(checks.count(serviceCheckId(spec_name)));
@@ -275,7 +275,7 @@ TEST_CASE("agent.service_registration_special_chars", "[consul][agent][service][
         CHECK(s.id == spec_name);
         CHECK(s.name == spec_name);
         CHECK(s.port == 0);
-        CHECK(s.tags == ppconsul::agent::Tags());
+        CHECK(s.tags == ppconsul::Tags());
 
         sleep(0.5); // To get updated state and output
 

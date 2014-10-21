@@ -8,13 +8,12 @@
 
 #include "ppconsul/consul.h"
 #include "ppconsul/helpers.h"
-#include <vector>
-#include <map>
-#include <chrono>
-#include <stdint.h>
+#include "ppconsul/types.h"
 
 
 namespace ppconsul { namespace agent {
+
+    using ppconsul::Service;
 
     enum class CheckStatus
     {
@@ -24,20 +23,16 @@ namespace ppconsul { namespace agent {
         Failed
     };
 
-    typedef std::vector<std::string> Tags;
-    typedef std::map<std::string, std::string> Properties;
-
     enum class Pool
     {
         Lan,
         Wan
     };
 
-
     struct Check
     {
-        // Otherwise MSVC crashes with internal error
-        // on code like `registerCheck({ "check_name" }, "script_name", std::chrono::seconds(interval))`
+        // Without this ctor provided VS 2013 crashes with internal error on code like
+        // `registerCheck({ "check_name" }, "script_name", std::chrono::seconds(interval))`
         Check(std::string name = "", std::string notes = "", std::string id = "")
         : name(std::move(name)), notes(std::move(notes)), id(std::move(id))
         {}
@@ -56,27 +51,10 @@ namespace ppconsul { namespace agent {
         std::string serviceName;
     };
 
-    struct Service
-    {
-        // Otherwise MSVC crashes with internal error
-        // on code like `registerService({ "check_name" }, "script_name", std::chrono::seconds(interval))`
-        Service(std::string name = "", uint16_t port = 0, Tags tags = Tags(), std::string id = "")
-        : name(std::move(name)), port(port), tags(std::move(tags)), id(std::move(id))
-        {}
-
-        std::string name;
-        uint16_t port = 0;
-        Tags tags;
-        std::string id;
-    };
-
-    struct ServiceInfo: Service
-    {};
-
     struct Member
     {
         std::string name;
-        std::string addr;
+        std::string address;
         uint16_t port = 0;
         Properties tags;
         int status = 0;
@@ -112,7 +90,7 @@ namespace ppconsul { namespace agent {
         std::vector<Member> parseMembers(const std::string& json);
         std::pair<Config, Member> parseSelf(const std::string& json);
         std::map<std::string, CheckInfo> parseChecks(const std::string& json);
-        std::map<std::string, ServiceInfo> parseServices(const std::string& json);
+        std::map<std::string, Service> parseServices(const std::string& json);
 
         std::string checkRegistrationJson(const Check& check, const std::chrono::seconds& ttl);
         std::string checkRegistrationJson(const Check& check, const std::string& script, const std::chrono::seconds& interval);
@@ -175,12 +153,13 @@ namespace ppconsul { namespace agent {
             m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), params::note = helpers::encodeUrl(note));
         }
 
+        // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`
         void updateServiceCheck(const std::string& serviceId, CheckStatus newStatus, const std::string& note = "")
         {
             updateCheck(serviceCheckId(serviceId), newStatus, note);
         }
 
-        std::map<std::string, ServiceInfo> services() const
+        std::map<std::string, Service> services() const
         {
             return impl::parseServices(m_consul.get("/v1/agent/services"));
         }

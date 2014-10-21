@@ -6,7 +6,7 @@
 
 
 #include "ppconsul/agent.h"
-#include "s11n.h"
+#include "s11n_types.h"
 
 
 namespace json11 {
@@ -21,6 +21,7 @@ namespace json11 {
 
 
 namespace ppconsul { namespace agent {
+    using s11n::load;
 
     void load(const s11n::Json& src, CheckStatus& dst)
     {
@@ -38,16 +39,13 @@ namespace ppconsul { namespace agent {
 
     void load(const s11n::Json& src, Config& dst)
     {
-        using s11n::load;
         // TODO
     }
 
     void load(const s11n::Json& src, Member& dst)
     {
-        using s11n::load;
-        
         load(src, dst.name, "Name");
-        load(src, dst.addr, "Addr");
+        load(src, dst.address, "Addr");
         load(src, dst.port, "Port");
         load(src, dst.tags, "Tags");
         load(src, dst.status, "Status");
@@ -61,8 +59,6 @@ namespace ppconsul { namespace agent {
 
     void load(const s11n::Json& src, CheckInfo& dst)
     {
-        using s11n::load;
-
         load(src, dst.id, "CheckID");
         load(src, dst.node, "Node");
         load(src, dst.name, "Name");
@@ -71,16 +67,6 @@ namespace ppconsul { namespace agent {
         load(src, dst.output, "Output");
         load(src, dst.serviceId, "ServiceID");
         load(src, dst.serviceName, "ServiceName");
-    }
-
-    void load(const s11n::Json& src, ServiceInfo& dst)
-    {
-        using s11n::load;
-        
-        load(src, dst.name, "Service");
-        load(src, dst.port, "Port");
-        load(src, dst.tags, "Tags");
-        load(src, dst.id, "ID");
     }
 
 namespace impl {
@@ -114,9 +100,9 @@ namespace impl {
         return s11n::parseJson<std::map<std::string, CheckInfo>>(json);
     }
 
-    std::map<std::string, ServiceInfo> parseServices(const std::string& json)
+    std::map<std::string, Service> parseServices(const std::string& json)
     {
-        return s11n::parseJson<std::map<std::string, ServiceInfo>>(json);
+        return s11n::parseJson<std::map<std::string, Service>>(json);
     }
 
     std::string checkRegistrationJson(const Check& check, const std::chrono::seconds& ttl)

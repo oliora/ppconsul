@@ -29,7 +29,7 @@ TEST_CASE("agent.self", "[consul][agent][config][self]")
 
     auto selfMember = agent.self().second;
     CHECK(!selfMember.name.empty());
-    CHECK(!selfMember.addr.empty());
+    CHECK(!selfMember.address.empty());
     CHECK(selfMember.port);
     CHECK(!selfMember.tags.empty());
     CHECK(selfMember.status);
@@ -57,7 +57,7 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
         const auto selfMember = agent.self().second;
 
         auto it1 = std::find_if(members.begin(), members.end(), [&](const ppconsul::agent::Member& op){
-            return op.addr == selfMember.addr;
+            return op.address == selfMember.address;
         });
 
         REQUIRE(it1 != members.end());
@@ -65,7 +65,7 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
         const auto& m = *it1;
 
         CHECK(m.name.find(selfMember.name + ".") == 0);
-        CHECK(selfMember.addr == m.addr);
+        CHECK(selfMember.address == m.address);
         CHECK(m.port);
         CHECK(selfMember.tags == m.tags);
         CHECK(selfMember.status == m.status);
@@ -84,7 +84,7 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
         const auto selfMember = agent.self().second;
 
         auto it1 = std::find_if(members.begin(), members.end(), [&](const ppconsul::agent::Member& op){
-            return op.addr == selfMember.addr;
+            return op.address == selfMember.address;
         });
 
         REQUIRE(it1 != members.end());
@@ -93,7 +93,7 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
 
         CHECK((m.name == selfMember.name
             || m.name.find(selfMember.name + ".") == 0));
-        CHECK(selfMember.addr == m.addr);
+        CHECK(selfMember.address == m.address);
         CHECK(m.port);
         CHECK(selfMember.tags == m.tags);
         CHECK(selfMember.status == m.status);

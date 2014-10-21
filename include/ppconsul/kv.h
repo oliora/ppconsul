@@ -8,6 +8,7 @@
 
 #include "ppconsul/consul.h"
 #include "ppconsul/helpers.h"
+#include "ppconsul/types.h"
 #include <vector>
 #include <stdint.h>
 

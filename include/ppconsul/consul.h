@@ -8,11 +8,13 @@
 
 #include "ppconsul/config.h"
 #include "ppconsul/error.h"
+#include "ppconsul/types.h"
 #include "ppconsul/parameters.h"
 #include "ppconsul/http_status.h"
 #include "ppconsul/response.h"
 #include <chrono>
 #include <string>
+#include <vector>
 #include <tuple>
 #include <chrono>
 #include <memory>
@@ -26,15 +28,6 @@ namespace ppconsul {
         // Forward declaraion to use with PIMPL
         class HttpClient;
     }
-
-    enum class Consistency
-    {
-        Default,
-        Consistent,
-        Stale
-    };
-
-    typedef std::pair<std::chrono::seconds, uint64_t> BlockForValue;
 
     namespace params {
         PPCONSUL_PARAM(dc, std::string)
@@ -57,10 +50,6 @@ namespace ppconsul {
             os << "wait=" << v.first.count() << "s&index=" << v.second;
         }
     }
-
-
-    struct WithHeaders {};
-    const WithHeaders withHeaders{};
 
     const char Default_Server_Address[] = "localhost:8500";
 

@@ -15,6 +15,7 @@ set(HEADERS
     parameters.h
     ppconsul.h
     response.h
+    types.h
 )
 
 set(SOURCES
@@ -22,6 +23,7 @@ set(SOURCES
     http_client_impl_netlib.inl
     http_client_impl_curl.inl
     s11n.h
+    s11n_types.h
     agent.cpp
     consul.cpp
     helpers.cpp
