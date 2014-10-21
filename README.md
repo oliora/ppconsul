@@ -26,7 +26,7 @@ The library uses
 * [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
 * [Catch](https://github.com/philsquared/Catch) unit test framework.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
-* [Boost](http://www.boost.org/) library. PPConsul needs only the headers if libCURL is used. There is one exception: **using of GCC 4.8 requires to link with Boost.Regex library** because [regex is supported only in GCC 4.9](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+* [Boost](http://www.boost.org/) library. PPConsul needs only the headers if libCURL is used. There is one exception: using of GCC 4.8 requires to link with Boost.Regex library because [regex is supported only in GCC 4.9](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
 
 ## Documentation
 TBD
