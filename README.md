@@ -78,7 +78,7 @@ TBD
 Use [issue tracker](https://github.com/oliora/ppconsul/issues).
 
 ## Contribute
-Fork this repo, commit changes and create a pull request. Welcome on board!
+First of all, welcome on board! Please fork this repo, commit changes and create a pull request.
 
 ## License
 The library released under [Boost Software License](http://www.boost.org/LICENSE_1_0.txt).
