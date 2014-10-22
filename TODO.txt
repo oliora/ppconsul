@@ -1,7 +1,7 @@
 # TODO
 
 Releases:
-- Current version (in developing): 0.1
+- Curently developing version: 0.1
 - Next version: 0.2
 - ...
 
@@ -14,9 +14,10 @@ Releases:
 + Consistency modes
 + Blocking queries (simple)
 + Don't expose json11 in headers
-
-- Check JSON parsing errors
+- Don't use regex (it's slow and creates extra dependency)
+- More checks of received JSON data shape
 - Simplify JSON interface (?)
+
 - Support 64bit integers in JSON (postponed to 0.2)
 
 
@@ -36,8 +37,8 @@ Releases:
 + ensure value can contain any char from 0 to 255
 + Consistency modes
 + Blocking queries (simple)
-
 - Acquire/release lock (depends on session)
+
 - typed value access (postponed to 0.2)
 - Get flag as uin64_t. Now it extracted from JSON as double due to json11 limitations (postponed to 0.2)
 
@@ -47,6 +48,10 @@ Releases:
 - Config part of /v1/agent/self (postponed to 0.2)
 
 ### catalog
++ v1 interface except register/deregister
+- tests
+
+- register/deregister (postponed to 0.2)
 
 ### health
 
