@@ -63,7 +63,7 @@ namespace ppconsul { namespace catalog {
         }
 
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<Node> nodes(const Params&... params) const
         {
@@ -72,7 +72,7 @@ namespace ppconsul { namespace catalog {
         }
 
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         NodeServices node(const std::string& name, const Params&... params) const
         {
@@ -83,7 +83,7 @@ namespace ppconsul { namespace catalog {
         }
 
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::map<std::string, Tags> services(const Params&... params) const
         {
@@ -92,7 +92,7 @@ namespace ppconsul { namespace catalog {
         }
 
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<ServiceAndNode> service(const std::string& name, const Params&... params) const
         {
@@ -103,7 +103,7 @@ namespace ppconsul { namespace catalog {
         }
 
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<ServiceAndNode> service(const std::string& name, const std::string& tag, const Params&... params) const
         {

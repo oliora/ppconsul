@@ -79,27 +79,27 @@ namespace ppconsul { namespace kv {
         }
 
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         size_t count(const std::string& key, const Params&... params) const { return item(key, params...).valid() ? 1 : 0; }
 
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         size_t countAll(const std::string& keyPrefix, const Params&... params) const { return keys(keyPrefix, params...).size(); }
 
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         size_t countAll(const Params&... params) const { return countAll(std::string(), params...); }
 
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         size_t size(const Params&... params) const { return countAll(std::string(), params...); }
 
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         bool empty(const Params&... params) const
         {
@@ -126,21 +126,21 @@ namespace ppconsul { namespace kv {
 
         // Returns value's value or defaultValue if key does not exist.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string get(const std::string& key, const std::string& defaultValue, const Params&... params) const;
 
         // Returns invalid KeyValue (i.e. !kv.valid()) if key does not exist.
         // Result contains both headers and data.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<KeyValue> item(WithHeaders, const std::string& key, const Params&... params) const;
 
         // Returns invalid KeyValue (i.e. !kv.valid()) if key does not exist.
         // Result contains data only.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         KeyValue item(const std::string& key, const Params&... params) const
         {
@@ -150,14 +150,14 @@ namespace ppconsul { namespace kv {
         // Recursively get values which key starting with specified prefix. Returns empty vector if no keys found.
         // Result contains both headers and data.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<KeyValue>> items(WithHeaders, const std::string& keyPrefix, const Params&... params) const;
 
         // Recursively get values which key starting with specified prefix. Returns empty vector if no keys found.
         // Result contains data only.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<KeyValue> items(const std::string& keyPrefix, const Params&... params) const
         {
@@ -167,7 +167,7 @@ namespace ppconsul { namespace kv {
         // Get all values. Returns empty vector if no keys found. Same as items(withHeader, "")
         // Result contains both headers and data.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<KeyValue>> items(WithHeaders, const Params&... params) const
         {
@@ -177,7 +177,7 @@ namespace ppconsul { namespace kv {
         // Get all values. Returns empty vector if no keys found. Same as items("")
         // Result contains data only.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<KeyValue> items(const Params&... params) const
         {
@@ -187,7 +187,7 @@ namespace ppconsul { namespace kv {
         // Get keys up to a separator provided. Returns empty vector if no keys found.
         // Result contains both headers and data.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
@@ -198,7 +198,7 @@ namespace ppconsul { namespace kv {
         // Get keys up to a separator provided. Returns empty vector if no keys found.
         // Result contains data only.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<std::string> keys(const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
@@ -208,7 +208,7 @@ namespace ppconsul { namespace kv {
         // Get all keys strarting with specified prefix. Returns empty vector if no keys found.
         // Result contains both headers and data.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const Params&... params) const
         {
@@ -219,7 +219,7 @@ namespace ppconsul { namespace kv {
         // Get all keys. Returns empty vector if no keys found.
         // Result contains both headers and data.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<std::string>> keys(WithHeaders, const Params&... params) const
         {
@@ -229,7 +229,7 @@ namespace ppconsul { namespace kv {
         // Get all keys strarting with specified prefix. Returns empty vector if no keys found.
         // Result contains data only.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<std::string> keys(const std::string& prefix, const Params&... params) const
         {
@@ -239,7 +239,7 @@ namespace ppconsul { namespace kv {
         // Get all keys. Returns empty vector if no keys found.
         // Result contains data only.
         // Allowed parameters:
-        // - group::get
+        // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<std::string> keys(const Params&... params) const
         {
@@ -248,7 +248,7 @@ namespace ppconsul { namespace kv {
 
         // Throws UpdateError if value can not be set.
         // Allowed parameters:
-        // - group::put
+        // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         void put(const std::string& key, const std::string& value, const Params&... params)
         {
@@ -261,7 +261,7 @@ namespace ppconsul { namespace kv {
 
         // Compare and set. Returns true if value was successfully set and false otherwise.
         // Allowed parameters:
-        // - group::put
+        // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         bool cas(const std::string& key, uint64_t cas, const std::string& value, const Params&... params)
         {
