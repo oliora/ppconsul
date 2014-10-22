@@ -105,6 +105,11 @@ namespace ppconsul { namespace impl {
                 curl_easy_cleanup(m_handle);
         }
 
+        HttpClient(const HttpClient&) = delete;
+        HttpClient(HttpClient&&) = delete;
+        HttpClient& operator= (const HttpClient&) = delete;
+        HttpClient& operator= (HttpClient&&) = delete;
+
         GetResponse get(const std::string& url)
         {
             GetResponse r;
@@ -215,7 +220,7 @@ namespace ppconsul { namespace impl {
         template<class T>
         void setopt(CURLoption opt, T&& t)
         {
-            const auto err = curl_easy_setopt(m_handle, opt, t);
+            const auto err = curl_easy_setopt(m_handle, opt, std::forward<T>(t));
             if (err)
                 throwCurlError(err, m_errBuffer);
         }
