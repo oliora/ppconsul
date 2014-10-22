@@ -84,7 +84,12 @@ namespace kwargs {
 
             KwArg<This, Value> operator= (Value&& v) const { return{ std::move(v) }; }
             const KwArg<This, const Value&> operator= (const Value& v) const { return{ v }; }
+
+            static const K instance;
         };
+
+        template<class K, class V>
+        const K KeywordBase<K, V>::instance = {};
 
         struct get_keyword
         {
@@ -253,6 +258,9 @@ namespace kwargs {
                 >::type
             >::type type;
         };
+
+        template<class T>
+        using remove_reference_t = typename std::remove_reference<T>::type;
     }
 
     //template<class T, class Enabler = void>
@@ -352,7 +360,7 @@ namespace kwargs {
 }
 
 #define KWARGS__UNFOLD(...) __VA_ARGS__
-#define KWARGS__CLS_NAME(keyword) BOOST_PP_CAT(keyword, _keyword_)
+#define KWARGS__CLS_NAME(keyword) BOOST_PP_CAT(keyword, _keyword__)
 
 // Define keyword parameter of specified type.
 // Ex: KWARGS_KEYWORD(url, std::string)
@@ -360,10 +368,11 @@ namespace kwargs {
 struct KWARGS__CLS_NAME(keyword)                                        \
     : kwargs::detail::KeywordBase<KWARGS__CLS_NAME(keyword), type> {    \
     using Base::operator=;                                              \
-} const keyword = KWARGS__CLS_NAME(keyword){};
+};                                                                     \
+static const KWARGS__CLS_NAME(keyword)& keyword = KWARGS__CLS_NAME(keyword)::instance;
 
-// Get unique type of keyword. `decltype(keyword)`
-#define KWARGS_KW_TAG(keyword) decltype(keyword)
+// Get unique type of keyword
+#define KWARGS_KW_TAG(keyword) kwargs::detail::remove_reference_t<decltype(keyword)>
 
 // Define keywords group. Keywords must be specified in brackets.
 // Ex: KWARGS_KEYWORDS_GROUP(get_request, (url, seconds_to_wait))
