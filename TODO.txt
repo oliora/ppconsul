@@ -63,7 +63,7 @@ Releases:
 
 + v1 interface except register/deregister
 + tests
-- tests for block_for
++ tests for block_for
 - tests for dc
 - tests for default DC
 
