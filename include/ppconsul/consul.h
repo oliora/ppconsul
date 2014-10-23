@@ -87,7 +87,14 @@ namespace ppconsul {
 
         // Throws BadStatus if !response_status.success()
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string get(const std::string& path, const Params&... params);
+        Response<std::string> get(WithHeaders, const std::string& path, const Params&... params);
+
+        // Throws BadStatus if !response_status.success()
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::string get(const std::string& path, const Params&... params)
+        {
+            return std::move(get(withHeaders, path, params...).data());
+        }
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::string> get(http::Status& status, const std::string& path, const Params&... params)
@@ -152,12 +159,12 @@ namespace ppconsul {
     }
 
     template<class... Params, class>
-    std::string Consul::get(const std::string& path, const Params&... params)
+    Response<std::string> Consul::get(WithHeaders, const std::string& path, const Params&... params)
     {
         http::Status s;
-        auto r = std::move(get(s, path, params...).data());
+        auto r = get(s, path, params...);
         if (!s.success())
-            throwStatusError(std::move(s), std::move(r));
+            throwStatusError(std::move(s), std::move(r.data()));
         return r;
     }
 
