@@ -31,6 +31,7 @@ Releases:
 
 
 ### Consul
+
 - tests for default DC and default token
 
 
@@ -44,26 +45,29 @@ Releases:
 + Consistency modes
 + Blocking queries (simple)
 - Acquire/release lock (depends on session)
+- tests for dc
+- tests for default DC and default token
 
 - typed value access (postponed to 0.2)
 - Get flag as uin64_t. Now it extracted from JSON as double due to json11 limitations (postponed to 0.2)
-- tests for default DC and default token
 
 
 ### agent
+
 + v1 interface except Config part of /v1/agent/self
 
 - Config part of /v1/agent/self (postponed to 0.2)
 
 
 ### catalog
+
 + v1 interface except register/deregister
-- tests
++ tests
 - tests for block_for
 - tests for dc
+- tests for default DC
 
 - register/deregister (postponed to 0.2)
-- tests for default DC
 
 
 ### health
@@ -75,3 +79,4 @@ Releases:
 ### event
 
 ### status
+
