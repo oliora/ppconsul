@@ -49,6 +49,7 @@ namespace ppconsul { namespace kv {
     namespace params {
         using ppconsul::params::consistency;
         using ppconsul::params::token;
+        using ppconsul::params::dc;
         using ppconsul::params::block_for;
 
         PPCONSUL_PARAM(cas, uint64_t)
@@ -58,8 +59,8 @@ namespace ppconsul { namespace kv {
         PPCONSUL_PARAM(separator, std::string)
 
         namespace groups {
-            PPCONSUL_PARAMS_GROUP(get, (consistency, token, block_for))
-            PPCONSUL_PARAMS_GROUP(put, (flags, token))
+            PPCONSUL_PARAMS_GROUP(get, (consistency, token, dc, block_for))
+            PPCONSUL_PARAMS_GROUP(put, (flags, token, dc))
         }
     }
 
@@ -67,15 +68,17 @@ namespace ppconsul { namespace kv {
     {
     public:
         // Allowed parameters:
-        // - consistency - default consistency for all get requests
+        // - consistency - default consistency for all "get" requests
         // - token - default token for all requests
+        // - dc - default dc for all requests
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Storage(Consul& consul, const Params&... params)
         : m_consul(consul)
         , m_defaultToken(kwargs::get(params::token, std::string(), params...))
         , m_defaultConsistency(kwargs::get(params::consistency, Consistency::Default, params...))
+        , m_defaultDc(kwargs::get(params::dc, "", params...))
         {
-            KWARGS_CHECK_IN_LIST(Params, (params::consistency, params::token))
+            KWARGS_CHECK_IN_LIST(Params, (params::consistency, params::token, params::dc))
         }
 
         // Allowed parameters:
@@ -109,13 +112,13 @@ namespace ppconsul { namespace kv {
         void erase(const std::string& key)
         {
             m_consul.del(keyPath(key),
-                         params::token = m_defaultToken);
+                         params::token = m_defaultToken, params::dc = m_defaultDc);
         }
 
         void eraseAll(const std::string& keyPrefix)
         {
             m_consul.del(keyPath(keyPrefix),
-                         params::token = m_defaultToken,
+                         params::token = m_defaultToken, params::dc = m_defaultDc,
                          params::recurse = true);
         }
 
@@ -254,7 +257,7 @@ namespace ppconsul { namespace kv {
         {
             KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::put)
             if ("true" != m_consul.put(keyPath(key), value,
-                                       params::token = m_defaultToken,
+                                       params::token = m_defaultToken, params::dc = m_defaultDc,
                                        params...))
                 throw UpdateError(key);
         }
@@ -267,7 +270,7 @@ namespace ppconsul { namespace kv {
         {
             KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::put)
             return "true" == m_consul.put(keyPath(key), value,
-                                          params::token = m_defaultToken,
+                                          params::token = m_defaultToken, params::dc = m_defaultDc,
                                           params::cas = cas, params...);
         }
 
@@ -286,6 +289,7 @@ namespace ppconsul { namespace kv {
 
         std::string m_defaultToken;
         Consistency m_defaultConsistency;
+        std::string m_defaultDc;
     };
 
 
@@ -310,7 +314,7 @@ namespace ppconsul { namespace kv {
         KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::get)
         http::Status s;
         auto r = m_consul.get(s, keyPath(key),
-                              params::token = m_defaultToken, params::consistency = m_defaultConsistency,
+                              params::token = m_defaultToken, params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
                               params...);
 
         if (s.success())
@@ -336,7 +340,7 @@ namespace ppconsul { namespace kv {
         KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::get)
         http::Status s;
         auto r = m_consul.get(s, keyPath(keyPrefix),
-                              params::token = m_defaultToken, params::consistency = m_defaultConsistency,
+                              params::token = m_defaultToken, params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
                               kv::params::recurse = true, params...);
 
         if (s.success())
@@ -351,7 +355,7 @@ namespace ppconsul { namespace kv {
     {
         http::Status s;
         auto r = m_consul.get(s, keyPath(keyPrefix),
-                              params::token = m_defaultToken, params::consistency = m_defaultConsistency,
+                              params::token = m_defaultToken, params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
                               kv::params::keys = true, params...);
         if (s.success())
             return makeResponse(r.headers(), impl::parseKeys(r.data()));

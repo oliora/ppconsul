@@ -30,11 +30,12 @@ namespace ppconsul { namespace catalog {
     namespace params {
         using ppconsul::params::consistency;
         using ppconsul::params::block_for;
+        using ppconsul::params::dc;
 
         PPCONSUL_PARAM(tag, std::string)
 
         namespace groups {
-            PPCONSUL_PARAMS_GROUP(get, (consistency, block_for))
+            PPCONSUL_PARAMS_GROUP(get, (consistency, dc, block_for))
         }
     }
 
@@ -50,13 +51,15 @@ namespace ppconsul { namespace catalog {
     {
     public:
         // Allowed parameters:
-        // - consistency - default consistency for requests that support it
+        // - consistency - default consistency for requests that supports it
+        // - dc - default dc for requests that supports it
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Catalog(Consul& consul, const Params&... params)
         : m_consul(consul)
         , m_defaultConsistency(kwargs::get(params::consistency, Consistency::Default, params...))
+        , m_defaultDc(kwargs::get(params::dc, "", params...))
         {
-            KWARGS_CHECK_IN_LIST(Params, (params::consistency))
+            KWARGS_CHECK_IN_LIST(Params, (params::consistency, params::dc))
         }
 
         std::vector<std::string> datacenters() const
@@ -70,7 +73,9 @@ namespace ppconsul { namespace catalog {
         std::vector<Node> nodes(const Params&... params) const
         {
             KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
-            return impl::parseNodes(m_consul.get("/v1/catalog/nodes", params::consistency = m_defaultConsistency, params...));
+            return impl::parseNodes(m_consul.get("/v1/catalog/nodes",
+                params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
+                params...));
         }
 
         // If node does not exist, function returns invalid node with empty serivces map
@@ -81,7 +86,7 @@ namespace ppconsul { namespace catalog {
         {
             KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
             return impl::parseNode(m_consul.get("/v1/catalog/node/" + helpers::encodeUrl(name),
-                params::consistency = m_defaultConsistency,
+                params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
                 params...));
         }
 
@@ -91,7 +96,9 @@ namespace ppconsul { namespace catalog {
         std::unordered_map<std::string, Tags> services(const Params&... params) const
         {
             KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
-            return impl::parseServices(m_consul.get("/v1/catalog/services", params::consistency = m_defaultConsistency, params...));
+            return impl::parseServices(m_consul.get("/v1/catalog/services",
+                params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
+                params...));
         }
 
         // Allowed parameters:
@@ -101,7 +108,7 @@ namespace ppconsul { namespace catalog {
         {
             KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
             return impl::parseService(m_consul.get("/v1/catalog/service/" + helpers::encodeUrl(name),
-                params::consistency = m_defaultConsistency,
+                params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
                 params...));
         }
 
@@ -112,7 +119,7 @@ namespace ppconsul { namespace catalog {
         {
             KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
             return impl::parseService(m_consul.get("/v1/catalog/service/" + helpers::encodeUrl(name),
-                params::consistency = m_defaultConsistency,
+                params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
                 params::tag = helpers::encodeUrl(tag),
                 params...));
         }
@@ -121,6 +128,7 @@ namespace ppconsul { namespace catalog {
         Consul& m_consul;
 
         Consistency m_defaultConsistency;
+        std::string m_defaultDc;
     };
 
 
