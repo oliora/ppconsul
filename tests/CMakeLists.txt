@@ -24,6 +24,6 @@ else ()
     include_directories(${CURL_INCLUDE_DIR})
 endif ()
 
-add_subdirectory(consul-get-app)
-add_subdirectory(tests-consul)
+add_subdirectory(consul-get)
+add_subdirectory(consul-tests)
 add_subdirectory(unittests)

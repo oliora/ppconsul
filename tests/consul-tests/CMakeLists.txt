@@ -4,6 +4,13 @@
 #  Boost Software License, Version 1.0. (See accompanying file
 #  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-project(consul-get)
-add_executable(${PROJECT_NAME} consul_get_app.cpp)
+project(consul-tests)
+add_executable(${PROJECT_NAME}
+    main.cpp
+    agent_checks_tests.cpp
+    agent_services_tests.cpp
+    agent_other_tests.cpp
+    kv_tests.cpp
+)
 link_test_libs(${PROJECT_NAME})
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})

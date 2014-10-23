@@ -14,6 +14,10 @@ endif ()
 
 option(USE_CPPNETLIB "Use cpp-netlib as HTTP backend (CURL is used by default)" OFF)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
+
 if (${USE_CPPNETLIB})
     add_definitions(-DPPCONSUL_USE_CPPNETLIB)
 endif ()

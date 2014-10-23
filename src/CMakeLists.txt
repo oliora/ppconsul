@@ -51,4 +51,5 @@ add_library(${PROJECT_NAME}
     ${LIBB64_SOURCES}
 )
 
+source_group(ppconsul FILES ${SOURCES})
 source_group(libb64 FILES ${LIBB64_SOURCES})
