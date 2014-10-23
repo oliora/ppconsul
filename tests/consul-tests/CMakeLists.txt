@@ -10,6 +10,7 @@ add_executable(${PROJECT_NAME}
     agent_checks_tests.cpp
     agent_services_tests.cpp
     agent_other_tests.cpp
+    catalog_tests.cpp
     kv_tests.cpp
 )
 link_test_libs(${PROJECT_NAME})

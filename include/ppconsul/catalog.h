@@ -19,6 +19,8 @@ namespace ppconsul { namespace catalog {
     {
         std::string name;
         std::string address;
+
+        bool valid() const { return !name.empty() && !address.empty(); }
     };
 
     typedef std::pair<Node, std::unordered_map<std::string, Service>> NodeServices;
@@ -71,6 +73,7 @@ namespace ppconsul { namespace catalog {
             return impl::parseNodes(m_consul.get("/v1/catalog/nodes", params::consistency = m_defaultConsistency, params...));
         }
 
+        // If node does not exist, function returns invalid node with empty serivces map
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
@@ -119,4 +122,16 @@ namespace ppconsul { namespace catalog {
 
         Consistency m_defaultConsistency;
     };
+
+
+    inline bool operator!= (const Node& l, const Node& r)
+    {
+        return l.name != r.name || l.address != r.address;
+    }
+
+    inline bool operator== (const Node& l, const Node& r)
+    {
+        return !operator!=(l, r);
+    }
+
 }}
