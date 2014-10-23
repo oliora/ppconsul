@@ -17,7 +17,7 @@ Most features supported. Note that:
 ### Catalog
 
 Most features supported. Note that:
-- Registration/derigistration is **not supported**. The agent endpoint (implemented) can be used instead, so I have no plans to implement this feature until I realize a real use case for it.
+- Registration/derigistration is **not supported**. The agent endpoint should be used instead. Note that I have no plans to implement this feature until I get a real use case for it.
 - Support of blocking queries is limited [[1]].
 
 ### Health
