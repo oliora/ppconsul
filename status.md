@@ -15,10 +15,14 @@ Most features supported. Note that:
 - Accessing to `"Config"` object received from `/v1/agent/self` endpoint is **not supported**.
 
 ### Catalog
-In progress
+
+Most features supported. Note that:
+- Registration/derigistration is **not supported**. The agent endpoint (implemented) can be used instead, so I have no plans to implement this feature until I realize a real use case for it.
+- Support of blocking queries is limited [[1]].
 
 ### Health
-TBD
+
+In progress.
 
 ### Session
 TBD
