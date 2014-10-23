@@ -42,8 +42,6 @@ TEST_CASE("agent.self", "[consul][agent][config][self]")
     CHECK(selfMember.delegateCur);
 }
 
-
-
 TEST_CASE("agent.members", "[consul][agent][config][members]")
 {
     using ppconsul::agent::Pool;
@@ -76,6 +74,21 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
         CHECK(selfMember.delegateMin == m.delegateMin);
         CHECK(selfMember.delegateMax == m.delegateMax);
         CHECK(selfMember.delegateCur == m.delegateCur);
+
+        for (const auto& m : members)
+        {
+            CHECK(m.name != "");
+            CHECK(m.address != "");
+            CHECK(m.port != 0);
+            CHECK(!m.tags.empty());
+            CHECK(m.status != 0);
+            CHECK(m.protocolMin != 0);
+            CHECK(m.protocolMax != 0);
+            CHECK(m.protocolCur != 0);
+            CHECK(m.delegateMin != 0);
+            CHECK(m.delegateMax != 0);
+            CHECK(m.delegateCur != 0);
+        }
     }
 
     SECTION("lan")
@@ -107,6 +120,21 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
 
         // Useful only if the wan farm present
         CHECK(agent.members().size() == agent.members(Pool::Lan).size());
+
+        for (const auto& m : members)
+        {
+            CHECK(m.name != "");
+            CHECK(m.address != "");
+            CHECK(m.port != 0);
+            CHECK(!m.tags.empty());
+            CHECK(m.status != 0);
+            CHECK(m.protocolMin != 0);
+            CHECK(m.protocolMax != 0);
+            CHECK(m.protocolCur != 0);
+            CHECK(m.delegateMin != 0);
+            CHECK(m.delegateMax != 0);
+            CHECK(m.delegateCur != 0);
+        }
     }
 }
 
