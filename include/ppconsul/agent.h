@@ -89,8 +89,8 @@ namespace ppconsul { namespace agent {
     namespace impl {
         std::vector<Member> parseMembers(const std::string& json);
         std::pair<Config, Member> parseSelf(const std::string& json);
-        std::map<std::string, CheckInfo> parseChecks(const std::string& json);
-        std::map<std::string, Service> parseServices(const std::string& json);
+        std::unordered_map<std::string, CheckInfo> parseChecks(const std::string& json);
+        std::unordered_map<std::string, Service> parseServices(const std::string& json);
 
         std::string checkRegistrationJson(const Check& check, const std::chrono::seconds& ttl);
         std::string checkRegistrationJson(const Check& check, const std::string& script, const std::chrono::seconds& interval);
@@ -128,7 +128,7 @@ namespace ppconsul { namespace agent {
             m_consul.get("/v1/agent/force-leave/" + helpers::encodeUrl(node));
         }
 
-        std::map<std::string, CheckInfo> checks() const
+        std::unordered_map<std::string, CheckInfo> checks() const
         {
             return impl::parseChecks(m_consul.get("/v1/agent/checks"));
         }
@@ -159,7 +159,7 @@ namespace ppconsul { namespace agent {
             updateCheck(serviceCheckId(serviceId), newStatus, note);
         }
 
-        std::map<std::string, Service> services() const
+        std::unordered_map<std::string, Service> services() const
         {
             return impl::parseServices(m_consul.get("/v1/agent/services"));
         }

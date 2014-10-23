@@ -21,7 +21,7 @@ namespace ppconsul { namespace catalog {
         std::string address;
     };
 
-    typedef std::pair<Node, std::map<std::string, Service>> NodeServices;
+    typedef std::pair<Node, std::unordered_map<std::string, Service>> NodeServices;
 
     typedef std::pair<Service, Node> ServiceAndNode;
 
@@ -40,7 +40,7 @@ namespace ppconsul { namespace catalog {
         std::vector<std::string> parseDatacenters(const std::string& json);
         std::vector<Node> parseNodes(const std::string& json);
         NodeServices parseNode(const std::string& json);
-        std::map<std::string, Tags> parseServices(const std::string& json);
+        std::unordered_map<std::string, Tags> parseServices(const std::string& json);
         std::vector<ServiceAndNode> parseService(const std::string& json);
     }
 
@@ -85,7 +85,7 @@ namespace ppconsul { namespace catalog {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::map<std::string, Tags> services(const Params&... params) const
+        std::unordered_map<std::string, Tags> services(const Params&... params) const
         {
             KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
             return impl::parseServices(m_consul.get("/v1/catalog/services", params::consistency = m_defaultConsistency, params...));

@@ -9,7 +9,8 @@
 #include "ppconsul/config.h"
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <chrono>
 #include <stdint.h>
@@ -26,9 +27,9 @@ namespace ppconsul {
 
     typedef std::pair<std::chrono::seconds, uint64_t> BlockForValue;
 
-    typedef std::vector<std::string> Tags;
+    typedef std::unordered_set<std::string> Tags;
 
-    typedef std::map<std::string, std::string> Properties;
+    typedef std::unordered_map<std::string, std::string> Properties;
 
     struct Service
     {

@@ -8,7 +8,8 @@
 #include "ppconsul/error.h"
 #include <json11/json11.hpp>
 #include <vector>
-#include <map>
+#include <unordered_set>
+#include <unordered_map>
 #include <string>
 
 
@@ -65,7 +66,23 @@ namespace ppconsul { namespace s11n {
     }
 
     template<class T>
-    void load(const Json& src, std::map<std::string, T>& dst)
+    void load(const Json& src, std::unordered_set<T>& dst)
+    {
+        const auto& arr = src.array_items();
+
+        dst.clear();
+        dst.reserve(arr.size());
+
+        for (const auto& i : arr)
+        {
+            T t;
+            load(i, t);
+            dst.insert(std::move(t));
+        }
+    }
+
+    template<class T>
+    void load(const Json& src, std::unordered_map<std::string, T>& dst)
     {
         const auto& obj = src.object_items();
 
