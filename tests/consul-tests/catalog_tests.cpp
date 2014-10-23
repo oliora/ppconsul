@@ -69,7 +69,7 @@ TEST_CASE("catalog.nodes", "[consul][catalog][config]")
 
     auto nodes = catalog.nodes();
 
-    REQUIRE(nodes.size() > 0);
+    REQUIRE(nodes.size());
 
     auto it1 = std::find_if(nodes.begin(), nodes.end(), [&](const ppconsul::catalog::Node& op){
         return op.address == selfMember.address;
@@ -84,6 +84,42 @@ TEST_CASE("catalog.nodes", "[consul][catalog][config]")
         CHECK(node.name != "");
         CHECK(node.address != "");
     }
+}
+
+TEST_CASE("catalog.nodes_blocking", "[consul][catalog][config][blocking]")
+{
+    using namespace ppconsul::params;
+
+    auto consul = create_test_consul();
+    Catalog catalog(consul);
+
+    const auto selfMember = Agent(consul).self().second;
+
+    auto index1 = catalog.nodes(ppconsul::withHeaders).headers().index();
+
+    REQUIRE(index1);
+
+    auto t1 = std::chrono::steady_clock::now();
+    auto resp1 = catalog.nodes(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
+    CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
+    CHECK(index1 == resp1.headers().index());
+    
+    CHECK(resp1.data().size());
+
+    auto it1 = std::find_if(resp1.data().begin(), resp1.data().end(), [&](const ppconsul::catalog::Node& op){
+        return op.address == selfMember.address;
+    });
+
+    REQUIRE(it1 != resp1.data().end());
+    CHECK((it1->name == selfMember.name
+        || it1->name.find(selfMember.name + ".") == 0));
+
+    // Wait for already changed
+    auto t2 = std::chrono::steady_clock::now();
+    auto resp2 = catalog.nodes(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), 0 });
+    CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
+    
+    CHECK(resp1.data().size());
 }
 
 TEST_CASE("catalog.services", "[consul][catalog][services]")
@@ -296,5 +332,82 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
         CHECK(services2[1 - service1Index].first.port == 3456);
         CHECK(services2[1 - service1Index].first.tags == ppconsul::Tags({ "print", "secret" }));
         CHECK(services2[1 - service1Index].first.id == "service3");
+    }
+}
+
+TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
+{
+    using namespace ppconsul::params;
+
+    auto consul = create_test_consul();
+    Catalog catalog(consul);
+    Agent agent(consul);
+
+    const auto selfMember = Agent(consul).self().second;
+    const auto selfNode = ppconsul::catalog::Node{ selfMember.name, selfMember.address };
+
+    agent.deregisterService("service1");
+    agent.deregisterService("service2");
+    agent.deregisterService("service3");
+    agent.registerService({ Uniq_Name_1, 1234, { "print", "udp" }, "service1" });
+    agent.registerService({ Uniq_Name_2, 2345, { "copier", "udp" }, "service2" });
+
+    sleep(1); // Give some time to propogate registered services to the catalog
+
+    SECTION("services")
+    {
+        auto index1 = catalog.services(ppconsul::withHeaders).headers().index();
+
+        REQUIRE(index1);
+
+        auto t1 = std::chrono::steady_clock::now();
+        auto resp1 = catalog.services(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
+        CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
+        CHECK(index1 == resp1.headers().index());
+
+        CHECK(resp1.data().at(Uniq_Name_1) == ppconsul::Tags({ "print", "udp" }));
+        CHECK(resp1.data().at(Uniq_Name_2) == ppconsul::Tags({ "copier", "udp" }));
+
+        agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
+
+        sleep(1); // Give some time to propogate to the catalog
+
+        auto t2 = std::chrono::steady_clock::now();
+        auto resp2 = catalog.services(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
+        CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
+        CHECK(index1 != resp2.headers().index());
+
+        CHECK(resp2.data().at(Uniq_Name_1) == ppconsul::Tags({ "print", "secret", "udp" }));
+        CHECK(resp2.data().at(Uniq_Name_2) == ppconsul::Tags({ "copier", "udp" }));
+    }
+
+    SECTION("service")
+    {
+        auto index1 = catalog.service(ppconsul::withHeaders, Uniq_Name_1).headers().index();
+
+        REQUIRE(index1);
+
+        auto t1 = std::chrono::steady_clock::now();
+        auto resp1 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, block_for = { std::chrono::seconds(5), index1 });
+        CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
+        CHECK(index1 == resp1.headers().index());
+
+
+        REQUIRE(resp1.data().size() == 1);
+        CHECK(resp1.data()[0].first.id == "service1");
+
+        agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
+
+        sleep(1); // Give some time to propogate to the catalog
+
+        auto t2 = std::chrono::steady_clock::now();
+        auto resp2 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, block_for = { std::chrono::seconds(5), index1 });
+        CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
+        CHECK(index1 != resp2.headers().index());
+
+        REQUIRE(resp2.data().size() == 2);
+        const auto service1Index = resp2.data()[0].first.id == "service1" ? 0 : 1;
+        CHECK(resp2.data()[service1Index].first.id == "service1");
+        CHECK(resp2.data()[1 - service1Index].first.id == "service3");
     }
 }
