@@ -23,20 +23,6 @@ namespace json11 {
 namespace ppconsul { namespace agent {
     using s11n::load;
 
-    void load(const s11n::Json& src, CheckStatus& dst)
-    {
-        const auto& s = src.string_value();
-
-        if (s == "passing")
-            dst = CheckStatus::Passing;
-        else if (s == "warning")
-            dst = CheckStatus::Warning;
-        else if (s == "critical")
-            dst = CheckStatus::Failed;
-        else
-            dst = CheckStatus::Unknown;
-    }
-
     void load(const s11n::Json& src, Config& dst)
     {
         // TODO
@@ -57,17 +43,6 @@ namespace ppconsul { namespace agent {
         load(src, dst.delegateCur, "DelegateCur");
     }
 
-    void load(const s11n::Json& src, CheckInfo& dst)
-    {
-        load(src, dst.id, "CheckID");
-        load(src, dst.node, "Node");
-        load(src, dst.name, "Name");
-        load(src, dst.status, "Status");
-        load(src, dst.notes, "Notes");
-        load(src, dst.output, "Output");
-        load(src, dst.serviceId, "ServiceID");
-        load(src, dst.serviceName, "ServiceName");
-    }
 
 namespace impl {
 

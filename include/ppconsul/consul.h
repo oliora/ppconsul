@@ -34,6 +34,7 @@ namespace ppconsul {
         PPCONSUL_PARAM(token, std::string)
         PPCONSUL_PARAM_NO_NAME(consistency, Consistency)
         PPCONSUL_PARAM_NO_NAME(block_for, BlockForValue)
+        PPCONSUL_PARAM(tag, std::string)
 
         inline void printParameter(std::ostream& os, const Consistency& v, KWARGS_KW_TAG(consistency))
         {

@@ -13,7 +13,7 @@
 
 
 using ppconsul::agent::Agent;
-using ppconsul::agent::CheckStatus;
+using ppconsul::CheckStatus;
 
 
 /*namespace {

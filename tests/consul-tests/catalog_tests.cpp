@@ -15,6 +15,7 @@
 
 using ppconsul::catalog::Catalog;
 using ppconsul::agent::Agent;
+using ppconsul::Node;
 namespace params = ppconsul::params;
 using ppconsul::Consistency;
 
@@ -37,10 +38,10 @@ namespace {
 
 TEST_CASE("catalog.node_valid", "[consul][catalog][config]")
 {
-    CHECK_FALSE((ppconsul::catalog::Node{}).valid());
-    CHECK((ppconsul::catalog::Node{ "name", "addr" }).valid());
-    CHECK_FALSE((ppconsul::catalog::Node{ "", "addr" }).valid());
-    CHECK_FALSE((ppconsul::catalog::Node{ "name", "" }).valid());
+    CHECK_FALSE((Node{}).valid());
+    CHECK((Node{ "name", "addr" }).valid());
+    CHECK_FALSE((Node{ "", "addr" }).valid());
+    CHECK_FALSE((Node{ "name", "" }).valid());
 }
 
 
@@ -71,18 +72,17 @@ TEST_CASE("catalog.nodes", "[consul][catalog][config]")
 
     REQUIRE(nodes.size());
 
-    auto it1 = std::find_if(nodes.begin(), nodes.end(), [&](const ppconsul::catalog::Node& op){
+    auto it1 = std::find_if(nodes.begin(), nodes.end(), [&](const Node& op){
         return op.address == selfMember.address;
     });
 
     REQUIRE(it1 != nodes.end());
-    CHECK((it1->name == selfMember.name
-        || it1->name.find(selfMember.name + ".") == 0));
+    CHECK((it1->node == selfMember.name
+        || it1->node.find(selfMember.name + ".") == 0));
 
     for (const auto& node : nodes)
     {
-        CHECK(node.name != "");
-        CHECK(node.address != "");
+        CHECK(node.valid());
     }
 }
 
@@ -106,13 +106,13 @@ TEST_CASE("catalog.nodes_blocking", "[consul][catalog][config][blocking]")
     
     CHECK(resp1.data().size());
 
-    auto it1 = std::find_if(resp1.data().begin(), resp1.data().end(), [&](const ppconsul::catalog::Node& op){
+    auto it1 = std::find_if(resp1.data().begin(), resp1.data().end(), [&](const Node& op){
         return op.address == selfMember.address;
     });
 
     REQUIRE(it1 != resp1.data().end());
-    CHECK((it1->name == selfMember.name
-        || it1->name.find(selfMember.name + ".") == 0));
+    CHECK((it1->node == selfMember.name
+        || it1->node.find(selfMember.name + ".") == 0));
 
     // Wait for already changed
     auto t2 = std::chrono::steady_clock::now();
@@ -129,7 +129,7 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
     Agent agent(consul);
 
     const auto selfMember = Agent(consul).self().second;
-    const auto selfNode = ppconsul::catalog::Node{ selfMember.name, selfMember.address };
+    const auto selfNode = Node{ selfMember.name, selfMember.address };
 
     agent.deregisterService("service1");
     agent.deregisterService("service2");
@@ -162,19 +162,19 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
         
         REQUIRE(services.size() == 2);
 
-        const auto service1Index = services[0].first.id == "service1" ? 0 : 1;
+        const auto service1Index = services[0].second.id == "service1" ? 0 : 1;
 
-        CHECK(services[service1Index].second == selfNode);
-        CHECK(services[service1Index].first.name == Uniq_Name_1);
-        CHECK(services[service1Index].first.port == 1234);
-        CHECK(services[service1Index].first.tags == ppconsul::Tags({ "print", "udp" }));
-        CHECK(services[service1Index].first.id == "service1");
+        CHECK(services[service1Index].first == selfNode);
+        CHECK(services[service1Index].second.name == Uniq_Name_1);
+        CHECK(services[service1Index].second.port == 1234);
+        CHECK(services[service1Index].second.tags == ppconsul::Tags({ "print", "udp" }));
+        CHECK(services[service1Index].second.id == "service1");
 
-        CHECK(services[1 - service1Index].second == selfNode);
-        CHECK(services[1 - service1Index].first.name == Uniq_Name_1);
-        CHECK(services[1 - service1Index].first.port == 3456);
-        CHECK(services[1 - service1Index].first.tags == ppconsul::Tags({ "print", "secret" }));
-        CHECK(services[1 - service1Index].first.id == "service3");
+        CHECK(services[1 - service1Index].first == selfNode);
+        CHECK(services[1 - service1Index].second.name == Uniq_Name_1);
+        CHECK(services[1 - service1Index].second.port == 3456);
+        CHECK(services[1 - service1Index].second.tags == ppconsul::Tags({ "print", "secret" }));
+        CHECK(services[1 - service1Index].second.id == "service3");
     }
 
     SECTION("non existing service tag")
@@ -188,29 +188,29 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
 
         REQUIRE(services1.size() == 1);
 
-        CHECK(services1[0].second == selfNode);
-        CHECK(services1[0].first.name == Uniq_Name_1);
-        CHECK(services1[0].first.port == 1234);
-        CHECK(services1[0].first.tags == ppconsul::Tags({ "print", "udp" }));
-        CHECK(services1[0].first.id == "service1");
+        CHECK(services1[0].first == selfNode);
+        CHECK(services1[0].second.name == Uniq_Name_1);
+        CHECK(services1[0].second.port == 1234);
+        CHECK(services1[0].second.tags == ppconsul::Tags({ "print", "udp" }));
+        CHECK(services1[0].second.id == "service1");
 
         auto services2 = catalog.service(Uniq_Name_1, "print");
 
         REQUIRE(services2.size() == 2);
 
-        const auto service1Index = services2[0].first.id == "service1" ? 0 : 1;
+        const auto service1Index = services2[0].second.id == "service1" ? 0 : 1;
         
-        CHECK(services2[service1Index].second == selfNode);
-        CHECK(services2[service1Index].first.name == Uniq_Name_1);
-        CHECK(services2[service1Index].first.port == 1234);
-        CHECK(services2[service1Index].first.tags == ppconsul::Tags({ "print", "udp" }));
-        CHECK(services2[service1Index].first.id == "service1");
+        CHECK(services2[service1Index].first == selfNode);
+        CHECK(services2[service1Index].second.name == Uniq_Name_1);
+        CHECK(services2[service1Index].second.port == 1234);
+        CHECK(services2[service1Index].second.tags == ppconsul::Tags({ "print", "udp" }));
+        CHECK(services2[service1Index].second.id == "service1");
         
-        CHECK(services2[1 - service1Index].second == selfNode);
-        CHECK(services2[1 - service1Index].first.name == Uniq_Name_1);
-        CHECK(services2[1 - service1Index].first.port == 3456);
-        CHECK(services2[1 - service1Index].first.tags == ppconsul::Tags({ "print", "secret" }));
-        CHECK(services2[1 - service1Index].first.id == "service3");
+        CHECK(services2[1 - service1Index].first == selfNode);
+        CHECK(services2[1 - service1Index].second.name == Uniq_Name_1);
+        CHECK(services2[1 - service1Index].second.port == 3456);
+        CHECK(services2[1 - service1Index].second.tags == ppconsul::Tags({ "print", "secret" }));
+        CHECK(services2[1 - service1Index].second.id == "service3");
     }
 
     SECTION("node")
@@ -260,7 +260,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
     Agent agent(consul);
 
     const auto selfMember = Agent(consul).self().second;
-    const auto selfNode = ppconsul::catalog::Node{ selfMember.name, selfMember.address };
+    const auto selfNode = Node{ selfMember.name, selfMember.address };
 
     agent.deregisterService("service1");
     agent.deregisterService("service2");
@@ -288,19 +288,19 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
 
         REQUIRE(services.size() == 2);
 
-        const auto service1Index = services[0].first.id == "service1" ? 0 : 1;
+        const auto service1Index = services[0].second.id == "service1" ? 0 : 1;
 
-        CHECK(services[service1Index].second == selfNode);
-        CHECK(services[service1Index].first.name == Uniq_Name_1_Spec);
-        CHECK(services[service1Index].first.port == 1234);
-        CHECK(services[service1Index].first.tags == ppconsul::Tags({ "print", Tag_Spec }));
-        CHECK(services[service1Index].first.id == "service1");
+        CHECK(services[service1Index].first == selfNode);
+        CHECK(services[service1Index].second.name == Uniq_Name_1_Spec);
+        CHECK(services[service1Index].second.port == 1234);
+        CHECK(services[service1Index].second.tags == ppconsul::Tags({ "print", Tag_Spec }));
+        CHECK(services[service1Index].second.id == "service1");
 
-        CHECK(services[1 - service1Index].second == selfNode);
-        CHECK(services[1 - service1Index].first.name == Uniq_Name_1_Spec);
-        CHECK(services[1 - service1Index].first.port == 3456);
-        CHECK(services[1 - service1Index].first.tags == ppconsul::Tags({ "print", "secret" }));
-        CHECK(services[1 - service1Index].first.id == "service3");
+        CHECK(services[1 - service1Index].first == selfNode);
+        CHECK(services[1 - service1Index].second.name == Uniq_Name_1_Spec);
+        CHECK(services[1 - service1Index].second.port == 3456);
+        CHECK(services[1 - service1Index].second.tags == ppconsul::Tags({ "print", "secret" }));
+        CHECK(services[1 - service1Index].second.id == "service3");
     }
 
     SECTION("service with tag")
@@ -309,29 +309,29 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
 
         REQUIRE(services1.size() == 1);
 
-        CHECK(services1[0].second == selfNode);
-        CHECK(services1[0].first.name == Uniq_Name_1_Spec);
-        CHECK(services1[0].first.port == 1234);
-        CHECK(services1[0].first.tags == ppconsul::Tags({ "print", Tag_Spec }));
-        CHECK(services1[0].first.id == "service1");
+        CHECK(services1[0].first == selfNode);
+        CHECK(services1[0].second.name == Uniq_Name_1_Spec);
+        CHECK(services1[0].second.port == 1234);
+        CHECK(services1[0].second.tags == ppconsul::Tags({ "print", Tag_Spec }));
+        CHECK(services1[0].second.id == "service1");
 
         auto services2 = catalog.service(Uniq_Name_1_Spec, "print");
 
         REQUIRE(services2.size() == 2);
 
-        const auto service1Index = services2[0].first.id == "service1" ? 0 : 1;
+        const auto service1Index = services2[0].second.id == "service1" ? 0 : 1;
 
-        CHECK(services2[service1Index].second == selfNode);
-        CHECK(services2[service1Index].first.name == Uniq_Name_1_Spec);
-        CHECK(services2[service1Index].first.port == 1234);
-        CHECK(services2[service1Index].first.tags == ppconsul::Tags({ "print", Tag_Spec }));
-        CHECK(services2[service1Index].first.id == "service1");
+        CHECK(services2[service1Index].first == selfNode);
+        CHECK(services2[service1Index].second.name == Uniq_Name_1_Spec);
+        CHECK(services2[service1Index].second.port == 1234);
+        CHECK(services2[service1Index].second.tags == ppconsul::Tags({ "print", Tag_Spec }));
+        CHECK(services2[service1Index].second.id == "service1");
         
-        CHECK(services2[1 - service1Index].second == selfNode);
-        CHECK(services2[1 - service1Index].first.name == Uniq_Name_1_Spec);
-        CHECK(services2[1 - service1Index].first.port == 3456);
-        CHECK(services2[1 - service1Index].first.tags == ppconsul::Tags({ "print", "secret" }));
-        CHECK(services2[1 - service1Index].first.id == "service3");
+        CHECK(services2[1 - service1Index].first == selfNode);
+        CHECK(services2[1 - service1Index].second.name == Uniq_Name_1_Spec);
+        CHECK(services2[1 - service1Index].second.port == 3456);
+        CHECK(services2[1 - service1Index].second.tags == ppconsul::Tags({ "print", "secret" }));
+        CHECK(services2[1 - service1Index].second.id == "service3");
     }
 }
 
@@ -344,7 +344,7 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
     Agent agent(consul);
 
     const auto selfMember = Agent(consul).self().second;
-    const auto selfNode = ppconsul::catalog::Node{ selfMember.name, selfMember.address };
+    const auto selfNode = Node{ selfMember.name, selfMember.address };
 
     agent.deregisterService("service1");
     agent.deregisterService("service2");
@@ -394,7 +394,7 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
 
 
         REQUIRE(resp1.data().size() == 1);
-        CHECK(resp1.data()[0].first.id == "service1");
+        CHECK(resp1.data()[0].second.id == "service1");
 
         agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
 
@@ -406,8 +406,8 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
         CHECK(index1 != resp2.headers().index());
 
         REQUIRE(resp2.data().size() == 2);
-        const auto service1Index = resp2.data()[0].first.id == "service1" ? 0 : 1;
-        CHECK(resp2.data()[service1Index].first.id == "service1");
-        CHECK(resp2.data()[1 - service1Index].first.id == "service3");
+        const auto service1Index = resp2.data()[0].second.id == "service1" ? 0 : 1;
+        CHECK(resp2.data()[service1Index].second.id == "service1");
+        CHECK(resp2.data()[1 - service1Index].second.id == "service3");
     }
 }

@@ -8,32 +8,25 @@
 #include "ppconsul/catalog.h"
 #include "s11n_types.h"
 
-
-namespace ppconsul { namespace catalog {
-    
-    using s11n::load;
-
-    void load(const s11n::Json& src, Node& dst)
+namespace ppconsul { namespace s11n {
+    void load(const s11n::Json& src, ppconsul::catalog::NodeService& dst)
     {
-        load(src, dst.name, "Node");
-        load(src, dst.address, "Address");
+        load(src, dst.first);
+        load(src, dst.second.name, "ServiceName");
+        load(src, dst.second.port, "ServicePort");
+        load(src, dst.second.tags, "ServiceTags");
+        load(src, dst.second.id, "ServiceID");
     }
 
-    void load(const s11n::Json& src, ServiceAndNode& dst)
-    {
-        load(src, dst.first.name, "ServiceName");
-        load(src, dst.first.port, "ServicePort");
-        load(src, dst.first.tags, "ServiceTags");
-        load(src, dst.first.id, "ServiceID");
-        load(src, dst.second);
-    }
-
-    void load(const s11n::Json& src, NodeServices& dst)
+    void load(const s11n::Json& src, ppconsul::catalog::NodeServices& dst)
     {
         load(src, dst.first, "Node");
         load(src, dst.second, "Services");
     }
+}}
 
+namespace ppconsul { namespace catalog {
+    
 namespace impl {
 
     std::vector<std::string> parseDatacenters(const std::string& json)
@@ -56,9 +49,9 @@ namespace impl {
         return s11n::parseJson<std::unordered_map<std::string, Tags>>(json);
     }
 
-    std::vector<ServiceAndNode> parseService(const std::string& json)
+    std::vector<NodeService> parseService(const std::string& json)
     {
-        return s11n::parseJson<std::vector<ServiceAndNode>>(json);
+        return s11n::parseJson<std::vector<NodeService>>(json);
     }
 
 }

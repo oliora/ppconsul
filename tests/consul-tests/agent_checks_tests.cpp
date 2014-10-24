@@ -11,7 +11,7 @@
 #include <thread>
 
 using ppconsul::agent::Agent;
-using ppconsul::agent::CheckStatus;
+using ppconsul::CheckStatus;
 
 
 namespace {
@@ -208,7 +208,7 @@ TEST_CASE("agent.check_update", "[consul][agent][checks][health]")
 
     agent.registerCheck({ "check1", "the check" }, std::chrono::minutes(5));
 
-    ppconsul::agent::CheckInfo c = agent.checks().at("check1");
+    ppconsul::CheckInfo c = agent.checks().at("check1");
     REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "");
@@ -285,7 +285,7 @@ TEST_CASE("agent.check_update_special_chars", "[consul][agent][checks][health][s
 
     agent.registerCheck({ "check1", "the check" }, std::chrono::minutes(5));
 
-    ppconsul::agent::CheckInfo c = agent.checks().at("check1");
+    ppconsul::CheckInfo c = agent.checks().at("check1");
     REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "");

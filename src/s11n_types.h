@@ -21,4 +21,41 @@ namespace ppconsul {
         load(src, dst.id, "ID");
     }
 
+    inline void load(const s11n::Json& src, Node& dst)
+    {
+        using s11n::load;
+
+        load(src, dst.node, "Node");
+        load(src, dst.address, "Address");
+    }
+
+    inline void load(const s11n::Json& src, CheckStatus& dst)
+    {
+        const auto& s = src.string_value();
+
+        if (s == "passing")
+            dst = CheckStatus::Passing;
+        else if (s == "warning")
+            dst = CheckStatus::Warning;
+        else if (s == "critical")
+            dst = CheckStatus::Failed;
+        else
+            dst = CheckStatus::Unknown;
+    }
+
+
+    inline void load(const s11n::Json& src, CheckInfo& dst)
+    {
+        using s11n::load;
+
+        load(src, dst.id, "CheckID");
+        load(src, dst.node, "Node");
+        load(src, dst.name, "Name");
+        load(src, dst.status, "Status");
+        load(src, dst.notes, "Notes");
+        load(src, dst.output, "Output");
+        load(src, dst.serviceId, "ServiceID");
+        load(src, dst.serviceName, "ServiceName");
+    }
+
 }

@@ -13,26 +13,14 @@
 
 namespace ppconsul { namespace catalog {
 
-    using ppconsul::Service;
-
-    struct Node
-    {
-        std::string name;
-        std::string address;
-
-        bool valid() const { return !name.empty() && !address.empty(); }
-    };
-
     typedef std::pair<Node, std::unordered_map<std::string, Service>> NodeServices;
 
-    typedef std::pair<Service, Node> ServiceAndNode;
+    typedef std::pair<Node, Service> NodeService;
 
     namespace params {
         using ppconsul::params::consistency;
         using ppconsul::params::block_for;
         using ppconsul::params::dc;
-
-        PPCONSUL_PARAM(tag, std::string)
 
         namespace groups {
             PPCONSUL_PARAMS_GROUP(get, (consistency, dc, block_for))
@@ -44,15 +32,15 @@ namespace ppconsul { namespace catalog {
         std::vector<Node> parseNodes(const std::string& json);
         NodeServices parseNode(const std::string& json);
         std::unordered_map<std::string, Tags> parseServices(const std::string& json);
-        std::vector<ServiceAndNode> parseService(const std::string& json);
+        std::vector<NodeService> parseService(const std::string& json);
     }
 
     class Catalog
     {
     public:
         // Allowed parameters:
-        // - consistency - default consistency for requests that supports it
-        // - dc - default dc for requests that supports it
+        // - consistency - default consistency for requests that support it
+        // - dc - default dc for requests that support it
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Catalog(Consul& consul, const Params&... params)
         : m_consul(consul)
@@ -118,13 +106,13 @@ namespace ppconsul { namespace catalog {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<ServiceAndNode>> service(WithHeaders, const std::string& name, const Params&... params) const;
+        Response<std::vector<NodeService>> service(WithHeaders, const std::string& name, const Params&... params) const;
 
         // Result contains data only.
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<ServiceAndNode> service(const std::string& name, const Params&... params) const
+        std::vector<NodeService> service(const std::string& name, const Params&... params) const
         {
             return std::move(service(withHeaders, name, params...).data());
         }
@@ -133,13 +121,13 @@ namespace ppconsul { namespace catalog {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<ServiceAndNode>> service(WithHeaders, const std::string& name, const std::string& tag, const Params&... params) const;
+        Response<std::vector<NodeService>> service(WithHeaders, const std::string& name, const std::string& tag, const Params&... params) const;
 
         // Result contains data only.
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<ServiceAndNode> service(const std::string& name, const std::string& tag, const Params&... params) const
+        std::vector<NodeService> service(const std::string& name, const std::string& tag, const Params&... params) const
         {
             return std::move(service(withHeaders, name, tag, params...).data());
         }
@@ -150,17 +138,6 @@ namespace ppconsul { namespace catalog {
         Consistency m_defaultConsistency;
         std::string m_defaultDc;
     };
-
-
-    inline bool operator!= (const Node& l, const Node& r)
-    {
-        return l.name != r.name || l.address != r.address;
-    }
-
-    inline bool operator== (const Node& l, const Node& r)
-    {
-        return !operator!=(l, r);
-    }
 
 
     // Implementation
@@ -196,7 +173,7 @@ namespace ppconsul { namespace catalog {
     }
 
     template<class... Params, class>
-    Response<std::vector<ServiceAndNode>> Catalog::service(WithHeaders, const std::string& name, const Params&... params) const
+    Response<std::vector<NodeService>> Catalog::service(WithHeaders, const std::string& name, const Params&... params) const
     {
         KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
             auto r = m_consul.get(withHeaders, "/v1/catalog/service/" + helpers::encodeUrl(name),
@@ -206,12 +183,12 @@ namespace ppconsul { namespace catalog {
     }
 
     template<class... Params, class>
-    Response<std::vector<ServiceAndNode>> Catalog::service(WithHeaders, const std::string& name, const std::string& tag, const Params&... params) const
+    Response<std::vector<NodeService>> Catalog::service(WithHeaders, const std::string& name, const std::string& tag, const Params&... params) const
     {
         KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
             auto r = m_consul.get(withHeaders, "/v1/catalog/service/" + helpers::encodeUrl(name),
             params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
-            params::tag = helpers::encodeUrl(tag),
+            ppconsul::params::tag = helpers::encodeUrl(tag),
             params...);
         return makeResponse(r.headers(), impl::parseService(r.data()));
     }

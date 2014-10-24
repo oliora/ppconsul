@@ -11,7 +11,7 @@
 #include <thread>
 
 using ppconsul::agent::Agent;
-using ppconsul::agent::CheckStatus;
+using ppconsul::CheckStatus;
 using ppconsul::agent::serviceCheckId;
 
 
@@ -302,7 +302,7 @@ TEST_CASE("agent.service_check_update", "[consul][agent][service][health]")
     agent.deregisterService("service1");
 
     agent.registerService({ "service1" }, std::chrono::minutes(5));
-    ppconsul::agent::CheckInfo c = agent.checks().at(serviceCheckId("service1"));
+    ppconsul::CheckInfo c = agent.checks().at(serviceCheckId("service1"));
     REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.output == "");
 
