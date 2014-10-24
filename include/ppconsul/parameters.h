@@ -7,6 +7,7 @@
 #pragma once
 
 #include "kwargs.h"
+#include "helpers.h"
 #include <type_traits>
 #include <string>
 #include <sstream>
@@ -36,7 +37,7 @@ namespace ppconsul { namespace parameters {
         void printParameter(std::ostream&os, const std::string& v, Keyword k)
         {
             if (!v.empty())
-                os << parameter_name(k) << "=" << v;
+                os << parameter_name(k) << "=" << helpers::encodeUrl(v);
         }
 
         struct ParameterPrinter
