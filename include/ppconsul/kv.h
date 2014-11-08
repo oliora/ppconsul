@@ -195,7 +195,7 @@ namespace ppconsul { namespace kv {
         Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::params::groups::get))
-            return get_keys_impl(keyPrefix, kv::params::separator = helpers::encodeUrl(separator), params...);
+            return get_keys_impl(keyPrefix, kv::params::separator = separator, params...);
         }
 
         // Get keys up to a separator provided. Returns empty vector if no keys found.

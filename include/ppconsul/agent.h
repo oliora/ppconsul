@@ -116,7 +116,7 @@ namespace ppconsul { namespace agent {
 
         void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
         {
-            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), params::note = helpers::encodeUrl(note));
+            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), params::note = note);
         }
 
         // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`

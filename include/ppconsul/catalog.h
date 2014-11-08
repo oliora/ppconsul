@@ -188,7 +188,7 @@ namespace ppconsul { namespace catalog {
         KWARGS_CHECK_IN_LIST(Params, (params::groups::get))
             auto r = m_consul.get(withHeaders, "/v1/catalog/service/" + helpers::encodeUrl(name),
             params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
-            ppconsul::params::tag = helpers::encodeUrl(tag),
+            ppconsul::params::tag = tag,
             params...);
         return makeResponse(r.headers(), impl::parseService(r.data()));
     }
