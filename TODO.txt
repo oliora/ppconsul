@@ -14,17 +14,19 @@ Releases:
 + Consistency modes
 + Blocking queries (simple)
 + Don't expose json11 in headers
-- provide comparision operators (at least ==, !=) for all structs defined
-- Don't use regex (it's slow and creates extra dependency)
-- More checks of received JSON data shape
-- Simplify JSON interface (?)
+- build library as shared (default) or static (choosen by option)
 
+- More checks of received JSON data shape (?)
+- Simplify JSON interface (?)
+- provide comparision operators (at least ==, !=) for all structs defined (postponed to 0.2)
+- Don't use regex for CURL headers (it's slow and creates dependency on Boost.Regex compiled library) (postponed to 0.2)
 - Support 64bit integers in JSON (postponed to 0.2)
 - tests for consistency / default consistency (if possible)
 
 
 ### CI
 
+CI postponed to 0.2
 - build for 3 platforms (Windows, Linux, OSX)
 - run unit-tests
 - run integration tests
@@ -32,7 +34,7 @@ Releases:
 
 ### Consul
 
-- tests for default DC and default token
+- tests for default DC and default token (postponed to 0.2)
 
 
 ### kv
@@ -45,9 +47,9 @@ Releases:
 + Consistency modes
 + Blocking queries (simple)
 - Acquire/release lock (depends on session)
-- tests for dc
-- tests for default DC and default token
 
+- tests for dc (postponed to 0.2)
+- tests for default DC and default token (postponed to 0.2)
 - typed value access (postponed to 0.2)
 - Get flag as uin64_t. Now it extracted from JSON as double due to json11 limitations (postponed to 0.2)
 
@@ -64,10 +66,10 @@ Releases:
 + v1 interface except register/deregister
 + tests
 + tests for block_for
-- tests for dc
-- tests for default DC
 
-- register/deregister (postponed to 0.2)
+- tests for dc (postponed to 0.2)
+- tests for default DC (postponed to 0.2)
+- register/deregister (no reason to implement)
 
 
 ### health

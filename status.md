@@ -5,7 +5,7 @@ The status of Consul HTTP API v1 coverage. Note that all implemented features ar
 ### KV
 
 Most features supported. Note that:
-- Lock acquiring / release is **not supported**.
+- Lock acquiring / release is **not supported**. Will be implemented after Session endpoint.
 - Support of blocking queries is limited [[1]].
 - It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(key, some_double)` etc. 
 
