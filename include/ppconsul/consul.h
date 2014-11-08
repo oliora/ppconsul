@@ -20,6 +20,7 @@
 #include <memory>
 #include <stdexcept>
 #include <limits>
+#include <iostream>
 
 
 namespace ppconsul {

@@ -14,6 +14,7 @@
 #include <utility>
 #include <chrono>
 #include <stdint.h>
+#include <iostream>
 
 
 namespace ppconsul {

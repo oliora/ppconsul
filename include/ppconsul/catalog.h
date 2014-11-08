@@ -145,7 +145,7 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<std::vector<Node>> Catalog::nodes(WithHeaders, const Params&... params) const
     {
-        KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
+        KWARGS_CHECK_IN_LIST(Params, (params::groups::get))
             auto r = m_consul.get(withHeaders, "/v1/catalog/nodes",
             params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
             params...);
@@ -155,7 +155,7 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<NodeServices> Catalog::node(WithHeaders, const std::string& name, const Params&... params) const
     {
-        KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
+        KWARGS_CHECK_IN_LIST(Params, (params::groups::get))
             auto r = m_consul.get(withHeaders, "/v1/catalog/node/" + helpers::encodeUrl(name),
             params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
             params...);
@@ -165,7 +165,7 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<std::unordered_map<std::string, Tags>> Catalog::services(WithHeaders, const Params&... params) const
     {
-        KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
+        KWARGS_CHECK_IN_LIST(Params, (params::groups::get))
             auto r = m_consul.get(withHeaders, "/v1/catalog/services",
             params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
             params...);
@@ -175,7 +175,7 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<std::vector<NodeService>> Catalog::service(WithHeaders, const std::string& name, const Params&... params) const
     {
-        KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
+        KWARGS_CHECK_IN_LIST(Params, (params::groups::get))
             auto r = m_consul.get(withHeaders, "/v1/catalog/service/" + helpers::encodeUrl(name),
             params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
             params...);
@@ -185,7 +185,7 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<std::vector<NodeService>> Catalog::service(WithHeaders, const std::string& name, const std::string& tag, const Params&... params) const
     {
-        KWARGS_CHECK_IN_GROUP(Params, params::groups::get)
+        KWARGS_CHECK_IN_LIST(Params, (params::groups::get))
             auto r = m_consul.get(withHeaders, "/v1/catalog/service/" + helpers::encodeUrl(name),
             params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
             ppconsul::params::tag = helpers::encodeUrl(tag),
