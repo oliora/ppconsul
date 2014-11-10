@@ -19,14 +19,17 @@ The library is written in C++11 and requires a quite modern compiler. Compilers 
 * OSX: Clang 6, libc++ (Xcode 6)
 * Linux: GCC 4.9, GCC 4.8.2
 
-The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 will definitely give up.
+The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
-The library uses
+The library depends on:
 * [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP.
+* [Boost](http://www.boost.org/) library. PPConsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is supported only in GCC 4.9](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+
+The library includes code of the following 3rd party libraries (look at `ext` directory): 
 * [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
-* [Catch](https://github.com/philsquared/Catch) unit test framework.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
-* [Boost](http://www.boost.org/) library. PPConsul needs only the headers if libCURL is used. There is one exception: using of GCC 4.8 requires to link with Boost.Regex library because [regex is supported only in GCC 4.9](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+
+For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
 
 ## Documentation
 TBD
