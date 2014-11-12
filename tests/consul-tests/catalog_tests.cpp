@@ -179,12 +179,12 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
 
     SECTION("non existing service tag")
     {
-        CHECK(catalog.service(Uniq_Name_1, Non_Existing_Tag_Name).empty());
+        CHECK(catalog.service(Uniq_Name_1, params::tag = Non_Existing_Tag_Name).empty());
     }
 
     SECTION("service with tag")
     {
-        auto services1 = catalog.service(Uniq_Name_1, "udp");
+        auto services1 = catalog.service(Uniq_Name_1, params::tag = "udp");
 
         REQUIRE(services1.size() == 1);
 
@@ -194,7 +194,7 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
         CHECK(services1[0].second.tags == ppconsul::Tags({ "print", "udp" }));
         CHECK(services1[0].second.id == "service1");
 
-        auto services2 = catalog.service(Uniq_Name_1, "print");
+        auto services2 = catalog.service(Uniq_Name_1, params::tag = "print");
 
         REQUIRE(services2.size() == 2);
 
@@ -305,7 +305,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
 
     SECTION("service with tag")
     {
-        auto services1 = catalog.service(Uniq_Name_1_Spec, Tag_Spec);
+        auto services1 = catalog.service(Uniq_Name_1_Spec, params::tag = Tag_Spec);
 
         REQUIRE(services1.size() == 1);
 
@@ -315,7 +315,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
         CHECK(services1[0].second.tags == ppconsul::Tags({ "print", Tag_Spec }));
         CHECK(services1[0].second.id == "service1");
 
-        auto services2 = catalog.service(Uniq_Name_1_Spec, "print");
+        auto services2 = catalog.service(Uniq_Name_1_Spec, params::tag = "print");
 
         REQUIRE(services2.size() == 2);
 
