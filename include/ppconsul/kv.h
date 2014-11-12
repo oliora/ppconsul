@@ -187,25 +187,25 @@ namespace ppconsul { namespace kv {
             return items(std::string(), params...);
         }
 
-        // Get keys up to a separator provided. Returns empty vector if no keys found.
+        // Get keys starting with specified prefix up to a separator provided. Returns empty vector if no keys found.
         // Result contains both headers and data.
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
+        Response<std::vector<std::string>> sub_keys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::params::groups::get))
             return get_keys_impl(keyPrefix, kv::params::separator = separator, params...);
         }
 
-        // Get keys up to a separator provided. Returns empty vector if no keys found.
+        // Get keys starting with specified prefix up to a separator provided. Returns empty vector if no keys found.
         // Result contains data only.
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<std::string> keys(const std::string& keyPrefix, const std::string& separator, const Params&... params) const
+        std::vector<std::string> sub_keys(const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
-            return std::move(keys(withHeaders, keyPrefix, separator, params...).data());
+            return std::move(sub_keys(withHeaders, keyPrefix, separator, params...).data());
         }
 
         // Get all keys strarting with specified prefix. Returns empty vector if no keys found.
@@ -219,16 +219,6 @@ namespace ppconsul { namespace kv {
             return get_keys_impl(keyPrefix, params...);
         }
 
-        // Get all keys. Returns empty vector if no keys found.
-        // Result contains both headers and data.
-        // Allowed parameters:
-        // - groups::get
-        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> keys(WithHeaders, const Params&... params) const
-        {
-            return keys(withHeaders, std::string(), params...);
-        }
-
         // Get all keys strarting with specified prefix. Returns empty vector if no keys found.
         // Result contains data only.
         // Allowed parameters:
@@ -237,6 +227,16 @@ namespace ppconsul { namespace kv {
         std::vector<std::string> keys(const std::string& prefix, const Params&... params) const
         {
             return std::move(keys(withHeaders, prefix, params...).data());
+        }
+
+        // Get all keys. Returns empty vector if no keys found.
+        // Result contains both headers and data.
+        // Allowed parameters:
+        // - groups::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        Response<std::vector<std::string>> keys(WithHeaders, const Params&... params) const
+        {
+            return keys(withHeaders, std::string(), params...);
         }
 
         // Get all keys. Returns empty vector if no keys found.

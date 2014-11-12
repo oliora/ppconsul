@@ -266,11 +266,11 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
     SECTION("get keys")
     {
         CHECK(kv.keys(Non_Existing_Key) == std::vector<std::string>());
-        CHECK(kv.keys(Non_Existing_Key, "/") == std::vector<std::string>());
+        CHECK(kv.sub_keys(Non_Existing_Key, "/") == std::vector<std::string>());
         CHECK(kv.keys("key") == std::vector<std::string>({"key1", "key2", "key3"}));
         CHECK(kv.keys("other/Key") == std::vector<std::string>({ "other/Key1", "other/Key2" }));
-        CHECK(kv.keys("", "/") == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
-        CHECK(kv.keys("", "e") == std::vector<std::string>({ "ke", "othe" }));
+        CHECK(kv.sub_keys("", "/") == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
+        CHECK(kv.sub_keys("", "e") == std::vector<std::string>({ "ke", "othe" }));
     }
 
     SECTION("get keys with headers")
@@ -289,14 +289,14 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(v1.headers().knownLeader());
         CHECK(v1.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v2 = kv.keys(ppconsul::withHeaders, Non_Existing_Key, "/");
+        ppconsul::Response<std::vector<std::string>> v2 = kv.sub_keys(ppconsul::withHeaders, Non_Existing_Key, "/");
         CHECK(v2.data() == std::vector<std::string>());
         CHECK(v2.headers().valid());
         CHECK(v2.headers().index());
         CHECK(v2.headers().knownLeader());
         CHECK(v2.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v3 = kv.keys(ppconsul::withHeaders, "", "/");
+        ppconsul::Response<std::vector<std::string>> v3 = kv.sub_keys(ppconsul::withHeaders, "", "/");
         CHECK(v3.data() == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
         CHECK(v3.headers().valid());
         CHECK(v3.headers().index());
@@ -628,7 +628,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
         kv.put("key{1}\x2-3\x2&2-\x06", "value4");
         REQUIRE(kv.size() == 4);
 
-        auto keys = kv.keys("key{1}\x2", "\x2");
+        auto keys = kv.sub_keys("key{1}\x2", "\x2");
         REQUIRE(keys.size() == 3);
         CHECK(keys[0] == "key{1}\x2-1\x2");
         CHECK(keys[1] == "key{1}\x2-2\x2");
@@ -646,7 +646,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
         kv.put(keyPart + "-3" + null + "&2-\x06", "value4");
         REQUIRE(kv.size() == 4);
 
-        auto keys = kv.keys(keyPart, null);
+        auto keys = kv.sub_keys(keyPart, null);
         REQUIRE(keys.size() == 3);
         CHECK(keys[0] == keyPart + "-1\t" + null);
         CHECK(keys[1] == keyPart + "-2" + null);
