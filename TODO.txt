@@ -18,8 +18,8 @@ Releases:
 
 - More checks of received JSON data shape (?)
 - Simplify JSON interface (?)
+- Don't use regex for CURL headers (it's slow and creates dependency on Boost.Regex compiled library) (?)
 - provide comparision operators (at least ==, !=) for all structs defined (postponed to 0.2)
-- Don't use regex for CURL headers (it's slow and creates dependency on Boost.Regex compiled library) (postponed to 0.2)
 - Support 64bit integers in JSON (postponed to 0.2)
 - tests for consistency / default consistency (if possible)
 
@@ -74,11 +74,19 @@ CI postponed to 0.2
 
 ### health
 
-### session
++ v1 interface except register/deregister
+- tests
+- tests for block_for
 
-### acl
+- tests for dc (postponed to 0.2)
+- tests for default DC (postponed to 0.2)
+
+
+### session
 
 ### event
 
 ### status
+
+### acl
 
