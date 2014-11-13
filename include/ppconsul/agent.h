@@ -119,10 +119,40 @@ namespace ppconsul { namespace agent {
             m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), params::note = note);
         }
 
+        void pass(const std::string& checkId, const std::string& note = "")
+        {
+            updateCheck(checkId, CheckStatus::Passing, note);
+        }
+
+        void warn(const std::string& checkId, const std::string& note = "")
+        {
+            updateCheck(checkId, CheckStatus::Warning, note);
+        }
+
+        void fail(const std::string& checkId, const std::string& note = "")
+        {
+            updateCheck(checkId, CheckStatus::Critical, note);
+        }
+
         // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`
         void updateServiceCheck(const std::string& serviceId, CheckStatus newStatus, const std::string& note = "")
         {
             updateCheck(serviceCheckId(serviceId), newStatus, note);
+        }
+
+        void servicePass(const std::string& serviceId, const std::string& note = "")
+        {
+            updateServiceCheck(serviceId, CheckStatus::Passing, note);
+        }
+
+        void serviceWarn(const std::string& serviceId, const std::string& note = "")
+        {
+            updateServiceCheck(serviceId, CheckStatus::Warning, note);
+        }
+
+        void serviceFail(const std::string& serviceId, const std::string& note = "")
+        {
+            updateServiceCheck(serviceId, CheckStatus::Critical, note);
         }
 
         std::unordered_map<std::string, Service> services() const
@@ -166,7 +196,7 @@ namespace ppconsul { namespace agent {
                 return "/v1/agent/check/pass/";
             case CheckStatus::Warning:
                 return "/v1/agent/check/warn/";
-            case CheckStatus::Failed:
+            case CheckStatus::Critical:
                 return "/v1/agent/check/fail/";
             default:
                 throw std::logic_error("Wrong CheckStatus value");

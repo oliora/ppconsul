@@ -306,9 +306,9 @@ TEST_CASE("agent.service_check_update", "[consul][agent][service][health]")
     REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.output == "");
 
-    agent.updateServiceCheck("service1", CheckStatus::Failed, "it's failed :(");
+    agent.updateServiceCheck("service1", CheckStatus::Critical, "it's failed :(");
     c = agent.checks().at(serviceCheckId("service1"));
-    REQUIRE(c.status == CheckStatus::Failed);
+    REQUIRE(c.status == CheckStatus::Critical);
     REQUIRE(c.output == "it's failed :(");
 
     agent.updateServiceCheck("service1", CheckStatus::Passing, "status:\neverything passing!!!\n");

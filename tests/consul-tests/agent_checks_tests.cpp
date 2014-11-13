@@ -213,9 +213,9 @@ TEST_CASE("agent.check_update", "[consul][agent][checks][health]")
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "");
     
-    agent.updateCheck("check1", CheckStatus::Failed, "it's failed :(");
+    agent.updateCheck("check1", CheckStatus::Critical, "it's failed :(");
     c = agent.checks().at("check1");
-    REQUIRE(c.status == CheckStatus::Failed);
+    REQUIRE(c.status == CheckStatus::Critical);
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "it's failed :(");
 
@@ -269,7 +269,7 @@ TEST_CASE("agent.check_expired", "[consul][agent][checks][health]")
     sleep(1.5);
 
     auto c = agent.checks().at("check1");
-    CHECK(c.status == CheckStatus::Failed);
+    CHECK(c.status == CheckStatus::Critical);
     CHECK(!c.output.empty());
 }
 
