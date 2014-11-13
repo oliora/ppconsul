@@ -213,31 +213,31 @@ TEST_CASE("agent.check_update", "[consul][agent][checks][health]")
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "");
     
-    agent.updateCheck("check1", CheckStatus::Critical, "it's failed :(");
+    agent.fail("check1", "it's failed :(");
     c = agent.checks().at("check1");
     REQUIRE(c.status == CheckStatus::Critical);
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "it's failed :(");
 
-    agent.updateCheck("check1", CheckStatus::Passing, "status:\neverything passing!!!\n");
+    agent.pass("check1", "status:\neverything passing!!!\n");
     c = agent.checks().at("check1");
     REQUIRE(c.status == CheckStatus::Passing);
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "status:\neverything passing!!!\n");
 
-    agent.updateCheck("check1", CheckStatus::Passing);
+    agent.pass("check1");
     c = agent.checks().at("check1");
     REQUIRE(c.status == CheckStatus::Passing);
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "");
 
-    agent.updateCheck("check1", CheckStatus::Warning);
+    agent.warn("check1");
     c = agent.checks().at("check1");
     REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "");
 
-    CHECK_THROWS_AS(agent.updateCheck("check1", CheckStatus::Unknown), std::logic_error);
+    //CHECK_THROWS_AS(agent.updateCheck("check1", CheckStatus::Unknown), std::logic_error);
 }
 
 TEST_CASE("agent.check_update_incorrect", "[consul][agent][checks][health]")
@@ -248,11 +248,11 @@ TEST_CASE("agent.check_update_incorrect", "[consul][agent][checks][health]")
     agent.deregisterCheck("check1");
     REQUIRE(!agent.checks().count("check1"));
 
-    CHECK_THROWS_AS(agent.updateCheck(Non_Existing_Check_Name, CheckStatus::Passing), ppconsul::Error);
+    CHECK_THROWS_AS(agent.pass(Non_Existing_Check_Name), ppconsul::Error);
 
     agent.registerCheck({ "check1" }, Non_Existing_Script_Name, std::chrono::minutes(5));
 
-    CHECK_THROWS_AS(agent.updateCheck("check1", CheckStatus::Passing), ppconsul::Error);
+    CHECK_THROWS_AS(agent.pass("check1"), ppconsul::Error);
 }
 
 TEST_CASE("agent.check_expired", "[consul][agent][checks][health]")
@@ -290,7 +290,7 @@ TEST_CASE("agent.check_update_special_chars", "[consul][agent][checks][health][s
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "");
 
-    agent.updateCheck("check1", CheckStatus::Passing, "status:\neverything passing!!!\n");
+    agent.pass("check1", "status:\neverything passing!!!\n");
     c = agent.checks().at("check1");
     REQUIRE(c.status == CheckStatus::Passing);
     REQUIRE(c.notes == "the check");

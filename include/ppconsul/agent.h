@@ -114,11 +114,6 @@ namespace ppconsul { namespace agent {
             m_consul.get("/v1/agent/check/deregister/" + helpers::encodeUrl(id));
         }
 
-        void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
-        {
-            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), params::note = note);
-        }
-
         void pass(const std::string& checkId, const std::string& note = "")
         {
             updateCheck(checkId, CheckStatus::Passing, note);
@@ -132,12 +127,6 @@ namespace ppconsul { namespace agent {
         void fail(const std::string& checkId, const std::string& note = "")
         {
             updateCheck(checkId, CheckStatus::Critical, note);
-        }
-
-        // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`
-        void updateServiceCheck(const std::string& serviceId, CheckStatus newStatus, const std::string& note = "")
-        {
-            updateCheck(serviceCheckId(serviceId), newStatus, note);
         }
 
         // Same as pass(serviceCheckId(serviceId), note))
@@ -184,6 +173,17 @@ namespace ppconsul { namespace agent {
         }
 
     private:
+        void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
+        {
+            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), params::note = note);
+        }
+
+        // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`
+        void updateServiceCheck(const std::string& serviceId, CheckStatus newStatus, const std::string& note = "")
+        {
+            updateCheck(serviceCheckId(serviceId), newStatus, note);
+        }
+
         Consul& m_consul;
     };
 
