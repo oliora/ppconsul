@@ -190,20 +190,18 @@ namespace ppconsul { namespace agent {
 
     // Implementation
 
-    namespace impl {
-        inline std::string updateCheckUrl(CheckStatus newStatus)
+    inline std::string impl::updateCheckUrl(CheckStatus newStatus)
+    {
+        switch (newStatus)
         {
-            switch (newStatus)
-            {
-            case CheckStatus::Passing:
-                return "/v1/agent/check/pass/";
-            case CheckStatus::Warning:
-                return "/v1/agent/check/warn/";
-            case CheckStatus::Critical:
-                return "/v1/agent/check/fail/";
-            default:
-                throw std::logic_error("Wrong CheckStatus value");
-            }
+        case CheckStatus::Passing:
+            return "/v1/agent/check/pass/";
+        case CheckStatus::Warning:
+            return "/v1/agent/check/warn/";
+        case CheckStatus::Critical:
+            return "/v1/agent/check/fail/";
+        default:
+            throw std::logic_error("Wrong CheckStatus value");
         }
     }
 
