@@ -140,16 +140,19 @@ namespace ppconsul { namespace agent {
             updateCheck(serviceCheckId(serviceId), newStatus, note);
         }
 
+        // Same as pass(serviceCheckId(serviceId), note))
         void servicePass(const std::string& serviceId, const std::string& note = "")
         {
             updateServiceCheck(serviceId, CheckStatus::Passing, note);
         }
 
+        // Same as warn(serviceCheckId(serviceId), note))
         void serviceWarn(const std::string& serviceId, const std::string& note = "")
         {
             updateServiceCheck(serviceId, CheckStatus::Warning, note);
         }
 
+        // Same as fail(serviceCheckId(serviceId), note))
         void serviceFail(const std::string& serviceId, const std::string& note = "")
         {
             updateServiceCheck(serviceId, CheckStatus::Critical, note);
