@@ -48,14 +48,13 @@ Otherwise download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above.
 ### Prepare Project
 
 Execute the following commands:  
-`git clone git@github.com:oliora/ppconsul.git`  
-`cd ppconsul`  
-`mkdir workspace`  
-`cd workspace`  
-If you want to use libCURL:  
-`cmake ..`  
-Otherwise:  
-`cmake .. -DUSE_CPPNETLIB=1`
+```
+mkdir workspace
+cd workspace
+cmake ..
+```
+
+To use cpp-netlib instead of libCURL use `-DUSE_CPPNETLIB=1` when invoking CMake.
 
 **Note that** if you are building on Windows you need to set up additional variables:
 * Path to Boost headers and library.
@@ -71,8 +70,8 @@ Linux/OSX:
 `make`  
 
 Windows:  
-open sulution file `ppconsul\workspace\ppconsul.sln` in MSVS and build there or build the project from the command line with  
-`cmake --build . --config release`.
+open solution file `ppconsul\workspace\ppconsul.sln` in MSVS or build the project from the command line with  
+`cmake --build . --config Release`.
 
 ## How To Run Tests
 TBD
