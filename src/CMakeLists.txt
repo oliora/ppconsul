@@ -30,6 +30,7 @@ set(SOURCES
     catalog.cpp
     consul.cpp
     helpers.cpp
+    health.cpp
     kv.cpp
 )
 

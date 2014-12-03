@@ -20,6 +20,7 @@
 #include <memory>
 #include <stdexcept>
 #include <limits>
+#include <iostream>
 
 
 namespace ppconsul {
@@ -52,7 +53,7 @@ namespace ppconsul {
         }
     }
 
-    const char Default_Server_Address[] = "localhost:8500";
+    const char Default_Server_Address[] = "127.0.0.1:8500";
 
     class Consul
     {

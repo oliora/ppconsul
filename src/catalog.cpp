@@ -8,9 +8,12 @@
 #include "ppconsul/catalog.h"
 #include "s11n_types.h"
 
-namespace ppconsul { namespace s11n {
-    void load(const s11n::Json& src, ppconsul::catalog::NodeService& dst)
+
+namespace json11 {
+    void load(const json11::Json& src, ppconsul::catalog::NodeService& dst)
     {
+        using ppconsul::s11n::load;
+
         load(src, dst.first);
         load(src, dst.second.name, "ServiceName");
         load(src, dst.second.port, "ServicePort");
@@ -18,12 +21,14 @@ namespace ppconsul { namespace s11n {
         load(src, dst.second.id, "ServiceID");
     }
 
-    void load(const s11n::Json& src, ppconsul::catalog::NodeServices& dst)
+    void load(const json11::Json& src, ppconsul::catalog::NodeServices& dst)
     {
+        using ppconsul::s11n::load;
+
         load(src, dst.first, "Node");
         load(src, dst.second, "Services");
     }
-}}
+}
 
 namespace ppconsul { namespace catalog {
     
