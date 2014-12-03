@@ -19,6 +19,7 @@ Releases:
 - More checks of received JSON data shape (?)
 - Simplify JSON interface (?)
 - Don't use regex for CURL headers (it's slow and creates dependency on Boost.Regex compiled library) (?)
+- Add CMake 3 support
 - provide comparision operators (at least ==, !=) for all structs defined (postponed to 0.2)
 - Support 64bit integers in JSON (postponed to 0.2)
 - tests for consistency / default consistency (if possible)

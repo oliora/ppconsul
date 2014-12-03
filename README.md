@@ -19,14 +19,17 @@ The library is written in C++11 and requires a quite modern compiler. Compilers 
 * OSX: Clang 6, libc++ (Xcode 6)
 * Linux: GCC 4.9, GCC 4.8.2
 
-The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 will definitely give up.
+The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
-The library uses
+The library depends on:
 * [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP.
+* [Boost](http://www.boost.org/) library. PPConsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is supported only in GCC 4.9](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+
+The library includes code of the following 3rd party libraries (look at `ext` directory): 
 * [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
-* [Catch](https://github.com/philsquared/Catch) unit test framework.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
-* [Boost](http://www.boost.org/) library. PPConsul needs only the headers if libCURL is used. There is one exception: using of GCC 4.8 requires to link with Boost.Regex library because [regex is supported only in GCC 4.9](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+
+For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
 
 ## Documentation
 TBD
@@ -36,7 +39,7 @@ TBD
 ### Get Dependencies
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [Git](http://git-scm.com/) client.
-* Install [CMake](http://www.cmake.org/) 2.8 or above on Linux/OSX, 2.8.12 or above on Windows. Note that CMake 3 not guaranteed to work.
+* Install [CMake](http://www.cmake.org/) 2.8.12 or above (earlier version may also be OK on Linux/OSX but not on Windows). Note that CMake 3 not guaranteed to work.
 * Download [Boost](http://www.boost.org/) library. Build it if you going to use cpp-netlib instead of libCURL or GCC 4.8.
 * If you prefer to use libCURL then install libCURL (any version should be OK). Note that on Windows it is included in [CURL installer](http://curl.haxx.se/download.html).
 Otherwise download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that the latter depends on compiled Boost libraries.
@@ -45,14 +48,13 @@ Otherwise download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above.
 ### Prepare Project
 
 Execute the following commands:  
-`git clone git@github.com:oliora/ppconsul.git`  
-`cd ppconsul`  
-`mkdir workspace`  
-`cd workspace`  
-If you want to use libCURL:  
-`cmake ..`  
-Otherwise:  
-`cmake .. -DUSE_CPPNETLIB=1`
+```
+mkdir workspace
+cd workspace
+cmake ..
+```
+
+To use cpp-netlib instead of libCURL use `-DUSE_CPPNETLIB=1` when invoking CMake.
 
 **Note that** if you are building on Windows you need to set up additional variables:
 * Path to Boost headers and library.
@@ -68,8 +70,8 @@ Linux/OSX:
 `make`  
 
 Windows:  
-open sulution file `ppconsul\workspace\ppconsul.sln` in MSVS and build there or build the project from the command line with  
-`cmake --build . --config release`.
+open solution file `ppconsul\workspace\ppconsul.sln` in MSVS or build the project from the command line with  
+`cmake --build . --config Release`.
 
 ## How To Run Tests
 TBD
