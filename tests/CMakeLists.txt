@@ -12,7 +12,7 @@ macro(link_test_libs project_name)
     if (${USE_CPPNETLIB})
         target_link_libraries(${project_name} ${CPPNETLIB_LIBRARIES})
     else ()
-        target_link_libraries(${PROJECT_NAME} ${CURL_LIBRARIES})
+        target_link_libraries(${project_name} ${CURL_LIBRARIES})
     endif ()
 endmacro()
 
