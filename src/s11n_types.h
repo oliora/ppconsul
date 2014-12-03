@@ -38,7 +38,7 @@ namespace ppconsul {
         else if (s == "warning")
             dst = CheckStatus::Warning;
         else if (s == "critical")
-            dst = CheckStatus::Failed;
+            dst = CheckStatus::Critical;
         else
             dst = CheckStatus::Unknown;
     }

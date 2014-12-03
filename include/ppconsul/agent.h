@@ -114,15 +114,37 @@ namespace ppconsul { namespace agent {
             m_consul.get("/v1/agent/check/deregister/" + helpers::encodeUrl(id));
         }
 
-        void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
+        void pass(const std::string& checkId, const std::string& note = "")
         {
-            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), params::note = helpers::encodeUrl(note));
+            updateCheck(checkId, CheckStatus::Passing, note);
         }
 
-        // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`
-        void updateServiceCheck(const std::string& serviceId, CheckStatus newStatus, const std::string& note = "")
+        void warn(const std::string& checkId, const std::string& note = "")
         {
-            updateCheck(serviceCheckId(serviceId), newStatus, note);
+            updateCheck(checkId, CheckStatus::Warning, note);
+        }
+
+        void fail(const std::string& checkId, const std::string& note = "")
+        {
+            updateCheck(checkId, CheckStatus::Critical, note);
+        }
+
+        // Same as pass(serviceCheckId(serviceId), note))
+        void servicePass(const std::string& serviceId, const std::string& note = "")
+        {
+            updateServiceCheck(serviceId, CheckStatus::Passing, note);
+        }
+
+        // Same as warn(serviceCheckId(serviceId), note))
+        void serviceWarn(const std::string& serviceId, const std::string& note = "")
+        {
+            updateServiceCheck(serviceId, CheckStatus::Warning, note);
+        }
+
+        // Same as fail(serviceCheckId(serviceId), note))
+        void serviceFail(const std::string& serviceId, const std::string& note = "")
+        {
+            updateServiceCheck(serviceId, CheckStatus::Critical, note);
         }
 
         std::unordered_map<std::string, Service> services() const
@@ -151,26 +173,35 @@ namespace ppconsul { namespace agent {
         }
 
     private:
+        void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
+        {
+            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), params::note = note);
+        }
+
+        // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`
+        void updateServiceCheck(const std::string& serviceId, CheckStatus newStatus, const std::string& note = "")
+        {
+            updateCheck(serviceCheckId(serviceId), newStatus, note);
+        }
+
         Consul& m_consul;
     };
 
 
     // Implementation
 
-    namespace impl {
-        inline std::string updateCheckUrl(CheckStatus newStatus)
+    inline std::string impl::updateCheckUrl(CheckStatus newStatus)
+    {
+        switch (newStatus)
         {
-            switch (newStatus)
-            {
-            case CheckStatus::Passing:
-                return "/v1/agent/check/pass/";
-            case CheckStatus::Warning:
-                return "/v1/agent/check/warn/";
-            case CheckStatus::Failed:
-                return "/v1/agent/check/fail/";
-            default:
-                throw std::logic_error("Wrong CheckStatus value");
-            }
+        case CheckStatus::Passing:
+            return "/v1/agent/check/pass/";
+        case CheckStatus::Warning:
+            return "/v1/agent/check/warn/";
+        case CheckStatus::Critical:
+            return "/v1/agent/check/fail/";
+        default:
+            throw std::logic_error("Wrong CheckStatus value");
         }
     }
 

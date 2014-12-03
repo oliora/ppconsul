@@ -138,7 +138,7 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
     agent.registerService({ Uniq_Name_2, 2345, { "copier", "udp" }, "service2" });
     agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
 
-    sleep(1); // Give some time to propogate registered services to the catalog
+    sleep(1.0); // Give some time to propogate registered services to the catalog
 
     SECTION("services")
     {
@@ -179,12 +179,12 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
 
     SECTION("non existing service tag")
     {
-        CHECK(catalog.service(Uniq_Name_1, Non_Existing_Tag_Name).empty());
+        CHECK(catalog.service(Uniq_Name_1, params::tag = Non_Existing_Tag_Name).empty());
     }
 
     SECTION("service with tag")
     {
-        auto services1 = catalog.service(Uniq_Name_1, "udp");
+        auto services1 = catalog.service(Uniq_Name_1, params::tag = "udp");
 
         REQUIRE(services1.size() == 1);
 
@@ -194,7 +194,7 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
         CHECK(services1[0].second.tags == ppconsul::Tags({ "print", "udp" }));
         CHECK(services1[0].second.id == "service1");
 
-        auto services2 = catalog.service(Uniq_Name_1, "print");
+        auto services2 = catalog.service(Uniq_Name_1, params::tag = "print");
 
         REQUIRE(services2.size() == 2);
 
@@ -269,7 +269,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
     agent.registerService({ Uniq_Name_2_Spec, 2345, { "copier", Tag_Spec }, "service2" });
     agent.registerService({ Uniq_Name_1_Spec, 3456, { "print", "secret" }, "service3" });
 
-    sleep(1); // Give some time to propogate registered services to the catalog
+    sleep(1.0); // Give some time to propogate registered services to the catalog
 
     SECTION("services")
     {
@@ -305,7 +305,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
 
     SECTION("service with tag")
     {
-        auto services1 = catalog.service(Uniq_Name_1_Spec, Tag_Spec);
+        auto services1 = catalog.service(Uniq_Name_1_Spec, params::tag = Tag_Spec);
 
         REQUIRE(services1.size() == 1);
 
@@ -315,7 +315,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
         CHECK(services1[0].second.tags == ppconsul::Tags({ "print", Tag_Spec }));
         CHECK(services1[0].second.id == "service1");
 
-        auto services2 = catalog.service(Uniq_Name_1_Spec, "print");
+        auto services2 = catalog.service(Uniq_Name_1_Spec, params::tag = "print");
 
         REQUIRE(services2.size() == 2);
 
@@ -352,7 +352,7 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
     agent.registerService({ Uniq_Name_1, 1234, { "print", "udp" }, "service1" });
     agent.registerService({ Uniq_Name_2, 2345, { "copier", "udp" }, "service2" });
 
-    sleep(1); // Give some time to propogate registered services to the catalog
+    sleep(1.0); // Give some time to propogate registered services to the catalog
 
     SECTION("services")
     {
@@ -370,7 +370,7 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
 
         agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
 
-        sleep(1); // Give some time to propogate to the catalog
+        sleep(1.0); // Give some time to propogate to the catalog
 
         auto t2 = std::chrono::steady_clock::now();
         auto resp2 = catalog.services(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
@@ -398,7 +398,7 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
 
         agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
 
-        sleep(1); // Give some time to propogate to the catalog
+        sleep(1.0); // Give some time to propogate to the catalog
 
         auto t2 = std::chrono::steady_clock::now();
         auto resp2 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, block_for = { std::chrono::seconds(5), index1 });

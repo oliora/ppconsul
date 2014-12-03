@@ -187,25 +187,25 @@ namespace ppconsul { namespace kv {
             return items(std::string(), params...);
         }
 
-        // Get keys up to a separator provided. Returns empty vector if no keys found.
+        // Get keys starting with specified prefix up to a separator provided. Returns empty vector if no keys found.
         // Result contains both headers and data.
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
+        Response<std::vector<std::string>> subKeys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
-            KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::get)
-            return get_keys_impl(keyPrefix, kv::params::separator = helpers::encodeUrl(separator), params...);
+            KWARGS_CHECK_IN_LIST(Params, (kv::params::groups::get))
+            return get_keys_impl(keyPrefix, kv::params::separator = separator, params...);
         }
 
-        // Get keys up to a separator provided. Returns empty vector if no keys found.
+        // Get keys starting with specified prefix up to a separator provided. Returns empty vector if no keys found.
         // Result contains data only.
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<std::string> keys(const std::string& keyPrefix, const std::string& separator, const Params&... params) const
+        std::vector<std::string> subKeys(const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
-            return std::move(keys(withHeaders, keyPrefix, separator, params...).data());
+            return std::move(subKeys(withHeaders, keyPrefix, separator, params...).data());
         }
 
         // Get all keys strarting with specified prefix. Returns empty vector if no keys found.
@@ -215,18 +215,8 @@ namespace ppconsul { namespace kv {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const Params&... params) const
         {
-            KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::get)
+            KWARGS_CHECK_IN_LIST(Params, (kv::params::groups::get))
             return get_keys_impl(keyPrefix, params...);
-        }
-
-        // Get all keys. Returns empty vector if no keys found.
-        // Result contains both headers and data.
-        // Allowed parameters:
-        // - groups::get
-        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> keys(WithHeaders, const Params&... params) const
-        {
-            return keys(withHeaders, std::string(), params...);
         }
 
         // Get all keys strarting with specified prefix. Returns empty vector if no keys found.
@@ -237,6 +227,16 @@ namespace ppconsul { namespace kv {
         std::vector<std::string> keys(const std::string& prefix, const Params&... params) const
         {
             return std::move(keys(withHeaders, prefix, params...).data());
+        }
+
+        // Get all keys. Returns empty vector if no keys found.
+        // Result contains both headers and data.
+        // Allowed parameters:
+        // - groups::get
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        Response<std::vector<std::string>> keys(WithHeaders, const Params&... params) const
+        {
+            return keys(withHeaders, std::string(), params...);
         }
 
         // Get all keys. Returns empty vector if no keys found.
@@ -255,7 +255,7 @@ namespace ppconsul { namespace kv {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         void put(const std::string& key, const std::string& value, const Params&... params)
         {
-            KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::put)
+            KWARGS_CHECK_IN_LIST(Params, (kv::params::groups::put))
             if ("true" != m_consul.put(keyPath(key), value,
                                        params::token = m_defaultToken, params::dc = m_defaultDc,
                                        params...))
@@ -268,7 +268,7 @@ namespace ppconsul { namespace kv {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         bool cas(const std::string& key, uint64_t cas, const std::string& value, const Params&... params)
         {
-            KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::put)
+            KWARGS_CHECK_IN_LIST(Params, (kv::params::groups::put))
             return "true" == m_consul.put(keyPath(key), value,
                                           params::token = m_defaultToken, params::dc = m_defaultDc,
                                           params::cas = cas, params...);
@@ -311,7 +311,7 @@ namespace ppconsul { namespace kv {
     template<class... Params, class>
     Response<KeyValue> Storage::item(WithHeaders, const std::string& key, const Params&... params) const
     {
-        KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::get)
+        KWARGS_CHECK_IN_LIST(Params, (kv::params::groups::get))
         http::Status s;
         auto r = m_consul.get(s, keyPath(key),
                               params::token = m_defaultToken, params::consistency = m_defaultConsistency, params::dc = m_defaultDc,
@@ -337,7 +337,7 @@ namespace ppconsul { namespace kv {
     template<class... Params, class>
     Response<std::vector<KeyValue>> Storage::items(WithHeaders, const std::string& keyPrefix, const Params&... params) const
     {
-        KWARGS_CHECK_IN_GROUP(Params, kv::params::groups::get)
+        KWARGS_CHECK_IN_LIST(Params, (kv::params::groups::get))
         http::Status s;
         auto r = m_consul.get(s, keyPath(keyPrefix),
                               params::token = m_defaultToken, params::consistency = m_defaultConsistency, params::dc = m_defaultDc,

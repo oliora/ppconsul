@@ -9,6 +9,7 @@ set(HEADERS
     catalog.h
     consul.h
     error.h
+    health.h
     helpers.h
     http_status.h
     kv.h
@@ -29,6 +30,7 @@ set(SOURCES
     catalog.cpp
     consul.cpp
     helpers.cpp
+    health.cpp
     kv.cpp
 )
 

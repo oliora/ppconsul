@@ -14,6 +14,7 @@
 #include <utility>
 #include <chrono>
 #include <stdint.h>
+#include <iostream>
 
 
 namespace ppconsul {
@@ -58,7 +59,7 @@ namespace ppconsul {
         Unknown, // Not used since Consul 0.4.1
         Passing,
         Warning,
-        Failed
+        Critical
     };
 
     struct Check
@@ -91,16 +92,16 @@ namespace ppconsul {
         switch (s)
         {
         case CheckStatus::Passing:
-            os << "Passing";
+            os << "passing";
             break;
         case CheckStatus::Warning:
-            os << "Warning";
+            os << "warning";
             break;
-        case CheckStatus::Failed:
-            os << "Failed";
+        case CheckStatus::Critical:
+            os << "critical";
             break;
         case CheckStatus::Unknown:
-            os << "Unknown";
+            os << "unknown";
             break;
         default:
             os << "?";

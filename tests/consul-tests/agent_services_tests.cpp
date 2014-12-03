@@ -306,25 +306,25 @@ TEST_CASE("agent.service_check_update", "[consul][agent][service][health]")
     REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.output == "");
 
-    agent.updateServiceCheck("service1", CheckStatus::Failed, "it's failed :(");
+    agent.serviceFail("service1", "it's failed :(");
     c = agent.checks().at(serviceCheckId("service1"));
-    REQUIRE(c.status == CheckStatus::Failed);
+    REQUIRE(c.status == CheckStatus::Critical);
     REQUIRE(c.output == "it's failed :(");
 
-    agent.updateServiceCheck("service1", CheckStatus::Passing, "status:\neverything passing!!!\n");
+    agent.servicePass("service1", "status:\neverything passing!!!\n");
     c = agent.checks().at(serviceCheckId("service1"));
     REQUIRE(c.status == CheckStatus::Passing);
     REQUIRE(c.output == "status:\neverything passing!!!\n");
 
-    agent.updateServiceCheck("service1", CheckStatus::Passing);
+    agent.servicePass("service1");
     c = agent.checks().at(serviceCheckId("service1"));
     REQUIRE(c.status == CheckStatus::Passing);
     REQUIRE(c.output == "");
 
-    agent.updateServiceCheck("service1", CheckStatus::Warning);
+    agent.serviceWarn("service1");
     c = agent.checks().at(serviceCheckId("service1"));
     REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.output == "");
 
-    CHECK_THROWS_AS(agent.updateServiceCheck("service1", CheckStatus::Unknown), std::logic_error);
+    //CHECK_THROWS_AS(agent.updateServiceCheck("service1", CheckStatus::Unknown), std::logic_error);
 }
