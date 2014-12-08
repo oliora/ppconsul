@@ -20,6 +20,7 @@ namespace ppconsul { namespace health {
         using ppconsul::params::consistency;
         using ppconsul::params::block_for;
         using ppconsul::params::dc;
+        using ppconsul::params::tag;
 
         PPCONSUL_PARAM(passing, bool);
 
