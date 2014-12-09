@@ -12,6 +12,7 @@ add_executable(${PROJECT_NAME}
     agent_other_tests.cpp
     catalog_tests.cpp
     kv_tests.cpp
+    health_tests.cpp
 )
 link_test_libs(${PROJECT_NAME})
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME} -r junit -o "${PROJECT_NAME}.test_out.xml")

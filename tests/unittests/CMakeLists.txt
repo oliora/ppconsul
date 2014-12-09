@@ -11,4 +11,4 @@ add_executable(${PROJECT_NAME} main.cpp
     parameters.cpp
 )
 link_test_libs(${PROJECT_NAME})
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME} -r junit -o "${PROJECT_NAME}.test_out.xml")
