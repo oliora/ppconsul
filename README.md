@@ -45,32 +45,27 @@ TBD
 Otherwise download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that the latter depends on compiled Boost libraries.
 * Install [Consul](http://consul.io) 0.4.0 or above. It's optional and needed to run some of the tests only.
 
-### Prepare Project
+### Build
 
-Execute the following commands:  
+Prepare project:  
 ```
 mkdir workspace
 cd workspace
 cmake ..
 ```
 
-To use cpp-netlib instead of libCURL use `-DUSE_CPPNETLIB=1` when invoking CMake.
-
-**Note that** if you are building on Windows you need to set up additional variables:
-* Path to Boost headers and library.
-  Set environment variable `set BOOST_ROOT=<path_to_boost>` or pass it to CMake `cmake .. -DBOOST_ROOT=<path_to_boost>`.
-* Path to libCURL headers and library.
-  Set environment variable `set CURL_ROOT=<path_to_curl>` or pass it to CMake as described above.
+* To use cpp-netlib instead of libCURL use `-DUSE_CPPNETLIB=1` when invoking CMake.
+* To change where the build looks for Boost, pass `-DBOOST_ROOT=<path_to_boost>` parameter to CMake or set `BOOST_ROOT` environment variable.
+* To change where the build looks for libCURL, pass `-DCURL_ROOT=<path_to_curl>` parameter to CMake or set `CURL_ROOT` environment variable.
+* To change the default install location pass `-DCMAKE_INSTALL_PREFIX=<prefix>` parameter to CMake.
 
 *Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 
-### Build
-
-Linux/OSX:  
+Build on Linux/OSX:  
 `make`  
 
-Windows:  
-open solution file `ppconsul\workspace\ppconsul.sln` in MSVS or build the project from the command line with  
+Build on Windows:  
+open solution file `workspace\ppconsul.sln` in MSVS or build the project from the command line with  
 `cmake --build . --config Release`.
 
 ## How To Run Tests
