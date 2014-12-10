@@ -24,6 +24,6 @@ else ()
     include_directories(${CURL_INCLUDE_DIR})
 endif ()
 
+add_subdirectory(unittests) # to run unittests before consul ones
 add_subdirectory(consul-get)
 add_subdirectory(consul-tests)
-add_subdirectory(unittests)
