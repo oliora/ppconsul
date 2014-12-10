@@ -15,13 +15,13 @@ start)
 stop)
     if [ -e "/tmp/test-consul/pid" ]; then
         kill -SIGINT $(</tmp/test-consul/pid) || exit 1
-        echo "test consull stopped"
+        echo "test consul stopped"
     else
         echo "test consul is not running"
     fi
     ;;
 *)
-    echo "usage: test-consul.sh start|stop"
+    echo "Usage: test-consul.sh start|stop"
     exit 2
     ;;
 esac
