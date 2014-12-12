@@ -67,7 +67,8 @@ Build on Linux/OSX:
 `make`  
 
 Build on Windows:  
-Either open solution file `workspace\ppconsul.sln` or build from the command line: `cmake --build . --config Release`.
+Either open solution file `workspace\ppconsul.sln` or build from the command line:  
+`cmake --build . --config Release`.
 
 ## How To Run Tests
 TBD
