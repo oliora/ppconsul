@@ -27,7 +27,6 @@ Releases:
 
 ### CI
 
-CI postponed to 0.2
 + build for 3 platforms (Windows, Linux, OSX)
 + run unit-tests
 - run integration tests (-Windows, +Linux , +OSX)
