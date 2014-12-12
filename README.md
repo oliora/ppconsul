@@ -14,9 +14,9 @@ The goal of PPConsul is to:
 Note that this project is just started so it is under active developing, doesn't have a stable interface and was not tested enough.
 So if you are looking for something stable and ready to be used in production then it's better to come back later or help me growing this project to the quality level you need.
 
-The library is written in C++11 and requires a quite modern compiler. Compilers officially supported at the moment:
+The library is written in C++11 and requires a quite modern compiler. Currently it has been tested with:
 * Windows: Visual Studio 2013
-* OSX: Clang 6, libc++ (Xcode 6)
+* OS X: Clang 6 + libc++ (Xcode 6.1), Clang 5.1 + libc++ (Xcode 5.1)
 * Linux: GCC 4.9, GCC 4.8.2
 
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
