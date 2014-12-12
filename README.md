@@ -28,7 +28,7 @@ The library depends on:
 * [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP. Note that the latter depends on compiled Boost libraries.
 
 The library includes code of the following 3rd party libraries (look at `ext` directory): 
-* [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
+* Slightly tweaked [version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
 
 For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
