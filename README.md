@@ -24,8 +24,8 @@ Please check [PPConsul build status](https://78.46.71.115/project.html?projectId
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
 The library depends on:
-* [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP.
 * [Boost](http://www.boost.org/) library. PPConsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is supported only in GCC 4.9](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+* [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP. Note that the latter depends on compiled Boost libraries.
 
 The library includes code of the following 3rd party libraries (look at `ext` directory): 
 * [my own version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
@@ -42,9 +42,8 @@ TBD
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [Git](http://git-scm.com/) client.
 * Install [CMake](http://www.cmake.org/) 2.8.12 or above (earlier version may also be OK on Linux/OSX but not on Windows). Note that CMake 3 not guaranteed to work.
-* Download [Boost](http://www.boost.org/) library. You have to build it only if you going to use cpp-netlib or libCURL with GCC 4.8.
-* If you prefer to use libCURL then install libCURL (any version should be OK). Note that on Windows it is included in [CURL installer](http://curl.haxx.se/download.html).
-Otherwise download and build [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that the latter depends on compiled Boost libraries.
+* Install [Boost](http://www.boost.org/) library. You need compiled libraries if you going to use either cpp-netlib or GCC 4.8.
+* Install either [libCURL](http://curl.haxx.se/libcurl/) (any version is OK) or [cpp-netlib](http://cpp-netlib.org/) 0.11 or above. Note that on Windows libCURL is included in [CURL installer](http://curl.haxx.se/download.html).
 * Install [Consul](http://consul.io) 0.4.0 or above. It's only needed to run tests.
 
 ### Build
