@@ -28,9 +28,9 @@ Releases:
 ### CI
 
 CI postponed to 0.2
-- build for 3 platforms (+Windows, +Linux, -OSX)
++ build for 3 platforms (Windows, Linux, OSX)
 + run unit-tests
-- run integration tests (+Linux, -Windows, -OSX)
+- run integration tests (-Windows, +Linux , +OSX)
 - operator << for std::duration for tests
 
 ### Consul
