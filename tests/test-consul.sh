@@ -9,7 +9,7 @@ start)
         exit 1
     fi
 
-    DATA_DIR=test-consul
+    DATA_DIR=test-consul-data
     rm -rf $DATA_DIR
     consul agent -bootstrap-expect=1 -server -dc=ppconsul_test "-data-dir=$DATA_DIR" >/dev/null &
     sleep 3s
