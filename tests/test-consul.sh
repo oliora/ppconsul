@@ -3,23 +3,31 @@
 
 case "$1" in
 start)
-    mkdir -p /tmp/test-consul/data || exit 1
-    consul agent -bootstrap-expect=1 -server -dc=ppconsul_test -data-dir=/tmp/test-consul/data -pid-file=/tmp/test-consul/pid  >/dev/null &
+    consul info >/dev/null
+    if [ $? -eq 0 ]; then
+        echo "Consul is already running"
+        exit 1
+    fi
+
+    DATA_DIR=test-consul
+    rm -rf $DATA_DIR
+    consul agent -bootstrap-expect=1 -server -dc=ppconsul_test "-data-dir=$DATA_DIR" >/dev/null &
     sleep 3s
-    if [ -e "/tmp/test-consul/pid" ]; then
-        echo "test consul started, PID=$(</tmp/test-consul/pid)"
+    consul info >/dev/null
+    if [ $? -ne 0 ]; then
+        echo "Failed to start consul"
+        exit 1
     else
-        echo "failed to start"
+        echo "Consul started successfully"
     fi
     ;;
 stop)
-    if [ -e "/tmp/test-consul/pid" ]; then
-        consul leave || exit 1
-        #kill -SIGINT $(</tmp/test-consul/pid) || exit 1
-        #echo "test consul stopped"
-    else
-        echo "test consul is not running"
+    consul info >/dev/null
+    if [ $? -ne 0 ]; then
+        echo "Consul is not running"
+        exit 0
     fi
+    consul leave || exit 1
     ;;
 *)
     echo "Usage: test-consul.sh start|stop"
