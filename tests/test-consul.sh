@@ -14,8 +14,9 @@ start)
     ;;
 stop)
     if [ -e "/tmp/test-consul/pid" ]; then
-        kill -SIGINT $(</tmp/test-consul/pid) || exit 1
-        echo "test consul stopped"
+        consul leave || exit 1
+        #kill -SIGINT $(</tmp/test-consul/pid) || exit 1
+        #echo "test consul stopped"
     else
         echo "test consul is not running"
     fi
