@@ -10,7 +10,7 @@ start)
     fi
 
     DATA_DIR=test-consul-data
-    rm -rf $DATA_DIR
+    rm -rf "$DATA_DIR" || (echo "Can not delete data dir" && exit 1)
     consul agent -bootstrap-expect=1 -server -dc=ppconsul_test "-data-dir=$DATA_DIR" >/dev/null &
     sleep 3s
     consul info >/dev/null
