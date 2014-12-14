@@ -6,7 +6,7 @@ if "%1"=="start" (
     consul info > nul
     if NOT ERRORLEVEL 1 (echo Consul is already running && exit /b 1)
     if EXIST "%DATA_DIR%" (rd /S /Q "%DATA_DIR%" || echo Can not delete data dir && exit /b 1)
-    start consul agent -server -bootstrap-expect=1 "-data-dir=%DATA_DIR%"
+    start consul agent -server -bootstrap-expect=1 -dc=ppconsul_test "-data-dir=%DATA_DIR%"
     timeout 3
     consul info > nul
     if ERRORLEVEL 1 (echo Can not start Consul && exit /b 1)
