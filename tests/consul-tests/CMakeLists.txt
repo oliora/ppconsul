@@ -6,6 +6,8 @@
 
 project(consul-tests)
 add_executable(${PROJECT_NAME}
+    chrono_io.h
+    test_consul.h
     main.cpp
     agent_checks_tests.cpp
     agent_services_tests.cpp
