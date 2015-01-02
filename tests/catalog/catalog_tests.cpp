@@ -138,7 +138,7 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
     agent.registerService({ Uniq_Name_2, 2345, { "copier", "udp" }, "service2" });
     agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
 
-    sleep(1.5); // Give some time to propogate registered services to the catalog
+    sleep(2.0); // Give some time to propogate registered services to the catalog
 
     SECTION("services")
     {
@@ -269,7 +269,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
     agent.registerService({ Uniq_Name_2_Spec, 2345, { "copier", Tag_Spec }, "service2" });
     agent.registerService({ Uniq_Name_1_Spec, 3456, { "print", "secret" }, "service3" });
 
-    sleep(1.5); // Give some time to propogate registered services to the catalog
+    sleep(2.0); // Give some time to propogate registered services to the catalog
 
     SECTION("services")
     {
@@ -352,7 +352,7 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
     agent.registerService({ Uniq_Name_1, 1234, { "print", "udp" }, "service1" });
     agent.registerService({ Uniq_Name_2, 2345, { "copier", "udp" }, "service2" });
 
-    sleep(1.5); // Give some time to propogate registered services to the catalog
+    sleep(2.0); // Give some time to propogate registered services to the catalog
 
     SECTION("services")
     {
@@ -398,7 +398,7 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
 
         agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
 
-        sleep(1.5); // Give some time to propogate to the catalog
+        sleep(2.0); // Give some time to propogate to the catalog
 
         auto t2 = std::chrono::steady_clock::now();
         auto resp2 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, block_for = { std::chrono::seconds(5), index1 });
