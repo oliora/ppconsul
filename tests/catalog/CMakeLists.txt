@@ -4,16 +4,10 @@
 #  Boost Software License, Version 1.0. (See accompanying file
 #  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-project(consul-tests)
+project(catalog-tests)
 add_executable(${PROJECT_NAME}
-    chrono_io.h
-    test_consul.h
-    main.cpp
-    agent_checks_tests.cpp
-    agent_services_tests.cpp
-    agent_other_tests.cpp
+    ../main.cpp
     catalog_tests.cpp
-    kv_tests.cpp
 )
 link_test_libs(${PROJECT_NAME})
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME} -r junit -o "${PROJECT_NAME}.test_out.xml")
+add_catch_test(${PROJECT_NAME})

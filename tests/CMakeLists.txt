@@ -16,6 +16,15 @@ macro(link_test_libs project_name)
     endif ()
 endmacro()
 
+macro(add_catch_test name)
+    if (TEST_REPORT_FORMAT)
+        add_test(NAME ${name} COMMAND ${name} -r ${TEST_REPORT_FORMAT} -o "${name}.test_out.xml")
+    else()
+        add_test(NAME ${name} COMMAND ${name})
+    endif()
+endmacro()
+
+include_directories(${CMAKE_CURRENT_LIST_DIR})
 include_directories(${Boost_INCLUDE_DIRS})
 
 if (${USE_CPPNETLIB})
@@ -25,5 +34,9 @@ else ()
 endif ()
 
 add_subdirectory(unittests) # to run unittests before consul ones
+
+add_subdirectory(agent)
+add_subdirectory(catalog)
+add_subdirectory(kv)
+
 add_subdirectory(consul-get)
-add_subdirectory(consul-tests)
