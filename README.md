@@ -33,7 +33,10 @@ The library includes code of the following 3rd party libraries (look at `ext` di
 
 For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
 
-## Warm Up Examples
+## Warm Up Example
+
+Register, deregister and report the state of your service in Consul:
+
 
 ```cpp
 // #include "ppconsul/agent.h"
