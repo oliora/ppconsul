@@ -38,7 +38,7 @@ For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) f
 ```cpp
 // #include "ppconsul/agent.h"
 
-// Create a consul client with using of a default endpoint ("127.0.0.1:8500") and default DC
+// Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
 ppconsul::Consul consul;
 // We will need the 'agent' endpoint
 ppconsul::agent::Agent agent(consul);
