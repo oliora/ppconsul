@@ -33,6 +33,30 @@ The library includes code of the following 3rd party libraries (look at `ext` di
 
 For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
 
+## Warm Up Examples
+
+```cpp
+// #include "ppconsul/agent.h"
+
+// Create a consul client with using of a default endpoint ("127.0.0.1:8500") and default DC
+ppconsul::Consul consul;
+// We will need the 'agent' endpoint
+ppconsul::agent::Agent agent(consul);
+
+// Register a service with TTL:
+agent.registerService({ "my-service", 9876, {"tcp", "super_server"}}, std::chrono::seconds(5));
+
+...
+
+// Report service status, should be called periodically with no more than 15 seconds between calls
+agent.servicePass("my-service");
+
+...
+
+// Unregister service
+agent.deregisterService("my-service");
+```
+
 ## Documentation
 TBD
 
