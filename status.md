@@ -2,26 +2,25 @@
 
 The status of Consul HTTP API v1 coverage. Note that all implemented features are tested with automated integration tests.
 
-### KV
+### Key/Value Store (KV)
 
-Most features supported. Note that:
-- Lock acquiring / release is **not supported**. Will be implemented after Session endpoint.
+Everything is supported except the following:
+- Lock acquiring / release. Will be implemented after Session endpoint.
 - Support of blocking queries is limited [[1]].
-- It's only possible to work with values as strings, but there is a plan to add typed interface, something like `get<int>(key)`, `put(key, some_double)` etc. 
+- It's only possible to work with values as strings, but there is a plan to add a typed interface, something like `get<int>(key)`, `put(key, some_double)`, etc. 
 
 ### Agent
 
-Most features supported with the following exception:
-- Additional check types (HTTP, TCP, Docker), see [Checks](https://www.consul.io/docs/agent/checks.html)
-- [agent/maintenance](https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
-- [agent/service/maintenance](https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
-
-- Accessing to `"Config"` object received from `/v1/agent/self` endpoint is **not supported** and there is no plan to support it any time soon.
+Everything is supported except the following:
+- Additional check types (HTTP, TCP, Docker), see https://www.consul.io/docs/agent/checks.html
+- Endpoint [`/v1/agent/maintenance`](https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
+- Endpoint [`/v1/agent/service/maintenance`](https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
+- Accessing to `"Config"` object received from `/v1/agent/self` endpoint. There is no plan to support it any time soon unless requested by users.
 
 ### Catalog
 
-Most features supported. Note that:
-- Registration/derigistration is **not supported**. The agent endpoint should be used instead. I have no plans to implement this feature until I get a real use case for it.
+Everything is supported except the following:
+- Registration/derigistration. Please use the agent endpoint instead. There is no plan to support it any time soon unless requested by users.
 - Support of blocking queries is limited [[1]].
 
 ### Health
