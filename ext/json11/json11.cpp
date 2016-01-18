@@ -27,7 +27,7 @@
 #include <limits>
 
 
-#if defined _WIN32
+#if defined _MSC_VER && _MSC_VER < 1900  // MS Visual Studio before VS2014
     #if ! defined snprintf
         #define snprintf _snprintf
     #endif

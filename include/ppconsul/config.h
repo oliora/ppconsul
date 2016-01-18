@@ -8,6 +8,11 @@
 
 #if defined _MSC_VER && _MSC_VER < 1900  // MS Visual Studio before VS2014
     #define PPCONSUL_NO_CXX11_NOEXCEPT
+
+    #if ! defined PPCONSUL_SNPRINTF_DEFINED && ! defined snprintf
+        #define PPCONSUL_SNPRINTF_DEFINED
+        #define snprintf _snprintf
+    #endif
 #endif
 
 #if ! defined PPCONSUL_NO_CXX11_NOEXCEPT
@@ -15,9 +20,3 @@
 #else
     #define PPCONSUL_NOEXCEPT
 #endif
-
-#if defined _WIN32 && ! defined PPCONSUL_SNPRINTF_DEFINED && ! defined snprintf
-    #define PPCONSUL_SNPRINTF_DEFINED
-    #define snprintf _snprintf
-#endif
-
