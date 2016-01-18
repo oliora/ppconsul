@@ -41,14 +41,18 @@ Register, deregister and report the state of your service in Consul:
 
 
 ```cpp
-// #include "ppconsul/agent.h"
+// Include the agent endpoint header
+#include "ppconsul/agent.h"
 
-// Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
+...
+
+// Create a consul client using the default Consul address ("127.0.0.1:8500") and the default data-center
 ppconsul::Consul consul;
-// We will need the 'agent' endpoint
+
+// Create the agent endpoint
 ppconsul::agent::Agent agent(consul);
 
-// Register a service with TTL:
+// Register a service with TTL. The service "my-service" runs on port 9876 and has two tags attached.
 agent.registerService({ "my-service", 9876, {"tcp", "super_server"}}, std::chrono::seconds(5));
 
 ...
