@@ -14,14 +14,15 @@ The goal of PPConsul is to:
 Note that this project is just started so it is under active developing, doesn't have a stable interface and was not tested enough.
 So if you are looking for something stable and ready to be used in production then it's better to come back later or help me growing this project to the quality level you need.
 
+Library tests are running against **Consul v0.6.3** but known to worked with versions **0.4** and **0.5** as well (Please [create the issue](https://github.com/oliora/ppconsul/issues/new) if it doesn't).
+
+
 The library is written in C++11 and requires a quite modern compiler. Currently it has been tested with:
 * Windows: Visual Studio 2013
 * OS X: Clang 6 + libc++ (Xcode 6.1), Clang 5.1 + libc++ (Xcode 5.1)
 * Linux: GCC 4.9, GCC 4.8.2
 
 Please check [PPConsul build status](https://78.46.71.115/project.html?projectId=Ppconsul&guest=1).
-
-Library tests currently run against Consul v0.6.3 but known to worked with versions 0.4 and 0.5 as well (Please file [issue](https://github.com/oliora/ppconsul/issues) if it doesn't).
 
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
