@@ -5,6 +5,7 @@ The status of Consul HTTP API v1 coverage. Note that all implemented features ar
 ### Key/Value Store (KV)
 
 Everything is supported except the following:
+- ACL tokens
 - Lock acquiring / release. Will be implemented after Session endpoint.
 - Support of blocking queries is limited [[1]].
 - It's only possible to work with values as strings, but there is a plan to add a typed interface, something like `get<int>(key)`, `put(key, some_double)`, etc. 
@@ -12,6 +13,7 @@ Everything is supported except the following:
 ### Agent
 
 Everything is supported except the following:
+- ACL tokens
 - Additional check types (HTTP, TCP, Docker), see https://www.consul.io/docs/agent/checks.html
 - Endpoint [`/v1/agent/maintenance`](https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
 - Endpoint [`/v1/agent/service/maintenance`](https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
@@ -20,8 +22,9 @@ Everything is supported except the following:
 ### Catalog
 
 Everything is supported except the following:
-- Registration/derigistration. Please use the agent endpoint instead. There is no plan to support it any time soon unless requested by users.
+- ACL tokens
 - Support of blocking queries is limited [[1]].
+- Registration/derigistration. Please use the agent endpoint instead. There is no plan to support it any time soon unless requested by users.
 
 ### Health
 
