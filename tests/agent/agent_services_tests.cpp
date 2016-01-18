@@ -175,7 +175,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(!c.name.empty());
         CHECK(c.notes.empty());
         CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
-        CHECK(!c.output.empty());                   //
+        // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == "service1");
         CHECK(c.serviceName == "service1");
     }
@@ -204,7 +204,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(!c.name.empty());
         CHECK(c.notes.empty());
         CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
-        CHECK(!c.output.empty());                   //
+        // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == Unique_Id);
         CHECK(c.serviceName == "service1");
     }
@@ -288,7 +288,7 @@ TEST_CASE("agent.service_registration_special_chars", "[consul][agent][service][
         CHECK(!c.name.empty());
         CHECK(c.notes.empty());
         CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
-        CHECK(!c.output.empty());                   //
+        // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == spec_name);
         CHECK(c.serviceName == spec_name);
     }

@@ -684,6 +684,7 @@ TEST_CASE("kv.index", "[consul][kv][headers]")
     kv.erase("key1");
     REQUIRE(!kv.count("key1"));
 
+    // Check that getting an item does not change the item's modify-index
     auto modifyIndex1 = kv.items(ppconsul::withHeaders).headers().index();
     CHECK(kv.items(ppconsul::withHeaders).headers().index() == modifyIndex1);
     
@@ -691,9 +692,9 @@ TEST_CASE("kv.index", "[consul][kv][headers]")
     auto modifyIndex2 = kv.items(ppconsul::withHeaders).headers().index();
     CHECK(modifyIndex2 > modifyIndex1);
     
+    // Check that erasing of an item DO change the root's modify-index (probably broken before Consul 0.5.0)
     kv.erase("key1");
-    CHECK(kv.items(ppconsul::withHeaders).headers().index() < modifyIndex2);
-    CHECK(kv.items(ppconsul::withHeaders).headers().index() == modifyIndex1);
+    CHECK(kv.items(ppconsul::withHeaders).headers().index() > modifyIndex2);
 }
 
 TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
