@@ -3,6 +3,9 @@
 
 case "$1" in
 start)
+    CONSUL_VERSION=`consul --version`
+    echo "$CONSUL_VERSION"
+
     consul info >/dev/null
     if [ $? -eq 0 ]; then
         echo "Consul is already running"

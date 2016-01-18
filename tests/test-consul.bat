@@ -3,6 +3,8 @@
 set DATA_DIR=test-consul-data
 
 if "%1"=="start" (
+    consul --version
+
     consul info > nul
     if NOT ERRORLEVEL 1 (echo Consul is already running && exit /b 1)
     if EXIST "%DATA_DIR%" (rd /S /Q "%DATA_DIR%" || echo Can not delete data dir && exit /b 1)
