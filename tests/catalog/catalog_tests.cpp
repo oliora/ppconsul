@@ -362,8 +362,8 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
 
         auto t1 = std::chrono::steady_clock::now();
         auto resp1 = catalog.services(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
+        REQUIRE(index1 == resp1.headers().index()); // otherwise someone else did some change. TODO: make test stable
         CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
-        CHECK(index1 == resp1.headers().index());
 
         CHECK(resp1.data().at(Uniq_Name_1) == ppconsul::Tags({ "print", "udp" }));
         CHECK(resp1.data().at(Uniq_Name_2) == ppconsul::Tags({ "copier", "udp" }));
@@ -375,7 +375,7 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
         auto t2 = std::chrono::steady_clock::now();
         auto resp2 = catalog.services(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
         CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
-        CHECK(index1 != resp2.headers().index());
+        CHECK(resp2.headers().index() >= index1);
 
         CHECK(resp2.data().at(Uniq_Name_1) == ppconsul::Tags({ "print", "secret", "udp" }));
         CHECK(resp2.data().at(Uniq_Name_2) == ppconsul::Tags({ "copier", "udp" }));
