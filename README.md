@@ -14,8 +14,7 @@ The goal of PPConsul is to:
 Note that this project is just started so it is under active developing, doesn't have a stable interface and was not tested enough.
 So if you are looking for something stable and ready to be used in production then it's better to come back later or help me growing this project to the quality level you need.
 
-Library tests are running against **Consul v0.6.3** but known to worked with versions **0.4** and **0.5** as well (Please [create the issue](https://github.com/oliora/ppconsul/issues/new) if it doesn't).
-
+Library tests are running against **Consul v0.6.3**. Library known to work with versions **0.4** and **0.5** as well although some tests may fail because of differences in Consul behavior.
 
 The library is written in C++11 and requires a quite modern compiler. Currently it has been tested with:
 * Windows: Visual Studio 2013
