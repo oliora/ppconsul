@@ -8,7 +8,8 @@ Everything is supported except the following:
 - ACL tokens
 - Lock acquiring / release. Will be implemented after Session endpoint.
 - Support of blocking queries is limited [[1]].
-- It's only possible to work with values as strings, but there is a plan to add a typed interface, something like `get<int>(key)`, `put(key, some_double)`, etc. 
+
+At the moment it's only possible to work with values as strings, but there is a plan to add a typed interface, something like `get<int>(key)`, `put(key, some_double)`, etc. 
 
 ### Agent
 
