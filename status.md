@@ -11,8 +11,12 @@ Most features supported. Note that:
 
 ### Agent
 
-Most features supported. Note that:
-- Accessing to `"Config"` object received from `/v1/agent/self` endpoint is **not supported**.
+Most features supported with the following exception:
+- Additional check types (HTTP, TCP, Docker), see [Checks](https://www.consul.io/docs/agent/checks.html)
+- [agent/maintenance](https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
+- [agent/service/maintenance](https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
+
+- Accessing to `"Config"` object received from `/v1/agent/self` endpoint is **not supported** and there is no plan to support it any time soon.
 
 ### Catalog
 
