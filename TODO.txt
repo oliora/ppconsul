@@ -58,6 +58,12 @@ Releases:
 ### agent
 
 + v1 interface except Config part of /v1/agent/self
+- Additional check types (https://www.consul.io/docs/agent/checks.html)
+  - HTTP
+  - TCP
+  - Docker
+- agent/maintenance (https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
+- agent/service/maintenance (https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
 
 - Config part of /v1/agent/self (postponed to 0.2)
 
