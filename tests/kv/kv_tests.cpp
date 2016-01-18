@@ -692,7 +692,7 @@ TEST_CASE("kv.index", "[consul][kv][headers]")
     auto modifyIndex2 = kv.items(ppconsul::withHeaders).headers().index();
     CHECK(modifyIndex2 > modifyIndex1);
     
-    // Check that erasing of an item DO change the root's modify-index (probably broken before Consul 0.5.0)
+    // Check that erasing of an item changes the root's modify-index (doesn't work before Consul 0.5.0)
     kv.erase("key1");
     CHECK(kv.items(ppconsul::withHeaders).headers().index() > modifyIndex2);
 }
