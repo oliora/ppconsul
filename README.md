@@ -21,6 +21,8 @@ The library is written in C++11 and requires a quite modern compiler. Currently 
 
 Please check [PPConsul build status](https://78.46.71.115/project.html?projectId=Ppconsul&guest=1).
 
+Library tests currently run against Consul v0.6.3 but known to worked with versions 0.4 and 0.5 as well (Please file [issue](https://github.com/oliora/ppconsul/issues) if it doesn't).
+
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
 The library depends on:
