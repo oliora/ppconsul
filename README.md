@@ -21,7 +21,7 @@ The library is written in C++11 and requires a quite modern compiler. Currently 
 * OS X: Clang 6 + libc++ (Xcode 6.1), Clang 5.1 + libc++ (Xcode 5.1)
 * Linux: GCC 4.9, GCC 4.8.2
 
-Please check [PPConsul build status](https://78.46.71.115/project.html?projectId=Ppconsul&guest=1).
+Please check [PPConsul build status](https://78.46.71.115:4433/project.html?projectId=Ppconsul&guest=1).
 
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
