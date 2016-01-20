@@ -35,6 +35,7 @@ Releases:
 
 ### Consul
 
++ Use milliseconds instead of seconds as base units for blocking queries
 - tests for default DC and default token (postponed to 0.2)
 
 
