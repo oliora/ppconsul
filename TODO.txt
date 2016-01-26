@@ -62,6 +62,7 @@ Releases:
   - HTTP
   - TCP
   - Docker
+- Support "Notes" for a service's check
 - agent/maintenance (https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
 - agent/service/maintenance (https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
 

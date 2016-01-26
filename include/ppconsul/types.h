@@ -32,18 +32,28 @@ namespace ppconsul {
 
     typedef std::unordered_map<std::string, std::string> Properties;
 
-    struct Service
+    struct ServiceRegistrationData
     {
         // Without this ctor provided VS 2013 crashes with internal error on code like
         // `agent.registerService({ "check_name" }, "script_name", std::chrono::seconds(interval))`
-        Service(std::string name = "", uint16_t port = 0, Tags tags = Tags(), std::string id = "")
-        : name(std::move(name)), port(port), tags(std::move(tags)), id(std::move(id))
+        ServiceRegistrationData(std::string name = "", uint16_t port = 0, Tags tags = Tags(), std::string id = "", std::string address = "")
+        : id(std::move(id)), name(std::move(name)), address(std::move(address)), port(port), tags(std::move(tags))
         {}
 
+        std::string id;
         std::string name;
+        std::string address;
         uint16_t port = 0;
         Tags tags;
+    };
+
+    struct ServiceInfo
+    {
         std::string id;
+        std::string name;
+        std::string address;
+        uint16_t port;
+        Tags tags;
     };
 
     struct Node
@@ -62,26 +72,29 @@ namespace ppconsul {
         Critical
     };
 
-    struct Check
+    struct CheckRegistrationData
     {
         // Without this ctor provided VS 2013 crashes with internal error on code like
         // `agent.registerCheck({ "check_name" }, "script_name", std::chrono::seconds(interval))`
-        Check(std::string name = "", std::string notes = "", std::string id = "")
-            : name(std::move(name)), notes(std::move(notes)), id(std::move(id))
+        CheckRegistrationData(std::string name = "", std::string notes = "", std::string id = "")
+        : id(std::move(id)), name(std::move(name)), notes(std::move(notes))
         {}
 
+        std::string id;
         std::string name;
         std::string notes;
-        std::string id;
     };
 
-    struct CheckInfo: Check
+    struct CheckInfo
     {
+        std::string id;
+        std::string name;
+        std::string notes;
+        std::string serviceId;
+        std::string serviceName;
         std::string node;
         CheckStatus status;
         std::string output;
-        std::string serviceId;
-        std::string serviceName;
     };
 
     struct WithHeaders {};

@@ -11,14 +11,15 @@
 
 namespace ppconsul {
 
-    inline void load(const s11n::Json& src, Service& dst)
+    inline void load(const s11n::Json& src, ServiceInfo& dst)
     {
         using s11n::load;
 
+        load(src, dst.id, "ID");
         load(src, dst.name, "Service");
+        load(src, dst.address, "Address");
         load(src, dst.port, "Port");
         load(src, dst.tags, "Tags");
-        load(src, dst.id, "ID");
     }
 
     inline void load(const s11n::Json& src, Node& dst)

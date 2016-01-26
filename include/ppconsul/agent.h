@@ -56,13 +56,13 @@ namespace ppconsul { namespace agent {
         std::vector<Member> parseMembers(const std::string& json);
         std::pair<Config, Member> parseSelf(const std::string& json);
         std::unordered_map<std::string, CheckInfo> parseChecks(const std::string& json);
-        std::unordered_map<std::string, Service> parseServices(const std::string& json);
+        std::unordered_map<std::string, ServiceInfo> parseServices(const std::string& json);
 
-        std::string checkRegistrationJson(const Check& check, const std::chrono::seconds& ttl);
-        std::string checkRegistrationJson(const Check& check, const std::string& script, const std::chrono::seconds& interval);
-        std::string serviceRegistrationJson(const Service& service);
-        std::string serviceRegistrationJson(const Service& service, const std::chrono::seconds& ttl);
-        std::string serviceRegistrationJson(const Service& service, const std::string& script, const std::chrono::seconds& interval);
+        std::string checkRegistrationJson(const CheckRegistrationData& check, const std::chrono::seconds& ttl);
+        std::string checkRegistrationJson(const CheckRegistrationData& check, const std::string& script, const std::chrono::seconds& interval);
+        std::string serviceRegistrationJson(const ServiceRegistrationData& service);
+        std::string serviceRegistrationJson(const ServiceRegistrationData& service, const std::chrono::seconds& ttl);
+        std::string serviceRegistrationJson(const ServiceRegistrationData& service, const std::string& script, const std::chrono::seconds& interval);
 
         std::string updateCheckUrl(CheckStatus newStatus);
     }
@@ -99,12 +99,12 @@ namespace ppconsul { namespace agent {
             return impl::parseChecks(m_consul.get("/v1/agent/checks"));
         }
 
-        void registerCheck(const Check& check, const std::chrono::seconds& ttl)
+        void registerCheck(const CheckRegistrationData& check, const std::chrono::seconds& ttl)
         {
             m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(check, ttl));
         }
         
-        void registerCheck(const Check& check, const std::string& script, const std::chrono::seconds& interval)
+        void registerCheck(const CheckRegistrationData& check, const std::string& script, const std::chrono::seconds& interval)
         {
             m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(check, script, interval));
         }
@@ -147,22 +147,22 @@ namespace ppconsul { namespace agent {
             updateServiceCheck(serviceId, CheckStatus::Critical, note);
         }
 
-        std::unordered_map<std::string, Service> services() const
+        std::unordered_map<std::string, ServiceInfo> services() const
         {
             return impl::parseServices(m_consul.get("/v1/agent/services"));
         }
 
-        void registerService(const Service& service)
+        void registerService(const ServiceRegistrationData& service)
         {
             m_consul.put("/v1/agent/service/register", impl::serviceRegistrationJson(service));
         }
         
-        void registerService(const Service& service, const std::chrono::seconds& ttl)
+        void registerService(const ServiceRegistrationData& service, const std::chrono::seconds& ttl)
         {
             m_consul.put("/v1/agent/service/register", impl::serviceRegistrationJson(service, ttl));
         }
 
-        void registerService(const Service& service, const std::string& script, const std::chrono::seconds& interval)
+        void registerService(const ServiceRegistrationData& service, const std::string& script, const std::chrono::seconds& interval)
         {
             m_consul.put("/v1/agent/service/register", impl::serviceRegistrationJson(service, script, interval));
         }

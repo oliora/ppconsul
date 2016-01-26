@@ -13,9 +13,9 @@
 
 namespace ppconsul { namespace catalog {
 
-    typedef std::pair<Node, std::unordered_map<std::string, Service>> NodeServices;
+    typedef std::pair<Node, std::unordered_map<std::string, ServiceInfo>> NodeServices;
 
-    typedef std::pair<Node, Service> NodeService;
+    typedef std::pair<Node, ServiceInfo> NodeService;
 
     namespace params {
         using ppconsul::params::consistency;

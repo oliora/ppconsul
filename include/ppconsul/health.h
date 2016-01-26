@@ -14,7 +14,7 @@
 
 namespace ppconsul { namespace health {
 
-    using ppconsul::Service;
+    using ppconsul::ServiceRegistrationData;
 
     namespace params {
         using ppconsul::params::consistency;
@@ -29,7 +29,7 @@ namespace ppconsul { namespace health {
         }
     }
 
-    typedef std::tuple<Node, Service, std::vector<CheckInfo>> NodeServiceChecks;
+    typedef std::tuple<Node, ServiceInfo, std::vector<CheckInfo>> NodeServiceChecks;
 
     namespace impl {
         std::vector<CheckInfo> parseCheckInfos(const std::string& json);

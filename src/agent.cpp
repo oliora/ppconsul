@@ -75,12 +75,12 @@ namespace impl {
         return s11n::parseJson<std::unordered_map<std::string, CheckInfo>>(json);
     }
 
-    std::unordered_map<std::string, Service> parseServices(const std::string& json)
+    std::unordered_map<std::string, ServiceInfo> parseServices(const std::string& json)
     {
-        return s11n::parseJson<std::unordered_map<std::string, Service>>(json);
+        return s11n::parseJson<std::unordered_map<std::string, ServiceInfo>>(json);
     }
 
-    std::string checkRegistrationJson(const Check& check, const std::chrono::seconds& ttl)
+    std::string checkRegistrationJson(const CheckRegistrationData& check, const std::chrono::seconds& ttl)
     {
         using s11n::Json;
 
@@ -92,7 +92,7 @@ namespace impl {
         }).dump();
     }
 
-    std::string checkRegistrationJson(const Check& check, const std::string& script, const std::chrono::seconds& interval)
+    std::string checkRegistrationJson(const CheckRegistrationData& check, const std::string& script, const std::chrono::seconds& interval)
     {
         using s11n::Json;
 
@@ -105,7 +105,7 @@ namespace impl {
         }).dump();
     }
 
-    std::string serviceRegistrationJson(const Service& service)
+    std::string serviceRegistrationJson(const ServiceRegistrationData& service)
     {
         using s11n::Json;
 
@@ -113,11 +113,12 @@ namespace impl {
             { "ID", service.id },
             { "Name", service.name },
             { "Tags", to_json(service.tags) },
+            { "Address", service.address },
             { "Port", service.port }
         }).dump();
     }
 
-    std::string serviceRegistrationJson(const Service& service, const std::chrono::seconds& ttl)
+    std::string serviceRegistrationJson(const ServiceRegistrationData& service, const std::chrono::seconds& ttl)
     {
         using s11n::Json;
 
@@ -125,6 +126,7 @@ namespace impl {
             { "ID", service.id },
             { "Name", service.name },
             { "Tags", to_json(service.tags) },
+            { "Address", service.address },
             { "Port", service.port },
             { "Check", Json::object{
                 { "TTL", to_json(ttl) }
@@ -132,7 +134,7 @@ namespace impl {
         }).dump();
     }
 
-    std::string serviceRegistrationJson(const Service& service, const std::string& script, const std::chrono::seconds& interval)
+    std::string serviceRegistrationJson(const ServiceRegistrationData& service, const std::string& script, const std::chrono::seconds& interval)
     {
         using s11n::Json;
 
@@ -140,6 +142,7 @@ namespace impl {
             { "ID", service.id },
             { "Name", service.name },
             { "Tags", to_json(service.tags) },
+            { "Address", service.address },
             { "Port", service.port },
             { "Check", Json::object{
                 { "Script", script },
