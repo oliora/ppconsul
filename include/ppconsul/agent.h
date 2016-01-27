@@ -58,11 +58,8 @@ namespace ppconsul { namespace agent {
         std::unordered_map<std::string, CheckInfo> parseChecks(const std::string& json);
         std::unordered_map<std::string, ServiceInfo> parseServices(const std::string& json);
 
-        std::string checkRegistrationJson(const CheckRegistrationData& check, const std::chrono::seconds& ttl);
-        std::string checkRegistrationJson(const CheckRegistrationData& check, const std::string& script, const std::chrono::seconds& interval);
+        std::string checkRegistrationJson(const CheckRegistrationData& check);
         std::string serviceRegistrationJson(const ServiceRegistrationData& service);
-        std::string serviceRegistrationJson(const ServiceRegistrationData& service, const std::chrono::seconds& ttl);
-        std::string serviceRegistrationJson(const ServiceRegistrationData& service, const std::string& script, const std::chrono::seconds& interval);
 
         std::string updateCheckUrl(CheckStatus newStatus);
     }
@@ -99,16 +96,11 @@ namespace ppconsul { namespace agent {
             return impl::parseChecks(m_consul.get("/v1/agent/checks"));
         }
 
-        void registerCheck(const CheckRegistrationData& check, const std::chrono::seconds& ttl)
+        void registerCheck(const CheckRegistrationData& check)
         {
-            m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(check, ttl));
+            m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(check));
         }
-        
-        void registerCheck(const CheckRegistrationData& check, const std::string& script, const std::chrono::seconds& interval)
-        {
-            m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(check, script, interval));
-        }
-        
+
         void deregisterCheck(const std::string& id)
         {
             m_consul.get("/v1/agent/check/deregister/" + helpers::encodeUrl(id));
@@ -155,16 +147,6 @@ namespace ppconsul { namespace agent {
         void registerService(const ServiceRegistrationData& service)
         {
             m_consul.put("/v1/agent/service/register", impl::serviceRegistrationJson(service));
-        }
-        
-        void registerService(const ServiceRegistrationData& service, const std::chrono::seconds& ttl)
-        {
-            m_consul.put("/v1/agent/service/register", impl::serviceRegistrationJson(service, ttl));
-        }
-
-        void registerService(const ServiceRegistrationData& service, const std::string& script, const std::chrono::seconds& interval)
-        {
-            m_consul.put("/v1/agent/service/register", impl::serviceRegistrationJson(service, script, interval));
         }
         
         void deregisterService(const std::string& id)

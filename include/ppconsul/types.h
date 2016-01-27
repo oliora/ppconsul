@@ -15,6 +15,8 @@
 #include <chrono>
 #include <stdint.h>
 #include <iostream>
+#include <boost/variant.hpp>
+#include <boost/optional.hpp>
 
 
 namespace ppconsul {
@@ -26,35 +28,13 @@ namespace ppconsul {
         Stale
     };
 
+    using duration = std::chrono::milliseconds; // TODO: use for BlockForValue as well
+
     typedef std::pair<std::chrono::seconds, uint64_t> BlockForValue;
 
     typedef std::unordered_set<std::string> Tags;
 
     typedef std::unordered_map<std::string, std::string> Properties;
-
-    struct ServiceRegistrationData
-    {
-        // Without this ctor provided VS 2013 crashes with internal error on code like
-        // `agent.registerService({ "check_name" }, "script_name", std::chrono::seconds(interval))`
-        ServiceRegistrationData(std::string name = "", uint16_t port = 0, Tags tags = Tags(), std::string id = "", std::string address = "")
-        : id(std::move(id)), name(std::move(name)), address(std::move(address)), port(port), tags(std::move(tags))
-        {}
-
-        std::string id;
-        std::string name;
-        std::string address;
-        uint16_t port = 0;
-        Tags tags;
-    };
-
-    struct ServiceInfo
-    {
-        std::string id;
-        std::string name;
-        std::string address;
-        uint16_t port;
-        Tags tags;
-    };
 
     struct Node
     {
@@ -72,16 +52,72 @@ namespace ppconsul {
         Critical
     };
 
+    struct TtlCheckConfig
+    {
+        TtlCheckConfig() = default;
+        explicit TtlCheckConfig(const duration& ttl)
+        : ttl(ttl) {}
+
+        duration ttl;
+    };
+
+    struct ScriptCheckConfig
+    {
+        ScriptCheckConfig() = default;
+        ScriptCheckConfig(std::string script, const duration& interval)
+        : script(std::move(script)), interval(interval) {}
+
+        std::string script;
+        duration interval;
+    };
+
+    struct HttpCheckConfig
+    {
+        HttpCheckConfig() = default;
+        HttpCheckConfig(std::string url, const duration& interval, const duration& timeout = duration::zero())
+        : url(std::move(url)), interval(interval), timeout(timeout) {}
+
+        std::string url;
+        duration interval;
+        duration timeout;
+    };
+
+    struct TcpCheckConfig
+    {
+        TcpCheckConfig() = default;
+        TcpCheckConfig(std::string address, const duration& interval, const duration& timeout = duration::zero())
+        : address(std::move(address)), interval(interval), timeout(timeout) {}
+
+        std::string address;
+        duration interval;
+        duration timeout;
+    };
+
+    struct DockerCheckConfig
+    {
+        DockerCheckConfig() = default;
+        DockerCheckConfig(std::string containerId, std::string script, const duration& interval, std::string shell = "")
+        : containerId(std::move(containerId)), script(std::move(script)), interval(interval), shell(std::move(shell)) {}
+
+        std::string containerId;
+        std::string script;
+        duration interval;
+        std::string shell;
+    };
+
+    using CheckConfig = boost::variant<TtlCheckConfig, ScriptCheckConfig, HttpCheckConfig, TcpCheckConfig, DockerCheckConfig>;
+
     struct CheckRegistrationData
     {
-        // Without this ctor provided VS 2013 crashes with internal error on code like
-        // `agent.registerCheck({ "check_name" }, "script_name", std::chrono::seconds(interval))`
-        CheckRegistrationData(std::string name = "", std::string notes = "", std::string id = "")
-        : id(std::move(id)), name(std::move(name)), notes(std::move(notes))
+        CheckRegistrationData() = default;
+
+        CheckRegistrationData(std::string name, CheckConfig config, std::string notes = "", std::string id = "")
+        : id(std::move(id)), name(std::move(name)), config(std::move(config)), notes(std::move(notes))
         {}
 
         std::string id;
         std::string name;
+        CheckConfig config;
         std::string notes;
     };
 
@@ -95,6 +131,43 @@ namespace ppconsul {
         std::string node;
         CheckStatus status;
         std::string output;
+    };
+
+    struct ServiceRegistrationData
+    {
+        struct Check
+        {
+            CheckConfig config;
+            std::string notes;
+        };
+
+        ServiceRegistrationData() = default;
+
+        ServiceRegistrationData(std::string name, uint16_t port = 0, Tags tags = Tags(), std::string id = "", std::string address = "")
+        : id(std::move(id)), name(std::move(name)), address(std::move(address)), port(port), tags(std::move(tags))
+        {}
+
+        ServiceRegistrationData(std::string name, CheckConfig checkConfig, uint16_t port = 0, Tags tags = Tags(), std::string id = "", std::string address = "", std::string checkNotes = "")
+        : id(std::move(id)), name(std::move(name)), address(std::move(address)), port(port), tags(std::move(tags))
+        , check({std::move(checkConfig), std::move(checkNotes)})
+        {}
+
+        std::string id;
+        std::string name;
+        std::string address;
+        uint16_t port = 0;
+        Tags tags;
+
+        boost::optional<Check> check;
+    };
+
+    struct ServiceInfo
+    {
+        std::string id;
+        std::string name;
+        std::string address;
+        uint16_t port;
+        Tags tags;
     };
 
     struct WithHeaders {};
