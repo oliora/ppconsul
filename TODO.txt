@@ -34,6 +34,7 @@ Releases:
 - split consul tests into different executables
 
 ### Consul
+- Change 'block-for' resolution from seconds to milliseconds
 
 - tests for default DC and default token (postponed to 0.2)
 
@@ -63,6 +64,7 @@ Releases:
   - TCP
   - Docker
 - Support "Notes" for a service's check
+- Support "Status" (plus "Output"?) for a check's initial status
 - agent/maintenance (https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
 - agent/service/maintenance (https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
 
