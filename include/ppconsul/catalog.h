@@ -45,8 +45,8 @@ namespace ppconsul { namespace catalog {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Catalog(Consul& consul, const Params&... params)
         : m_consul(consul)
-        , m_defaultConsistency(kwargs::get(params::consistency, Consistency::Default, params...))
-        , m_defaultDc(kwargs::get(params::dc, "", params...))
+        , m_defaultConsistency(kwargs::get_opt(params::consistency, Consistency::Default, params...))
+        , m_defaultDc(kwargs::get_opt(params::dc, std::string(), params...))
         {
             KWARGS_CHECK_IN_LIST(Params, (params::consistency, params::dc))
         }

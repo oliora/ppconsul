@@ -384,35 +384,43 @@ namespace kwargs {
         return v.second;
     }
 
-    using detail::is_kwargs;
-    using detail::has_keyword;
+    template<class... Args>
+    using is_kwargs = std::integral_constant<bool, detail::is_kwargs<Args...>::value>;
+
+    template<class Keyword, class... Args>
+    using has_keyword = std::integral_constant<bool, detail::has_keyword<detail::decay_t<Keyword>, Args...>::value>;
 
     template<class... Args>
     using enable_if_kwargs_t = typename std::enable_if<is_kwargs<Args...>::value>::type;
 
-    /*template<class Keyword, class... Args>
-    inline typename std::enable_if<is_kwargs<Args...>::value, typename Keyword::Value>::type
-        get(Keyword, Args&&... args)
-    {
-        auto a = boost::fusion::vector_tie(args...);
-        return std::move(get_value(boost::fusion::at<typename detail::keyword_index<Keyword, Args...>::type>(a)));
-    }*/
-
-    template<class Keyword, class Default, class... Args>
+    template<class Keyword, class... Args>
     inline typename std::enable_if<
-        is_kwargs<Args...>::value && has_keyword<Keyword, Args...>::value,
+        is_kwargs<Args...>::value,
         typename Keyword::Value
-    >::type get(Keyword, Default&&, Args&&... args)
+    >::type get(const Keyword&, Args&&... args)
     {
+        // TODO: check forwarding
+        static_assert(has_keyword<Keyword, Args...>::value, "Required keyword is not present");
         auto a = boost::fusion::vector_tie(args...);
         return std::move(get_value(boost::fusion::at<typename detail::keyword_index<Keyword, Args...>::type>(a)));
     }
 
     template<class Keyword, class Default, class... Args>
     inline typename std::enable_if<
-        is_kwargs<Args...>::value && !detail::has_keyword<Keyword, Args...>::value,
+        is_kwargs<Args...>::value && has_keyword<Keyword, Args...>::value,
+        typename Keyword::Value
+    >::type get_opt(const Keyword&, Default&&, Args&&... args)
+    {
+        // TODO: check forwarding
+        auto a = boost::fusion::vector_tie(args...);
+        return std::move(get_value(boost::fusion::at<typename detail::keyword_index<Keyword, Args...>::type>(a)));
+    }
+
+    template<class Keyword, class Default, class... Args>
+    inline typename std::enable_if<
+        is_kwargs<Args...>::value && !has_keyword<Keyword, Args...>::value,
         Default&&
-    >::type get(Keyword, Default&& d, Args&&...)
+    >::type get_opt(const Keyword&, Default&& d, Args&&...)
     {
         return std::forward<Default>(d);
     }
