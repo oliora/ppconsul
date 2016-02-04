@@ -50,7 +50,7 @@ Consul consul;
 // We need the 'agent' endpoint for a service registration
 agent::Agent agent(consul);
 
-// Register a service with TTL:
+// Register a service with associated HTTP check:
 agent.registerService(
     agent::keywords::name = "my-service",
     agent::keywords::port = 9876,
