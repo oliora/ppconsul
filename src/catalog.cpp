@@ -15,10 +15,11 @@ namespace json11 {
         using ppconsul::s11n::load;
 
         load(src, dst.first);
+        load(src, dst.second.id, "ServiceID");
         load(src, dst.second.name, "ServiceName");
+        load(src, dst.second.address, "ServiceAddress");
         load(src, dst.second.port, "ServicePort");
         load(src, dst.second.tags, "ServiceTags");
-        load(src, dst.second.id, "ServiceID");
     }
 
     void load(const json11::Json& src, ppconsul::catalog::NodeServices& dst)

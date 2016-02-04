@@ -15,6 +15,8 @@
 #include <chrono>
 #include <stdint.h>
 #include <iostream>
+#include <boost/variant.hpp>
+#include <boost/optional.hpp>
 
 
 namespace ppconsul {
@@ -26,25 +28,13 @@ namespace ppconsul {
         Stale
     };
 
+    using duration = std::chrono::milliseconds; // TODO: use for BlockForValue as well
+
     typedef std::pair<std::chrono::seconds, uint64_t> BlockForValue;
 
     typedef std::unordered_set<std::string> Tags;
 
     typedef std::unordered_map<std::string, std::string> Properties;
-
-    struct Service
-    {
-        // Without this ctor provided VS 2013 crashes with internal error on code like
-        // `agent.registerService({ "check_name" }, "script_name", std::chrono::seconds(interval))`
-        Service(std::string name = "", uint16_t port = 0, Tags tags = Tags(), std::string id = "")
-        : name(std::move(name)), port(port), tags(std::move(tags)), id(std::move(id))
-        {}
-
-        std::string name;
-        uint16_t port = 0;
-        Tags tags;
-        std::string id;
-    };
 
     struct Node
     {
@@ -62,26 +52,25 @@ namespace ppconsul {
         Critical
     };
 
-    struct Check
+    struct CheckInfo
     {
-        // Without this ctor provided VS 2013 crashes with internal error on code like
-        // `agent.registerCheck({ "check_name" }, "script_name", std::chrono::seconds(interval))`
-        Check(std::string name = "", std::string notes = "", std::string id = "")
-            : name(std::move(name)), notes(std::move(notes)), id(std::move(id))
-        {}
-
+        std::string id;
         std::string name;
         std::string notes;
-        std::string id;
-    };
-
-    struct CheckInfo: Check
-    {
+        std::string serviceId;
+        std::string serviceName;
         std::string node;
         CheckStatus status;
         std::string output;
-        std::string serviceId;
-        std::string serviceName;
+    };
+
+    struct ServiceInfo
+    {
+        std::string id;
+        std::string name;
+        std::string address;
+        uint16_t port;
+        Tags tags;
     };
 
     struct WithHeaders {};

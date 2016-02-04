@@ -17,12 +17,14 @@ using ppconsul::catalog::Catalog;
 using ppconsul::agent::Agent;
 using ppconsul::Node;
 namespace params = ppconsul::params;
+namespace agent = ppconsul::agent;
 using ppconsul::Consistency;
 
 
 namespace {
     const auto Uniq_Name_1 = "B0D8A57F-0A73-4C6A-926A-262088B00B76";
     const auto Uniq_Name_2 = "749E5A49-4202-4995-AD5B-A3F28E19ADC1";
+    const auto Uniq_Name_3 = "8d097c82-e9fb-471e-9479-c6b03313ab61";
     const auto Uniq_Name_1_Spec = "\r\nB0D8A57F-0A73-4C6A-926A-262088B00B76{}";
     const auto Uniq_Name_2_Spec = "{}749E5A49-4202-4995-AD5B-A3F28E19ADC1\r\n";
     const auto Tag_Spec = "{}bla\r\n";
@@ -122,6 +124,31 @@ TEST_CASE("catalog.nodes_blocking", "[consul][catalog][config][blocking]")
     CHECK(resp1.data().size());
 }
 
+TEST_CASE("catalog.services_default_attributes", "[consul][catalog][services]")
+{
+    auto consul = create_test_consul();
+    Catalog catalog(consul);
+    Agent agent(consul);
+
+    const auto selfMember = Agent(consul).self().second;
+    const auto selfNode = Node{ selfMember.name, selfMember.address };
+
+    agent.deregisterService(Uniq_Name_3);
+    agent.registerService({ Uniq_Name_3 });
+
+    sleep(2.0); // Give some time to propogate registered services to the catalog
+
+    auto services = catalog.service(Uniq_Name_3);
+
+    REQUIRE(services.size() == 1);
+
+    CHECK(services[0].second.name == Uniq_Name_3);
+    CHECK(services[0].second.address == "");
+    CHECK(services[0].second.port == 0);
+    CHECK(services[0].second.tags == ppconsul::Tags{});
+    CHECK(services[0].second.id == Uniq_Name_3);
+}
+
 TEST_CASE("catalog.services", "[consul][catalog][services]")
 {
     auto consul = create_test_consul();
@@ -134,9 +161,25 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
     agent.deregisterService("service1");
     agent.deregisterService("service2");
     agent.deregisterService("service3");
-    agent.registerService({ Uniq_Name_1, 1234, { "print", "udp" }, "service1" });
-    agent.registerService({ Uniq_Name_2, 2345, { "copier", "udp" }, "service2" });
-    agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
+    agent.registerService(
+        agent::keywords::name = Uniq_Name_1,
+        agent::keywords::port = 1234,
+        agent::keywords::tags = { "print", "udp" },
+        agent::keywords::id = "service1",
+        agent::keywords::address = "hostxxx1"
+    );
+    agent.registerService(
+        agent::keywords::name = Uniq_Name_2,
+        agent::keywords::tags = { "copier", "udp" },
+        agent::keywords::id = "service2"
+    );
+    agent.registerService(
+        agent::keywords::name = Uniq_Name_1,
+        agent::keywords::port = 3456,
+        agent::keywords::tags = { "print", "secret" },
+        agent::keywords::id = "service3",
+        agent::keywords::address = "hostxxx2"
+    );
 
     sleep(2.0); // Give some time to propogate registered services to the catalog
 
@@ -166,12 +209,14 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
 
         CHECK(services[service1Index].first == selfNode);
         CHECK(services[service1Index].second.name == Uniq_Name_1);
+        CHECK(services[service1Index].second.address == "hostxxx1");
         CHECK(services[service1Index].second.port == 1234);
         CHECK(services[service1Index].second.tags == ppconsul::Tags({ "print", "udp" }));
         CHECK(services[service1Index].second.id == "service1");
 
         CHECK(services[1 - service1Index].first == selfNode);
         CHECK(services[1 - service1Index].second.name == Uniq_Name_1);
+        CHECK(services[1 - service1Index].second.address == "hostxxx2");
         CHECK(services[1 - service1Index].second.port == 3456);
         CHECK(services[1 - service1Index].second.tags == ppconsul::Tags({ "print", "secret" }));
         CHECK(services[1 - service1Index].second.id == "service3");
@@ -190,6 +235,7 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
 
         CHECK(services1[0].first == selfNode);
         CHECK(services1[0].second.name == Uniq_Name_1);
+        CHECK(services1[0].second.address == "hostxxx1");
         CHECK(services1[0].second.port == 1234);
         CHECK(services1[0].second.tags == ppconsul::Tags({ "print", "udp" }));
         CHECK(services1[0].second.id == "service1");
@@ -202,12 +248,14 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
         
         CHECK(services2[service1Index].first == selfNode);
         CHECK(services2[service1Index].second.name == Uniq_Name_1);
+        CHECK(services2[service1Index].second.address == "hostxxx1");
         CHECK(services2[service1Index].second.port == 1234);
         CHECK(services2[service1Index].second.tags == ppconsul::Tags({ "print", "udp" }));
         CHECK(services2[service1Index].second.id == "service1");
         
         CHECK(services2[1 - service1Index].first == selfNode);
         CHECK(services2[1 - service1Index].second.name == Uniq_Name_1);
+        CHECK(services2[1 - service1Index].second.address == "hostxxx2");
         CHECK(services2[1 - service1Index].second.port == 3456);
         CHECK(services2[1 - service1Index].second.tags == ppconsul::Tags({ "print", "secret" }));
         CHECK(services2[1 - service1Index].second.id == "service3");
@@ -229,16 +277,19 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
         const auto& s3 = node.second.at("service3");
         
         CHECK(s1.name == Uniq_Name_1);
+        CHECK(s1.address == "hostxxx1");
         CHECK(s1.port == 1234);
         CHECK(s1.tags == ppconsul::Tags({ "print", "udp" }));
         CHECK(s1.id == "service1");
 
         CHECK(s2.name == Uniq_Name_2);
-        CHECK(s2.port == 2345);
+        CHECK(s2.address == "");
+        CHECK(s2.port == 0);
         CHECK(s2.tags == ppconsul::Tags({ "copier", "udp" }));
         CHECK(s2.id == "service2");
 
         CHECK(s3.name == Uniq_Name_1);
+        CHECK(s3.address == "hostxxx2");
         CHECK(s3.port == 3456);
         CHECK(s3.tags == ppconsul::Tags({ "print", "secret" }));
         CHECK(s3.id == "service3");
@@ -265,9 +316,24 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
     agent.deregisterService("service1");
     agent.deregisterService("service2");
     agent.deregisterService("service3");
-    agent.registerService({ Uniq_Name_1_Spec, 1234, { "print", Tag_Spec }, "service1" });
-    agent.registerService({ Uniq_Name_2_Spec, 2345, { "copier", Tag_Spec }, "service2" });
-    agent.registerService({ Uniq_Name_1_Spec, 3456, { "print", "secret" }, "service3" });
+    agent.registerService(
+        agent::keywords::name = Uniq_Name_1_Spec,
+        agent::keywords::port = 1234,
+        agent::keywords::tags = { "print", Tag_Spec },
+        agent::keywords::id = "service1"
+    );
+    agent.registerService(
+        agent::keywords::name = Uniq_Name_2_Spec,
+        agent::keywords::port = 2345,
+        agent::keywords::tags = { "copier", Tag_Spec },
+        agent::keywords::id = "service2"
+    );
+    agent.registerService(
+        agent::keywords::name = Uniq_Name_1_Spec,
+        agent::keywords::port = 3456,
+        agent::keywords::tags = { "print", "secret" },
+        agent::keywords::id = "service3"
+    );
 
     sleep(2.0); // Give some time to propogate registered services to the catalog
 
@@ -349,8 +415,18 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
     agent.deregisterService("service1");
     agent.deregisterService("service2");
     agent.deregisterService("service3");
-    agent.registerService({ Uniq_Name_1, 1234, { "print", "udp" }, "service1" });
-    agent.registerService({ Uniq_Name_2, 2345, { "copier", "udp" }, "service2" });
+    agent.registerService(
+        agent::keywords::name = Uniq_Name_1,
+        agent::keywords::port = 1234,
+        agent::keywords::tags = { "print", "udp" },
+        agent::keywords::id = "service1"
+    );
+    agent.registerService(
+        agent::keywords::name = Uniq_Name_2,
+        agent::keywords::port = 2345,
+        agent::keywords::tags = { "copier", "udp" },
+        agent::keywords::id = "service2"
+    );
 
     sleep(2.0); // Give some time to propogate registered services to the catalog
 
@@ -368,7 +444,12 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
         CHECK(resp1.data().at(Uniq_Name_1) == ppconsul::Tags({ "print", "udp" }));
         CHECK(resp1.data().at(Uniq_Name_2) == ppconsul::Tags({ "copier", "udp" }));
 
-        agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
+        agent.registerService(
+            agent::keywords::name = Uniq_Name_1,
+            agent::keywords::port = 3456,
+            agent::keywords::tags = { "print", "secret" },
+            agent::keywords::id = "service3"
+        );
 
         sleep(1.0); // Give some time to propogate to the catalog
 
@@ -396,7 +477,12 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
         REQUIRE(resp1.data().size() == 1);
         CHECK(resp1.data()[0].second.id == "service1");
 
-        agent.registerService({ Uniq_Name_1, 3456, { "print", "secret" }, "service3" });
+        agent.registerService(
+            agent::keywords::name = Uniq_Name_1,
+            agent::keywords::port = 3456,
+            agent::keywords::tags = { "print", "secret" },
+            agent::keywords::id = "service3"
+        );
 
         sleep(2.0); // Give some time to propogate to the catalog
 

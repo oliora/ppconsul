@@ -47,16 +47,67 @@ namespace ppconsul { namespace agent {
 namespace impl {
 
     namespace {
-        std::string to_json(const std::chrono::seconds& seconds)
+        std::string to_json(const std::chrono::milliseconds& ms)
         {
             std::ostringstream os;
-            os << seconds.count() << "s";
+            os << ms.count() << "ms";
             return os.str();
         }
 
         s11n::Json::array to_json(const Tags& tags)
         {
             return s11n::Json::array(tags.begin(), tags.end());
+        }
+
+        struct CheckConfigSaver: boost::static_visitor<>
+        {
+            CheckConfigSaver(s11n::Json::object& dst): dst_(&dst) {}
+
+            void operator() (const TtlCheck& c) const
+            {
+                dst()["ttl"] = to_json(c.ttl);
+            }
+
+            void operator() (const ScriptCheck& c) const
+            {
+                dst()["script"] = c.script;
+                dst()["interval"] = to_json(c.interval);
+            }
+
+            void operator() (const HttpCheck& c) const
+            {
+                dst()["http"] = c.url;
+                dst()["interval"] = to_json(c.interval);
+                if (c.timeout != decltype(c.timeout)::zero())
+                    dst()["timeout"] = to_json(c.timeout);
+            }
+
+            void operator() (const TcpCheck& c) const
+            {
+                dst()["tcp"] = c.address;
+                dst()["interval"] = to_json(c.interval);
+                if (c.timeout != decltype(c.timeout)::zero())
+                    dst()["timeout"] = to_json(c.timeout);
+            }
+
+            void operator() (const DockerCheck& c) const
+            {
+                dst()["docker_container_id"] = c.containerId;
+                dst()["shell"] = c.shell;
+                dst()["script"] = c.script;
+                dst()["interval"] = to_json(c.interval);
+            }
+
+            s11n::Json::object& dst() const { return *dst_; }
+
+        private:
+            s11n::Json::object* dst_;
+        };
+
+
+        void save(s11n::Json::object& dst, const CheckParams& c)
+        {
+            boost::apply_visitor(CheckConfigSaver(dst), c);
         }
     }
     
@@ -75,78 +126,50 @@ namespace impl {
         return s11n::parseJson<std::unordered_map<std::string, CheckInfo>>(json);
     }
 
-    std::unordered_map<std::string, Service> parseServices(const std::string& json)
+    std::unordered_map<std::string, ServiceInfo> parseServices(const std::string& json)
     {
-        return s11n::parseJson<std::unordered_map<std::string, Service>>(json);
+        return s11n::parseJson<std::unordered_map<std::string, ServiceInfo>>(json);
     }
 
-    std::string checkRegistrationJson(const Check& check, const std::chrono::seconds& ttl)
+    std::string checkRegistrationJson(const CheckRegistrationData& check)
     {
         using s11n::Json;
 
-        return Json(Json::object{
+        Json::object o {
             { "ID", check.id },
             { "Name", check.name },
-            { "Notes", check.notes },
-            { "TTL", to_json(ttl) }
-        }).dump();
+            { "Notes", check.notes }
+        };
+
+        save(o, check.params);
+
+        return Json(std::move(o)).dump();
     }
 
-    std::string checkRegistrationJson(const Check& check, const std::string& script, const std::chrono::seconds& interval)
+    std::string serviceRegistrationJson(const ServiceRegistrationData& service)
     {
         using s11n::Json;
 
-        return Json(Json::object{
-            { "ID", check.id },
-            { "Name", check.name },
-            { "Notes", check.notes },
-            { "Script", script },
-            { "Interval", to_json(interval) }
-        }).dump();
-    }
-
-    std::string serviceRegistrationJson(const Service& service)
-    {
-        using s11n::Json;
-
-        return Json(Json::object{
+        Json::object o {
             { "ID", service.id },
             { "Name", service.name },
             { "Tags", to_json(service.tags) },
+            { "Address", service.address },
             { "Port", service.port }
-        }).dump();
+        };
+
+        if (service.check)
+        {
+            Json::object check_o {
+                { "Notes", service.check->notes }
+            };
+
+            save(check_o, service.check->params);
+
+            o["Check"] = check_o;
+        }
+
+        return Json(std::move(o)).dump();
     }
-
-    std::string serviceRegistrationJson(const Service& service, const std::chrono::seconds& ttl)
-    {
-        using s11n::Json;
-
-        return Json(Json::object{
-            { "ID", service.id },
-            { "Name", service.name },
-            { "Tags", to_json(service.tags) },
-            { "Port", service.port },
-            { "Check", Json::object{
-                { "TTL", to_json(ttl) }
-            }}
-        }).dump();
-    }
-
-    std::string serviceRegistrationJson(const Service& service, const std::string& script, const std::chrono::seconds& interval)
-    {
-        using s11n::Json;
-
-        return Json(Json::object{
-            { "ID", service.id },
-            { "Name", service.name },
-            { "Tags", to_json(service.tags) },
-            { "Port", service.port },
-            { "Check", Json::object{
-                { "Script", script },
-                { "Interval", to_json(interval) }
-            } }
-        }).dump();
-    }
-
 }
 }}

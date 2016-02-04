@@ -14,8 +14,6 @@
 
 namespace ppconsul { namespace health {
 
-    using ppconsul::Service;
-
     namespace params {
         using ppconsul::params::consistency;
         using ppconsul::params::block_for;
@@ -29,7 +27,7 @@ namespace ppconsul { namespace health {
         }
     }
 
-    typedef std::tuple<Node, Service, std::vector<CheckInfo>> NodeServiceChecks;
+    typedef std::tuple<Node, ServiceInfo, std::vector<CheckInfo>> NodeServiceChecks;
 
     namespace impl {
         std::vector<CheckInfo> parseCheckInfos(const std::string& json);
@@ -47,8 +45,8 @@ namespace ppconsul { namespace health {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Health(Consul& consul, const Params&... params)
         : m_consul(consul)
-        , m_defaultConsistency(kwargs::get(params::consistency, Consistency::Default, params...))
-        , m_defaultDc(kwargs::get(params::dc, "", params...))
+        , m_defaultConsistency(kwargs::get_opt(params::consistency, Consistency::Default, params...))
+        , m_defaultDc(kwargs::get_opt(params::dc, std::string(), params...))
         {
             KWARGS_CHECK_IN_LIST(Params, (params::consistency, params::dc))
         }

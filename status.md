@@ -15,11 +15,10 @@ At the moment it's only possible to work with values as strings, but there is a 
 
 Everything is supported except the following:
 - ACL tokens
-- Additional check types (HTTP, TCP, Docker) for nodes and services, see https://www.consul.io/docs/agent/checks.html
 - Endpoint [`/v1/agent/maintenance`](https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
 - Endpoint [`/v1/agent/service/maintenance`](https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
+- Provide a check's initial status
 - Multiple checks associated with a single service.
-- Register a check with initial state set to *passing*.
 - Accessing to `"Config"` object received from `/v1/agent/self` endpoint. There is no plan to support it any time soon unless requested by users.
 
 ### Catalog

@@ -36,36 +36,104 @@ namespace ppconsul { namespace agent {
 
     struct Config {}; // TODO: use boost::ptree
 
-    namespace params {
-        PPCONSUL_PARAM(pool, Pool)
-        PPCONSUL_PARAM(note, std::string)
+    struct TtlCheck
+    {
+        TtlCheck() = default;
+        explicit TtlCheck(const duration& ttl)
+        : ttl(ttl) {}
 
-        inline void printParameter(std::ostream& os, Pool v, KWARGS_KW_TAG(pool))
-        {
-            if (Pool::Wan == v)
-                os << "wan=1";
-        }
+        duration ttl;
+    };
+
+    struct ScriptCheck
+    {
+        ScriptCheck() = default;
+        ScriptCheck(std::string script, const duration& interval)
+        : script(std::move(script)), interval(interval) {}
+
+        std::string script;
+        duration interval;
+    };
+
+    struct HttpCheck
+    {
+        HttpCheck() = default;
+        HttpCheck(std::string url, const duration& interval, const duration& timeout = duration::zero())
+        : url(std::move(url)), interval(interval), timeout(timeout) {}
+
+        std::string url;
+        duration interval;
+        duration timeout;
+    };
+
+    struct TcpCheck
+    {
+        TcpCheck() = default;
+        TcpCheck(std::string address, const duration& interval, const duration& timeout = duration::zero())
+        : address(std::move(address)), interval(interval), timeout(timeout) {}
+
+        std::string address;
+        duration interval;
+        duration timeout;
+    };
+
+    struct DockerCheck
+    {
+        DockerCheck() = default;
+        DockerCheck(std::string containerId, std::string script, const duration& interval, std::string shell = "")
+        : containerId(std::move(containerId)), script(std::move(script)), interval(interval), shell(std::move(shell)) {}
+
+        std::string containerId;
+        std::string script;
+        duration interval;
+        std::string shell;
+    };
+
+    using CheckParams = boost::variant<TtlCheck, ScriptCheck, HttpCheck, TcpCheck, DockerCheck>;
+
+    namespace keywords {
+        KWARGS_KEYWORD(name, std::string)
+        KWARGS_KEYWORD(notes, std::string)
+        KWARGS_KEYWORD(id, std::string)
+        KWARGS_KEYWORD(check, CheckParams)
+        KWARGS_KEYWORD(port, uint16_t)
+        KWARGS_KEYWORD(address, std::string)
+        KWARGS_KEYWORD(tags, Tags)
     }
+
+
+    namespace impl {
+        namespace params {
+            PPCONSUL_PARAM(pool, Pool)
+            PPCONSUL_PARAM(note, std::string)
+
+            inline void printParameter(std::ostream& os, Pool v, KWARGS_KW_TAG(pool))
+            {
+                if (Pool::Wan == v)
+                    os << "wan=1";
+            }
+        }
+
+        struct CheckRegistrationData;
+        struct ServiceRegistrationData;
+
+        std::vector<Member> parseMembers(const std::string& json);
+        std::pair<Config, Member> parseSelf(const std::string& json);
+        std::unordered_map<std::string, CheckInfo> parseChecks(const std::string& json);
+        std::unordered_map<std::string, ServiceInfo> parseServices(const std::string& json);
+
+        std::string checkRegistrationJson(const CheckRegistrationData& check);
+        std::string serviceRegistrationJson(const ServiceRegistrationData& service);
+
+        std::string updateCheckUrl(CheckStatus newStatus);
+    }
+
 
     inline std::string serviceCheckId(const std::string& serviceId)
     {
         return "service:" + serviceId;
     }
-    
-    namespace impl {
-        std::vector<Member> parseMembers(const std::string& json);
-        std::pair<Config, Member> parseSelf(const std::string& json);
-        std::unordered_map<std::string, CheckInfo> parseChecks(const std::string& json);
-        std::unordered_map<std::string, Service> parseServices(const std::string& json);
 
-        std::string checkRegistrationJson(const Check& check, const std::chrono::seconds& ttl);
-        std::string checkRegistrationJson(const Check& check, const std::string& script, const std::chrono::seconds& interval);
-        std::string serviceRegistrationJson(const Service& service);
-        std::string serviceRegistrationJson(const Service& service, const std::chrono::seconds& ttl);
-        std::string serviceRegistrationJson(const Service& service, const std::string& script, const std::chrono::seconds& interval);
-
-        std::string updateCheckUrl(CheckStatus newStatus);
-    }
 
     class Agent
     {
@@ -76,7 +144,7 @@ namespace ppconsul { namespace agent {
 
         std::vector<Member> members(Pool pool = Pool::Lan) const
         {
-            return impl::parseMembers(m_consul.get("/v1/agent/members", params::pool = pool));
+            return impl::parseMembers(m_consul.get("/v1/agent/members", impl::params::pool = pool));
         }
         
         std::pair<Config, Member> self() const
@@ -86,7 +154,7 @@ namespace ppconsul { namespace agent {
 
         void join(const std::string& addr, Pool pool = Pool::Lan)
         {
-            m_consul.get("/v1/agent/join/" + helpers::encodeUrl(addr), params::pool = pool);
+            m_consul.get("/v1/agent/join/" + helpers::encodeUrl(addr), impl::params::pool = pool);
         }
 
         void forceLeave(const std::string& node)
@@ -99,16 +167,27 @@ namespace ppconsul { namespace agent {
             return impl::parseChecks(m_consul.get("/v1/agent/checks"));
         }
 
-        void registerCheck(const Check& check, const std::chrono::seconds& ttl)
+        // Allowed parameters:
+        // - name - the check's name (required)
+        // - check - parameters of the check (required)
+        // - id - the check's id, set to the check's name by default
+        // - notes - the check's notes, empty by default
+        template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
+        void registerCheck(Keywords&&... params);
+
+        // Allowed parameters:
+        // - id - the check's id, set to the check's name by default
+        // - notes - the check's notes, empty by default
+        template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
+        void registerCheck(std::string name, CheckParams check, Keywords&&... params)
         {
-            m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(check, ttl));
+            registerCheck(
+                keywords::name = std::move(name),
+                keywords::check = std::move(check),
+                std::forward<Keywords>(params)...
+            );
         }
-        
-        void registerCheck(const Check& check, const std::string& script, const std::chrono::seconds& interval)
-        {
-            m_consul.put("/v1/agent/check/register", impl::checkRegistrationJson(check, script, interval));
-        }
-        
+
         void deregisterCheck(const std::string& id)
         {
             m_consul.get("/v1/agent/check/deregister/" + helpers::encodeUrl(id));
@@ -147,26 +226,54 @@ namespace ppconsul { namespace agent {
             updateServiceCheck(serviceId, CheckStatus::Critical, note);
         }
 
-        std::unordered_map<std::string, Service> services() const
+        std::unordered_map<std::string, ServiceInfo> services() const
         {
             return impl::parseServices(m_consul.get("/v1/agent/services"));
         }
 
-        void registerService(const Service& service)
+        // Allowed parameters:
+        // - name - the service's name (required)
+        // - id - the service's id, set to the service's name by default
+        // - tags - the service's tags, empty by default
+        // - address - the service's address, empty by default (Note that Consul docs say one is set to the agent's address but this is not true)
+        // - port - the service's port, set to 0 by default
+        // - check - parameters for a check associated with the service, no check is associated if omitted
+        // - notes - notes for a check associated with the service, empty by default
+        template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
+        void registerService(Keywords&&... params);
+
+        // Allowed parameters:
+        // - id - the service's id, set to the service's name by default
+        // - tags - the service's tags, empty by default
+        // - address - the service's address, empty by default (Note that Consul docs say one is set to the agent's address but this is not true)
+        // - port - the service's port, set to 0 by default
+        // - check - parameters for a check associated with the service, no check is associated if omitted
+        // - notes - notes for a check associated with the service, empty by default
+        template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
+        void registerService(std::string name, Keywords&&... params)
         {
-            m_consul.put("/v1/agent/service/register", impl::serviceRegistrationJson(service));
-        }
-        
-        void registerService(const Service& service, const std::chrono::seconds& ttl)
-        {
-            m_consul.put("/v1/agent/service/register", impl::serviceRegistrationJson(service, ttl));
+            registerService(
+                keywords::name = std::move(name),
+                std::forward<Keywords>(params)...
+            );
         }
 
-        void registerService(const Service& service, const std::string& script, const std::chrono::seconds& interval)
+        // Allowed parameters:
+        // - id - the service's id, set to the service's name by default
+        // - tags - the service's tags, empty by default
+        // - address - the service's address, empty by default (Note that Consul docs say one is set to the agent's address but this is not true)
+        // - port - the service's port, set to 0 by default
+        // - notes - notes for a check associated with the service, empty by default
+        template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
+        void registerService(std::string name, CheckParams check, Keywords&&... params)
         {
-            m_consul.put("/v1/agent/service/register", impl::serviceRegistrationJson(service, script, interval));
+            registerService(
+                keywords::name = std::move(name),
+                keywords::check = std::move(check),
+                std::forward<Keywords>(params)...
+            );
         }
-        
+
         void deregisterService(const std::string& id)
         {
             m_consul.get("/v1/agent/service/deregister/" + helpers::encodeUrl(id));
@@ -175,7 +282,7 @@ namespace ppconsul { namespace agent {
     private:
         void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
         {
-            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), params::note = note);
+            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), impl::params::note = note);
         }
 
         // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`
@@ -190,19 +297,105 @@ namespace ppconsul { namespace agent {
 
     // Implementation
 
-    inline std::string impl::updateCheckUrl(CheckStatus newStatus)
-    {
-        switch (newStatus)
+    namespace impl {
+        struct CheckRegistrationData
         {
-        case CheckStatus::Passing:
-            return "/v1/agent/check/pass/";
-        case CheckStatus::Warning:
-            return "/v1/agent/check/warn/";
-        case CheckStatus::Critical:
-            return "/v1/agent/check/fail/";
-        default:
-            throw std::logic_error("Wrong CheckStatus value");
+            template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
+            CheckRegistrationData(Keywords&&... params)
+            : id(kwargs::get_opt(keywords::id, std::string(), std::forward<Keywords>(params)...))
+            , name(kwargs::get(keywords::name, std::forward<Keywords>(params)...))
+            , params(kwargs::get(keywords::check, std::forward<Keywords>(params)...))
+            , notes(kwargs::get_opt(keywords::notes, std::string(), std::forward<Keywords>(params)...))
+            {
+                KWARGS_CHECK_IN_LIST(Keywords, (keywords::id, keywords::name, keywords::check, keywords::notes))
+            }
+
+            std::string id;
+            std::string name;
+            CheckParams params;
+            std::string notes;
+        };
+
+        struct ServiceRegistrationData
+        {
+            struct Check
+            {
+                CheckParams params;
+                std::string notes;
+            };
+
+            template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
+            ServiceRegistrationData(std::true_type, Keywords&&... params)
+            : id(kwargs::get_opt(keywords::id, std::string(), std::forward<Keywords>(params)...))
+            , name(kwargs::get(keywords::name, std::forward<Keywords>(params)...))
+            , address(kwargs::get_opt(keywords::address, std::string(), std::forward<Keywords>(params)...))
+            , port(kwargs::get_opt(keywords::port, 0, std::forward<Keywords>(params)...))
+            , tags(kwargs::get_opt(keywords::tags, Tags(), std::forward<Keywords>(params)...))
+            , check({
+                kwargs::get(keywords::check, std::forward<Keywords>(params)...),
+                kwargs::get_opt(keywords::notes, std::string(), std::forward<Keywords>(params)...)})
+            {
+                KWARGS_CHECK_IN_LIST(Keywords, (
+                                                keywords::id, keywords::name, keywords::address, keywords::port, keywords::tags,
+                                                keywords::check, keywords::notes
+                                                ))
+            }
+
+            template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
+            ServiceRegistrationData(std::false_type, Keywords&&... params)
+            : id(kwargs::get_opt(keywords::id, std::string(), std::forward<Keywords>(params)...))
+            , name(kwargs::get(keywords::name, std::forward<Keywords>(params)...))
+            , address(kwargs::get_opt(keywords::address, std::string(), std::forward<Keywords>(params)...))
+            , port(kwargs::get_opt(keywords::port, 0, std::forward<Keywords>(params)...))
+            , tags(kwargs::get_opt(keywords::tags, Tags(), std::forward<Keywords>(params)...))
+            {
+                KWARGS_CHECK_IN_LIST(Keywords, (
+                                                keywords::id, keywords::name, keywords::address, keywords::port, keywords::tags
+                                                ))
+            }
+
+            template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
+            ServiceRegistrationData(Keywords&&... params)
+            : ServiceRegistrationData(kwargs::has_keyword<decltype(keywords::check), Keywords...>{}, std::forward<Keywords>(params)...)
+            {}
+
+            std::string id;
+            std::string name;
+            std::string address;
+            uint16_t port = 0;
+            Tags tags;
+
+            boost::optional<Check> check;
+        };
+
+        inline std::string updateCheckUrl(CheckStatus newStatus)
+        {
+            switch (newStatus)
+            {
+                case CheckStatus::Passing:
+                    return "/v1/agent/check/pass/";
+                case CheckStatus::Warning:
+                    return "/v1/agent/check/warn/";
+                case CheckStatus::Critical:
+                    return "/v1/agent/check/fail/";
+                default:
+                    throw std::logic_error("Wrong CheckStatus value");
+            }
         }
+    }
+
+    template<class... Keywords, class>
+    inline void Agent::registerCheck(Keywords&&... params)
+    {
+        m_consul.put("/v1/agent/check/register",
+                     impl::checkRegistrationJson({std::forward<Keywords>(params)...}));
+    }
+
+    template<class... Keywords, class>
+    inline void Agent::registerService(Keywords&&... params)
+    {
+        m_consul.put("/v1/agent/service/register",
+                     impl::serviceRegistrationJson({std::forward<Keywords>(params)...}));
     }
 
 }}
