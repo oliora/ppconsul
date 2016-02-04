@@ -720,3 +720,27 @@ TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
     CHECK(index1 != resp2.headers().index());
     CHECK(resp2.data().value == "value2");
 }
+
+TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")
+{
+    using namespace ppconsul::kv::params;
+
+    auto consul = create_test_consul();
+    Storage kv(consul);
+
+    kv.put("key1", "value1");
+    auto index1 = kv.item(ppconsul::withHeaders, "key1").headers().index();
+
+    auto t1 = std::chrono::steady_clock::now();
+    auto resp1 = kv.item(ppconsul::withHeaders, "key1", block_for = {std::chrono::milliseconds(500), index1});
+    CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::milliseconds(500));
+    CHECK(index1 == resp1.headers().index());
+    CHECK(resp1.data().value == "value1");
+
+    kv.put("key1", "value2");
+    auto t2 = std::chrono::steady_clock::now();
+    auto resp2 = kv.item(ppconsul::withHeaders, "key1", block_for = {std::chrono::milliseconds(500), index1});
+    CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::milliseconds(500));
+    CHECK(index1 != resp2.headers().index());
+    CHECK(resp2.data().value == "value2");
+}

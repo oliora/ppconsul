@@ -49,7 +49,7 @@ namespace ppconsul {
 
         inline void printParameter(std::ostream& os, const BlockForValue& v, KWARGS_KW_TAG(block_for))
         {
-            os << "wait=" << v.first.count() << "s&index=" << v.second;
+            os << "wait=" << v.first.count() << "ms&index=" << v.second;
         }
     }
 

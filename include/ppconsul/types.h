@@ -28,9 +28,9 @@ namespace ppconsul {
         Stale
     };
 
-    using duration = std::chrono::milliseconds; // TODO: use for BlockForValue as well
+    using duration = std::chrono::milliseconds;
 
-    typedef std::pair<std::chrono::seconds, uint64_t> BlockForValue;
+    typedef std::pair<std::chrono::milliseconds, uint64_t> BlockForValue;
 
     typedef std::unordered_set<std::string> Tags;
 
