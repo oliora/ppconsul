@@ -14,7 +14,7 @@ Releases:
 + Consistency modes
 + Blocking queries (simple)
 + Don't expose json11 in headers
-- build library as shared (default) or static (choosen by option)
+? build library as shared (default) or static (choosen by option)
 
 - More checks of received JSON data shape (?)
 - Simplify JSON interface (?)
@@ -59,11 +59,11 @@ Releases:
 ### agent
 
 + v1 interface except Config part of /v1/agent/self
-- Additional check types (https://www.consul.io/docs/agent/checks.html)
-  - HTTP
-  - TCP
-  - Docker
-- Support "Notes" for a service's check
++ Additional check types (https://www.consul.io/docs/agent/checks.html)
+  + HTTP
+  + TCP
+  + Docker
++ Support "Notes" for a service's check
 - Support "Status" (plus "Output"?) for a check's initial status
 - agent/maintenance (https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
 - agent/service/maintenance (https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
