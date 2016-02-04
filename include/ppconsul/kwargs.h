@@ -313,7 +313,7 @@ namespace kwargs {
         struct is_kwargs: is_kwargs_impl<Args...>::type {};
 
         template<class Keyword, class... Args>
-        struct has_keyword: contains<typename arg_keywords<Args...>::type, Keyword>::type {};
+        struct has_keyword: contains<typename arg_keywords<Args...>::type, decay_t<Keyword>>::type {};
 
         template<class Keyword, class... Args>
         struct keyword_index
@@ -385,10 +385,10 @@ namespace kwargs {
     }
 
     template<class... Args>
-    using is_kwargs = std::integral_constant<bool, detail::is_kwargs<Args...>::value>;
+    struct is_kwargs : std::integral_constant<bool, detail::is_kwargs<Args...>::value> {};
 
     template<class Keyword, class... Args>
-    using has_keyword = std::integral_constant<bool, detail::has_keyword<detail::decay_t<Keyword>, Args...>::value>;
+    struct has_keyword : std::integral_constant<bool, detail::has_keyword<Keyword, Args...>::value> {};
 
     template<class... Args>
     using enable_if_kwargs_t = typename std::enable_if<is_kwargs<Args...>::value>::type;

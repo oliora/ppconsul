@@ -356,7 +356,7 @@ namespace ppconsul { namespace agent {
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
             ServiceRegistrationData(Keywords&&... params)
             : ServiceRegistrationData(
-                typename kwargs::has_keyword<decltype(keywords::check), Keywords...>::type{},
+                kwargs::has_keyword<decltype(keywords::check), Keywords...>{},
                 std::forward<Keywords>(params)...)
             {}
 
