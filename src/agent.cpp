@@ -63,18 +63,18 @@ namespace impl {
         {
             CheckConfigSaver(s11n::Json::object& dst): dst_(&dst) {}
 
-            void operator() (const TtlCheckConfig& c) const
+            void operator() (const TtlCheck& c) const
             {
                 dst()["ttl"] = to_json(c.ttl);
             }
 
-            void operator() (const ScriptCheckConfig& c) const
+            void operator() (const ScriptCheck& c) const
             {
                 dst()["script"] = c.script;
                 dst()["interval"] = to_json(c.interval);
             }
 
-            void operator() (const HttpCheckConfig& c) const
+            void operator() (const HttpCheck& c) const
             {
                 dst()["http"] = c.url;
                 dst()["interval"] = to_json(c.interval);
@@ -82,7 +82,7 @@ namespace impl {
                     dst()["timeout"] = to_json(c.timeout);
             }
 
-            void operator() (const TcpCheckConfig& c) const
+            void operator() (const TcpCheck& c) const
             {
                 dst()["tcp"] = c.address;
                 dst()["interval"] = to_json(c.interval);
@@ -90,7 +90,7 @@ namespace impl {
                     dst()["timeout"] = to_json(c.timeout);
             }
 
-            void operator() (const DockerCheckConfig& c) const
+            void operator() (const DockerCheck& c) const
             {
                 dst()["docker_container_id"] = c.containerId;
                 dst()["shell"] = c.shell;
@@ -105,7 +105,7 @@ namespace impl {
         };
 
 
-        void save(s11n::Json::object& dst, const CheckConfig& c)
+        void save(s11n::Json::object& dst, const CheckParams& c)
         {
             boost::apply_visitor(CheckConfigSaver(dst), c);
         }
@@ -141,7 +141,7 @@ namespace impl {
             { "Notes", check.notes }
         };
 
-        save(o, check.config);
+        save(o, check.params);
 
         return Json(std::move(o)).dump();
     }
@@ -164,7 +164,7 @@ namespace impl {
                 { "Notes", service.check->notes }
             };
 
-            save(check_o, service.check->config);
+            save(check_o, service.check->params);
 
             o["Check"] = check_o;
         }
