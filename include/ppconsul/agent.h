@@ -307,7 +307,8 @@ namespace ppconsul { namespace agent {
             , params(kwargs::get(keywords::check, std::forward<Keywords>(params)...))
             , notes(kwargs::get_opt(keywords::notes, std::string(), std::forward<Keywords>(params)...))
             {
-                KWARGS_CHECK_IN_LIST(Keywords, (keywords::id, keywords::name, keywords::check, keywords::notes))
+                KWARGS_CHECK_IN_LIST(Keywords, (
+                    keywords::id, keywords::name, keywords::check, keywords::notes))
             }
 
             std::string id;
@@ -336,9 +337,8 @@ namespace ppconsul { namespace agent {
                 kwargs::get_opt(keywords::notes, std::string(), std::forward<Keywords>(params)...)})
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
-                                                keywords::id, keywords::name, keywords::address, keywords::port, keywords::tags,
-                                                keywords::check, keywords::notes
-                                                ))
+                    keywords::id, keywords::name, keywords::address, keywords::port, keywords::tags,
+                        keywords::check, keywords::notes))
             }
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
@@ -350,13 +350,14 @@ namespace ppconsul { namespace agent {
             , tags(kwargs::get_opt(keywords::tags, Tags(), std::forward<Keywords>(params)...))
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
-                                                keywords::id, keywords::name, keywords::address, keywords::port, keywords::tags
-                                                ))
+                    keywords::id, keywords::name, keywords::address, keywords::port, keywords::tags))
             }
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
             ServiceRegistrationData(Keywords&&... params)
-            : ServiceRegistrationData(kwargs::has_keyword<decltype(keywords::check), Keywords...>{}, std::forward<Keywords>(params)...)
+            : ServiceRegistrationData(
+                typename kwargs::has_keyword<decltype(keywords::check), Keywords...>::type{},
+                std::forward<Keywords>(params)...)
             {}
 
             std::string id;
