@@ -103,7 +103,7 @@ namespace ppconsul { namespace agent {
 
 
     namespace impl {
-        namespace params {
+        namespace kws {
             PPCONSUL_PARAM(pool, Pool)
             PPCONSUL_PARAM(note, std::string)
 
@@ -144,7 +144,7 @@ namespace ppconsul { namespace agent {
 
         std::vector<Member> members(Pool pool = Pool::Lan) const
         {
-            return impl::parseMembers(m_consul.get("/v1/agent/members", impl::params::pool = pool));
+            return impl::parseMembers(m_consul.get("/v1/agent/members", impl::kws::pool = pool));
         }
         
         std::pair<Config, Member> self() const
@@ -154,7 +154,7 @@ namespace ppconsul { namespace agent {
 
         void join(const std::string& addr, Pool pool = Pool::Lan)
         {
-            m_consul.get("/v1/agent/join/" + helpers::encodeUrl(addr), impl::params::pool = pool);
+            m_consul.get("/v1/agent/join/" + helpers::encodeUrl(addr), impl::kws::pool = pool);
         }
 
         void forceLeave(const std::string& node)
@@ -282,7 +282,7 @@ namespace ppconsul { namespace agent {
     private:
         void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
         {
-            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), impl::params::note = note);
+            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), impl::kws::note = note);
         }
 
         // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`

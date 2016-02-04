@@ -16,7 +16,7 @@
 using ppconsul::catalog::Catalog;
 using ppconsul::agent::Agent;
 using ppconsul::Node;
-namespace params = ppconsul::params;
+namespace keywords = ppconsul::keywords;
 namespace agent = ppconsul::agent;
 using ppconsul::Consistency;
 
@@ -90,7 +90,7 @@ TEST_CASE("catalog.nodes", "[consul][catalog][config]")
 
 TEST_CASE("catalog.nodes_blocking", "[consul][catalog][config][blocking]")
 {
-    using namespace ppconsul::params;
+    using namespace ppconsul::keywords;
 
     auto consul = create_test_consul();
     Catalog catalog(consul);
@@ -224,12 +224,12 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
 
     SECTION("non existing service tag")
     {
-        CHECK(catalog.service(Uniq_Name_1, params::tag = Non_Existing_Tag_Name).empty());
+        CHECK(catalog.service(Uniq_Name_1, keywords::tag = Non_Existing_Tag_Name).empty());
     }
 
     SECTION("service with tag")
     {
-        auto services1 = catalog.service(Uniq_Name_1, params::tag = "udp");
+        auto services1 = catalog.service(Uniq_Name_1, keywords::tag = "udp");
 
         REQUIRE(services1.size() == 1);
 
@@ -240,7 +240,7 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
         CHECK(services1[0].second.tags == ppconsul::Tags({ "print", "udp" }));
         CHECK(services1[0].second.id == "service1");
 
-        auto services2 = catalog.service(Uniq_Name_1, params::tag = "print");
+        auto services2 = catalog.service(Uniq_Name_1, keywords::tag = "print");
 
         REQUIRE(services2.size() == 2);
 
@@ -371,7 +371,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
 
     SECTION("service with tag")
     {
-        auto services1 = catalog.service(Uniq_Name_1_Spec, params::tag = Tag_Spec);
+        auto services1 = catalog.service(Uniq_Name_1_Spec, keywords::tag = Tag_Spec);
 
         REQUIRE(services1.size() == 1);
 
@@ -381,7 +381,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
         CHECK(services1[0].second.tags == ppconsul::Tags({ "print", Tag_Spec }));
         CHECK(services1[0].second.id == "service1");
 
-        auto services2 = catalog.service(Uniq_Name_1_Spec, params::tag = "print");
+        auto services2 = catalog.service(Uniq_Name_1_Spec, keywords::tag = "print");
 
         REQUIRE(services2.size() == 2);
 
@@ -403,7 +403,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
 
 TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
 {
-    using namespace ppconsul::params;
+    using namespace ppconsul::keywords;
 
     auto consul = create_test_consul();
     Catalog catalog(consul);

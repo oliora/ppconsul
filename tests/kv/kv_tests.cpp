@@ -13,7 +13,7 @@
 
 using ppconsul::kv::Storage;
 using ppconsul::kv::KeyValue;
-using namespace ppconsul::kv::params;
+using namespace ppconsul::kv::keywords;
 
 namespace 
 {
@@ -699,7 +699,7 @@ TEST_CASE("kv.index", "[consul][kv][headers]")
 
 TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
 {
-    using namespace ppconsul::kv::params;
+    using namespace ppconsul::kv::keywords;
 
     auto consul = create_test_consul();
     Storage kv(consul);
@@ -723,7 +723,7 @@ TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
 
 TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")
 {
-    using namespace ppconsul::kv::params;
+    using namespace ppconsul::kv::keywords;
 
     auto consul = create_test_consul();
     Storage kv(consul);
