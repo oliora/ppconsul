@@ -39,6 +39,7 @@ namespace ppconsul { namespace agent {
     struct TtlCheck
     {
         TtlCheck() = default;
+
         explicit TtlCheck(const duration& ttl)
         : ttl(ttl) {}
 
@@ -48,6 +49,7 @@ namespace ppconsul { namespace agent {
     struct ScriptCheck
     {
         ScriptCheck() = default;
+
         ScriptCheck(std::string script, const duration& interval)
         : script(std::move(script)), interval(interval) {}
 
@@ -58,6 +60,7 @@ namespace ppconsul { namespace agent {
     struct HttpCheck
     {
         HttpCheck() = default;
+
         HttpCheck(std::string url, const duration& interval, const duration& timeout = duration::zero())
         : url(std::move(url)), interval(interval), timeout(timeout) {}
 
@@ -66,11 +69,22 @@ namespace ppconsul { namespace agent {
         duration timeout;
     };
 
+    namespace impl {
+        inline std::string makeTcpAddress(const char *host, uint16_t port)
+        {
+            return helpers::format("%s:%u", host, static_cast<unsigned>(port));
+        }
+    }
+
     struct TcpCheck
     {
         TcpCheck() = default;
+
         TcpCheck(std::string address, const duration& interval, const duration& timeout = duration::zero())
         : address(std::move(address)), interval(interval), timeout(timeout) {}
+
+        TcpCheck(const std::string& host, uint16_t port, const duration& interval, const duration& timeout = duration::zero())
+        : TcpCheck(impl::makeTcpAddress(host.c_str(), port), interval, timeout) {}
 
         std::string address;
         duration interval;
@@ -80,6 +94,7 @@ namespace ppconsul { namespace agent {
     struct DockerCheck
     {
         DockerCheck() = default;
+
         DockerCheck(std::string containerId, std::string script, const duration& interval, std::string shell = "")
         : containerId(std::move(containerId)), script(std::move(script)), interval(interval), shell(std::move(shell)) {}
 

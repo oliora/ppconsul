@@ -206,6 +206,78 @@ TEST_CASE("agent.check_registration_special_chars", "[consul][agent][checks][spe
     }
 }
 
+TEST_CASE("agent.http_check_registration", "[consul][agent][checks][http_check]")
+{
+    auto consul = create_test_consul();
+    Agent agent(consul);
+
+    agent.deregisterCheck("check1");
+    agent.deregisterCheck(Unique_Id);
+
+    SECTION("default timeout")
+    {
+        REQUIRE_NOTHROW(agent.registerCheck("check1", agent::HttpCheck{ "invalid.", std::chrono::minutes(5) }));
+    }
+    SECTION("custom timeout")
+    {
+        REQUIRE_NOTHROW(agent.registerCheck("check1", agent::HttpCheck{ "invalid.", std::chrono::minutes(5), std::chrono::milliseconds(500) }));
+    }
+}
+
+TEST_CASE("agent.tcp_check_registration", "[consul][agent][checks][tcp_check]")
+{
+    auto consul = create_test_consul();
+    Agent agent(consul);
+
+    agent.deregisterCheck("check1");
+    agent.deregisterCheck(Unique_Id);
+
+    SECTION("string address")
+    {
+        SECTION("default timeout")
+        {
+            REQUIRE_NOTHROW(agent.registerCheck("check1", agent::TcpCheck{ "127.0.0.1:0", std::chrono::minutes(5) }));
+        }
+
+        SECTION("custom timeout")
+        {
+            REQUIRE_NOTHROW(agent.registerCheck("check1", agent::TcpCheck{ "127.0.0.1:0", std::chrono::minutes(5), std::chrono::milliseconds(500) }));
+        }
+    }
+
+    SECTION("host and port")
+    {
+        SECTION("default timeout")
+        {
+            REQUIRE_NOTHROW(agent.registerCheck("check1", agent::TcpCheck{ "127.0.0.1", 0, std::chrono::minutes(5) }));
+        }
+
+        SECTION("custom timeout")
+        {
+            REQUIRE_NOTHROW(agent.registerCheck("check1", agent::TcpCheck{ "127.0.0.1", 0, std::chrono::minutes(5), std::chrono::milliseconds(500) }));
+        }
+    }
+}
+
+TEST_CASE("agent.docker_check_registration", "[consul][agent][checks][docker_check]")
+{
+    auto consul = create_test_consul();
+    Agent agent(consul);
+
+    agent.deregisterCheck("check1");
+    agent.deregisterCheck(Unique_Id);
+
+    SECTION("default shell")
+    {
+        REQUIRE_NOTHROW(agent.registerCheck("check1", agent::DockerCheck{ "example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5) }));
+    }
+
+    SECTION("custom shell")
+    {
+        REQUIRE_NOTHROW(agent.registerCheck("check1", agent::DockerCheck{ "example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5), "/usr/bin/cpp_shell_of_the_future_3016" }));
+    }
+}
+
 TEST_CASE("agent.check_update", "[consul][agent][checks][health]")
 {
     auto consul = create_test_consul();
