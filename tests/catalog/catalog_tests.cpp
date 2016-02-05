@@ -19,6 +19,7 @@ using ppconsul::Node;
 namespace keywords = ppconsul::keywords;
 namespace agent = ppconsul::agent;
 using ppconsul::Consistency;
+namespace catalog = ppconsul::catalog;
 
 
 namespace {
@@ -432,13 +433,13 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
 
     SECTION("services")
     {
-        auto index1 = catalog.services(ppconsul::withHeaders).headers().index();
+        auto index1 = catalog.services(ppconsul::withHeaders, catalog::keywords::consistency = Consistency::Consistent).headers().index();
 
         REQUIRE(index1);
 
         auto t1 = std::chrono::steady_clock::now();
         auto resp1 = catalog.services(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
-        REQUIRE(index1 == resp1.headers().index()); // otherwise someone else did some change. TODO: make test stable
+        REQUIRE(index1 == resp1.headers().index()); // otherwise someone else did some change. TODO: make test more stable
         CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
 
         CHECK(resp1.data().at(Uniq_Name_1) == ppconsul::Tags({ "print", "udp" }));
