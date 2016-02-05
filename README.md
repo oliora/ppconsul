@@ -60,11 +60,6 @@ agent.registerService(
 
 ...
 
-// Report service status, should be called periodically with no more than 15 seconds between calls
-agent.servicePass("my-service");
-
-...
-
 // Unregister service
 agent.deregisterService("my-service");
 ```
