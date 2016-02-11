@@ -36,7 +36,7 @@ The library includes code of the following 3rd party libraries (look at `ext` di
 For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
 
 ##### Boost Version Note:
-Boost versions prior to 1.55 can not be used because of the [issue 8759](https://svn.boost.org/trac/boost/ticket/8759).
+Boost versions prior to 1.55 can not be used because of [Boost issue #8759](https://svn.boost.org/trac/boost/ticket/8759).
 
 ## Warm Up Example
 
