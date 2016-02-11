@@ -6,7 +6,7 @@ A C++ client library for [Consul](http://consul.io). Consul is a distributed too
 
 The goal of PPConsul is to:
 * Fully cover version 1 of Consul [HTTP API](http://www.consul.io/docs/agent/http.html). Please check the current [implementation status](status.md).
-* Provide simple but modular and effective API based on modern C++ approaches. This includes to be C++11 aware.
+* Provide simple, modular and effective API based on C++11.
 * Support different platforms. At the moment, Linux, Windows and OSX platforms supported.
 * Cover all the code with automated tests.
 * Have documentation.
