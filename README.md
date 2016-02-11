@@ -17,9 +17,9 @@ So if you are looking for something stable and ready to be used in production th
 Library tests are running against **Consul v0.6.3**. Library known to work with versions **0.4** and **0.5** as well although some tests may fail because of differences in Consul behavior.
 
 The library is written in C++11 and requires a quite modern compiler. Currently it has been tested with:
-* Windows: Visual Studio 2013
-* OS X: Clang 6 + libc++ (Xcode 6.1), Clang 5.1 + libc++ (Xcode 5.1)
-* Linux: GCC 4.9, GCC 4.8.2
+* Windows: Visual Studio 2013 Update 3
+* OS X: Clang 7 (Xcode 7), Clang 6 (Xcode 6.1), Clang 5 (Xcode 5.1) all with libc++.
+* Linux: GCC 5.3, GCC 4.9, GCC 4.8.2
 
 Please check [PPConsul build status](https://136.243.151.173:4433/project.html?projectId=Ppconsul&guest=1).
 
