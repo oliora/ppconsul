@@ -27,7 +27,7 @@ Everything is supported except the following:
 - ACL tokens
 - Flag {{?near=}} for querying nodes and services
 - Support of blocking queries is limited [[1]].
-- Registration/derigistration. Please use the agent endpoint instead. There is no plan to support it any time soon unless requested by users.
+- Registration/deregistration. Please use the agent endpoint instead. There is no plan to support it any time soon unless requested by users.
 
 ### Health
 
