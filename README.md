@@ -75,7 +75,7 @@ TBD
 ### Get Dependencies
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [CMake](http://www.cmake.org/) 2.8.12 or above (earlier version may also be OK on Linux/OSX but not on Windows). Note that CMake 3 not guaranteed to work.
-* Install [Boost](http://www.boost.org/) library. You need compiled libraries only if you going to use cpp-netlib or your compiler is GCC < 4.9.
+* Install [Boost](http://www.boost.org/) 1.55 or later. You need compiled Boost libraries if you going to use cpp-netlib or GCC < 4.9, otherwise you need Boost headers only.
 * Install either [libCURL](http://curl.haxx.se/libcurl/) (any version is OK) or [cpp-netlib](http://cpp-netlib.org/) 0.11 or above.
 * Install [Consul](http://consul.io) 0.4.0 or above. It's only needed to run tests.
 
