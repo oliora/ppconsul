@@ -26,7 +26,7 @@ Please check [PPConsul build status](https://136.243.151.173:4433/project.html?p
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
 The library depends on:
-* [Boost](http://www.boost.org/) library. PPConsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is supported only in GCC 4.9](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+* [Boost](http://www.boost.org/) 1.55 or later [see note](#boost-version-note). PPConsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is supported only in GCC 4.9](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
 * [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP. Note that the latter depends on compiled Boost libraries.
 
 The library includes code of the following 3rd party libraries (look at `ext` directory): 
@@ -34,6 +34,9 @@ The library includes code of the following 3rd party libraries (look at `ext` di
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
 
 For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
+
+##### Boost Version Note:
+Boost versions prior to 1.55 can not be used because of the [issue 8759](https://svn.boost.org/trac/boost/ticket/8759).
 
 ## Warm Up Example
 
