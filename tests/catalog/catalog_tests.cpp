@@ -98,14 +98,14 @@ TEST_CASE("catalog.nodes_blocking", "[consul][catalog][config][blocking]")
 
     const auto selfMember = Agent(consul).self().second;
 
-    auto index1 = catalog.nodes(ppconsul::withHeaders).headers().index();
+    auto index1 = catalog.nodes(ppconsul::withHeaders, catalog::keywords::consistency = Consistency::Consistent).headers().index();
 
     REQUIRE(index1);
 
     auto t1 = std::chrono::steady_clock::now();
     auto resp1 = catalog.nodes(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
+    REQUIRE(index1 == resp1.headers().index()); // otherwise someone else did some change. TODO: make test more stable
     CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
-    CHECK(index1 == resp1.headers().index());
     
     CHECK(resp1.data().size());
 
@@ -465,14 +465,14 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
 
     SECTION("service")
     {
-        auto index1 = catalog.service(ppconsul::withHeaders, Uniq_Name_1).headers().index();
+        auto index1 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, catalog::keywords::consistency = Consistency::Consistent).headers().index();
 
         REQUIRE(index1);
 
         auto t1 = std::chrono::steady_clock::now();
         auto resp1 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, block_for = { std::chrono::seconds(5), index1 });
+        REQUIRE(index1 == resp1.headers().index()); // otherwise someone else did some change. TODO: make test more stable
         CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
-        CHECK(index1 == resp1.headers().index());
 
 
         REQUIRE(resp1.data().size() == 1);
