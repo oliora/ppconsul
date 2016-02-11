@@ -22,7 +22,7 @@ if (${USE_CPPNETLIB})
     add_definitions(-DPPCONSUL_USE_CPPNETLIB)
 endif ()
 
-set(BOOST_MIN_VERSION 1.47) # The first Boost with Chrono
+set(BOOST_MIN_VERSION 1.55) # Because of https://svn.boost.org/trac/boost/ticket/8759
 set(USE_BOOST_REGEX OFF)
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
