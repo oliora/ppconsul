@@ -38,7 +38,7 @@ For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) f
 ##### Boost Version Note:
 Boost versions prior to 1.55 can not be used because of [Boost issue #8759](https://svn.boost.org/trac/boost/ticket/8759).
 
-## Warm Up Example
+## Warm Up Examples
 
 Register, deregister and report the state of your service in Consul:
 
@@ -65,6 +65,62 @@ agent.registerService(
 
 // Unregister service
 agent.deregisterService("my-service");
+
+...
+
+// Register a service with TTL
+agent.registerService(
+    agent::keywords::name = "my-service",
+    agent::keywords::port = 9876,
+    agent::keywords::id = "my-service-1",
+    agent::keywords::check = agent::TtlCheck{std::chrono::seconds(5)}
+);
+
+// Report service is OK
+agent.servicePass("my-service-1");
+
+// Report service is failed
+agent.serviceFail("my-service-1", "Disk is full");
+```
+
+Use Key-Value storage:
+
+```cpp
+#include "ppconsul/kv.h"
+
+using namespace ppconsul;
+
+// Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
+Consul consul;
+
+// We need the 'kv' endpoint
+kv::Storage storage(consul);
+
+// Read the value of a key from the storage
+std::string something = storage.get("settings.something", "default-value");
+
+// Read the value of a key from the storage with consistency mode specified
+something = storage.get("settings.something", "default-value", keywords::consistency = Consistency::Consistent);
+
+// Erase a key from the storage
+storage.erase("settings.something-else");
+
+// Set the value of a key
+storage.put("settings.something", "new-value");
+```
+
+Blocking query to Key-Value storage:
+
+```cpp
+// Get key-value item
+kv::KeyValue item = storage.item("status.last-event-id");
+
+// Wait for the item change for no more than 1 minute:
+item = storage.item("status.last-event-id", keywords::block_for = {std::chrono::minutes(1), item.modifyIndex});
+
+// If key exists, print it:
+if (item)
+    std::cout << item.key << "=" << item.value << "\n";
 ```
 
 ## Documentation
