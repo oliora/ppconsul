@@ -49,12 +49,16 @@ Releases:
 + ensure value can contain any char from 0 to 255
 + Consistency modes
 + Blocking queries (simple)
+- throwing `std::string get(key, params...)` i.e. w/o a default value
+- `boost::optional<std::string> getOptional(key, params...)`
+- items iterator that retrive a value only on dereferencing
 - Acquire/release lock (depends on session)
 
+- ? syntax sugar operator[] to simply get/put value w/o params. getter returns "" if key does not exist (postponed to 0.2?)
 - tests for dc (postponed to 0.2)
 - tests for default DC and default token (postponed to 0.2)
 - typed value access (postponed to 0.2)
-- Get flag as uin64_t. Now it extracted from JSON as double due to json11 limitations (postponed to 0.2)
+- Get flag as uin64_t. Now it extracted from JSON as double because of json11 limitations (postponed to 0.2)
 
 
 ### agent
