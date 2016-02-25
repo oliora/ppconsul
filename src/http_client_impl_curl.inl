@@ -41,8 +41,6 @@ namespace ppconsul { namespace impl {
             bool m_initialized;
         };
 
-        const CurlInitializer g_initialized;
-
 #if !defined PPCONSUL_USE_BOOST_REGEX
         using std::regex;
         using std::regex_match;
@@ -83,6 +81,8 @@ namespace ppconsul { namespace impl {
         HttpClient()
         : m_handle(nullptr)
         {
+            static const CurlInitializer g_initialized;
+
             if (!g_initialized)
                 throw std::runtime_error("CURL was not successfully initialized");
 
