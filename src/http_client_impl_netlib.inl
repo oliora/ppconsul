@@ -9,7 +9,7 @@
 #include <tuple>
 
 
-namespace ppconsul { namespace impl {
+namespace ppconsul { namespace http { namespace impl {
     
     namespace {
         inline const char *header(const boost::network::http::client::response::headers_container_type& h, const std::string& name)
@@ -29,10 +29,10 @@ namespace ppconsul { namespace impl {
     }
 
 
-    class HttpClient
+    class HttpClient: public ppconsul::http::Client
     {
     public:
-        std::tuple<http::Status, ResponseHeaders, std::string> get(const std::string& url)
+        virtual std::tuple<http::Status, ResponseHeaders, std::string> get(const std::string& url) override
         {
             boost::network::http::client::request request(url);
             auto response = m_client.get(request);
@@ -40,14 +40,14 @@ namespace ppconsul { namespace impl {
                 getHeaders(response), response.data());
         }
 
-        std::pair<http::Status, std::string> put(const std::string& url, const std::string& data)
+        virtual std::pair<http::Status, std::string> put(const std::string& url, const std::string& data) override
         {
             boost::network::http::client::request request(url);
             auto response = m_client.put(request, data);
             return std::make_pair(http::Status(response.status(), response.status_message()), response.data());
         }
 
-        std::pair<http::Status, std::string> del(const std::string& url)
+        virtual std::pair<http::Status, std::string> del(const std::string& url) override
         {
             boost::network::http::client::request request(url);
             auto response = m_client.delete_(request);
@@ -58,4 +58,4 @@ namespace ppconsul { namespace impl {
         boost::network::http::client m_client;
     };
 
-}}
+}}}

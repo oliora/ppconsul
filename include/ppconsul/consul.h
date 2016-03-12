@@ -12,6 +12,7 @@
 #include "ppconsul/parameters.h"
 #include "ppconsul/http_status.h"
 #include "ppconsul/response.h"
+#include "ppconsul/http_client.h"
 #include <chrono>
 #include <string>
 #include <vector>
@@ -24,11 +25,6 @@
 
 
 namespace ppconsul {
-
-    namespace impl {
-        // Forward declaraion to use with PIMPL
-        class HttpClient;
-    }
 
     namespace keywords {
         PPCONSUL_PARAM(dc, std::string)
@@ -134,11 +130,12 @@ namespace ppconsul {
             return parameters::makeUrl(m_addr, path, dc = m_dataCenter, token = m_defaultToken, params...);
         }
 
+        // TODO: make impl funcs inline
         Response<std::string> get_impl(http::Status& status, const std::string& url);
         std::string put_impl(http::Status& status, const std::string& url, const std::string& data);
         std::string del_impl(http::Status& status, const std::string& url);
 
-        std::unique_ptr<impl::HttpClient> m_client; // PIMPL
+        std::unique_ptr<http::impl::Client> m_client;
         std::string m_addr;
         std::string m_dataCenter;
 

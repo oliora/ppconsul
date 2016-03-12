@@ -11,6 +11,7 @@ set(HEADERS
     error.h
     health.h
     helpers.h
+    http_client.h
     http_status.h
     kv.h
     kwargs.h

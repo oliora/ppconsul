@@ -47,7 +47,7 @@ namespace ppconsul {
     }
 
     Consul::Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& addr)
-    : m_client(new impl::HttpClient())
+    : m_client(new http::impl::HttpClient())
     , m_addr(makeAddr(addr))
     , m_dataCenter(dataCenter)
     , m_defaultToken(defaultToken)

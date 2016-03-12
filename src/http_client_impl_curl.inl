@@ -17,7 +17,7 @@
 #include <boost/regex.hpp>
 #endif
 
-namespace ppconsul { namespace impl {
+namespace ppconsul { namespace http { namespace impl {
 
     namespace {
         struct CurlInitializer
@@ -69,7 +69,7 @@ namespace ppconsul { namespace impl {
         }
     }
 
-    class HttpClient
+    class HttpClient: public Client
     {
         enum { Buffer_Size = 16384 };
 
@@ -99,7 +99,7 @@ namespace ppconsul { namespace impl {
             setopt(CURLOPT_READFUNCTION, &HttpClient::readCallback);
         }
 
-        ~HttpClient()
+        virtual ~HttpClient() override
         {
             if (m_handle)
                 curl_easy_cleanup(m_handle);
@@ -110,7 +110,7 @@ namespace ppconsul { namespace impl {
         HttpClient& operator= (const HttpClient&) = delete;
         HttpClient& operator= (HttpClient&&) = delete;
 
-        GetResponse get(const std::string& url)
+        virtual GetResponse get(const std::string& url) override
         {
             GetResponse r;
             std::get<2>(r).reserve(Buffer_Size);
@@ -126,7 +126,7 @@ namespace ppconsul { namespace impl {
             return r;
         }
 
-        std::pair<http::Status, std::string> put(const std::string& url, const std::string& data)
+        virtual std::pair<http::Status, std::string> put(const std::string& url, const std::string& data) override
         {
             ReadContext ctx(&data, 0u);
             
@@ -147,7 +147,7 @@ namespace ppconsul { namespace impl {
             return r;
         }
 
-        std::pair<http::Status, std::string> del(const std::string& url)
+        virtual std::pair<http::Status, std::string> del(const std::string& url) override
         {
             std::pair<http::Status, std::string> r;
             r.second.reserve(Buffer_Size);
@@ -232,8 +232,8 @@ namespace ppconsul { namespace impl {
                 throwCurlError(err, m_errBuffer);
         }
 
-        CURL *m_handle;
-        char m_errBuffer[CURL_ERROR_SIZE];
+        CURL *m_handle; // TODO: use unique_ptr<CURL, ...>
+        char m_errBuffer[CURL_ERROR_SIZE]; // TODO: replace with unique_ptr<char[]> to allow move
     };
 
-}}
+}}}

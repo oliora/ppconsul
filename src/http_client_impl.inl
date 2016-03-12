@@ -10,7 +10,7 @@
 #include <cstring>
 
 
-namespace ppconsul { namespace impl {
+namespace ppconsul { namespace http { namespace impl {
     namespace {
         const std::string Index_Header_Name("X-Consul-Index");
         const std::string KnownLeader_Header_Name("X-Consul-Knownleader");
@@ -26,7 +26,7 @@ namespace ppconsul { namespace impl {
             return 0 == strcmp(v, "true");
         }
     }
-}}
+}}}
 
 #if defined PPCONSUL_USE_CPPNETLIB
     #include "http_client_impl_netlib.inl"
