@@ -15,7 +15,7 @@ namespace ppconsul { namespace http {
     class Status
     {
     public:
-        explicit Status(int code = 0)
+        explicit Status(int code = 0) PPCONSUL_NOEXCEPT
         : m_code(code)
         {}
 

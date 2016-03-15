@@ -1,4 +1,4 @@
-//  Copyright (c) 2014 Andrey Upadyshev <oliora@gmail.com>
+//  Copyright (c) 2014-2016 Andrey Upadyshev <oliora@gmail.com>
 //
 //  Use, modification and distribution are subject to the
 //  Boost Software License, Version 1.0. (See accompanying file
@@ -75,10 +75,22 @@ namespace ppconsul {
             : Consul(Default_Server_Address, params...)
         {}
 
-        ~Consul();
+        Consul(Consul &&op) PPCONSUL_NOEXCEPT
+        : m_client(std::move(op.m_client))
+        , m_addr(std::move(op.m_addr))
+        , m_dataCenter(std::move(op.m_dataCenter))
+        , m_defaultToken(std::move(op.m_defaultToken))
+        {}
 
-        Consul(Consul &&op);
-        Consul& operator= (Consul &&op);
+        Consul& operator= (Consul &&op) PPCONSUL_NOEXCEPT
+        {
+            m_client = std::move(op.m_client);
+            m_addr = std::move(op.m_addr);
+            m_dataCenter = std::move(op.m_dataCenter);
+            m_defaultToken = std::move(op.m_defaultToken);
+
+            return *this;
+        }
 
         Consul(const Consul &op) = delete;
         Consul& operator= (const Consul &op) = delete;
@@ -158,7 +170,7 @@ namespace ppconsul {
     }
 
     template<class... Params, class>
-    Response<std::string> Consul::get(WithHeaders, const std::string& path, const Params&... params)
+    inline Response<std::string> Consul::get(WithHeaders, const std::string& path, const Params&... params)
     {
         http::Status s;
         auto r = get(s, path, params...);
@@ -168,7 +180,7 @@ namespace ppconsul {
     }
 
     template<class... Params, class>
-    std::string Consul::put(const std::string& path, const std::string& data, const Params&... params)
+    inline std::string Consul::put(const std::string& path, const std::string& data, const Params&... params)
     {
         http::Status s;
         auto r = put(s, path, data, params...);
@@ -178,7 +190,7 @@ namespace ppconsul {
     }
 
     template<class... Params, class>
-    std::string Consul::del(const std::string& path, const Params&... params)
+    inline std::string Consul::del(const std::string& path, const Params&... params)
     {
         http::Status s;
         auto r = del(s, path, params...);
@@ -186,4 +198,26 @@ namespace ppconsul {
             throwStatusError(std::move(s), std::move(r));
         return r;
     }
+
+    inline Response<std::string> Consul::get_impl(http::Status& status, const std::string& url)
+    {
+        Response<std::string> r;
+        std::tie(status, r.headers(), r.data()) = m_client->get(url);
+        return r;
+    }
+
+    inline std::string Consul::put_impl(http::Status& status, const std::string& url, const std::string& data)
+    {
+        std::string r;
+        std::tie(status, r) = m_client->put(url, data);
+        return r;
+    }
+
+    inline std::string Consul::del_impl(http::Status& status, const std::string& url)
+    {
+        std::string r;
+        std::tie(status, r) = m_client->del(url);
+        return r;
+    }
+
 }

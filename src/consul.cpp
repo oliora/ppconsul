@@ -1,4 +1,4 @@
-//  Copyright (c) 2014 Andrey Upadyshev <oliora@gmail.com>
+//  Copyright (c) 2014-2016 Andrey Upadyshev <oliora@gmail.com>
 //
 //  Use, modification and distribution are subject to the
 //  Boost Software License, Version 1.0. (See accompanying file
@@ -7,7 +7,11 @@
 #include "ppconsul/consul.h"
 #include "ppconsul/helpers.h"
 
-#include "http_client_impl.inl"
+#if defined PPCONSUL_USE_CPPNETLIB
+#include "http_client_netlib.h"
+#else
+#include "http_client_curl.h"
+#endif
 
 
 namespace ppconsul {
@@ -52,49 +56,5 @@ namespace ppconsul {
     , m_dataCenter(dataCenter)
     , m_defaultToken(defaultToken)
     {}
-    
-    Consul::~Consul()
-    {}
-
-    Consul::Consul(Consul &&op)
-    : m_client(std::move(op.m_client))
-    , m_addr(std::move(op.m_addr))
-    , m_dataCenter(std::move(op.m_dataCenter))
-    , m_defaultToken(std::move(op.m_defaultToken))
-    {}
-
-    Consul& Consul::operator= (Consul &&op)
-    {
-        if (this != &op)
-        {
-            m_client = std::move(op.m_client);
-            m_addr = std::move(op.m_addr);
-            m_dataCenter = std::move(op.m_dataCenter);
-            m_defaultToken = std::move(op.m_defaultToken);
-        }
-        
-        return *this;
-    }
-
-    Response<std::string> Consul::get_impl(http::Status& status, const std::string& url)
-    {
-        Response<std::string> r;
-        std::tie(status, r.headers(), r.data()) = m_client->get(url);
-        return r;
-    }
-
-    std::string Consul::put_impl(http::Status& status, const std::string& url, const std::string& data)
-    {
-        std::string r;
-        std::tie(status, r) = m_client->put(url, data);
-        return r;
-    }
-
-    std::string Consul::del_impl(http::Status& status, const std::string& url)
-    {
-        std::string r;
-        std::tie(status, r) = m_client->del(url);
-        return r;
-    }
 
 }

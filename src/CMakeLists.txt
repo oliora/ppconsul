@@ -22,9 +22,7 @@ set(HEADERS
 )
 
 set(SOURCES
-    http_client_impl.inl
-    http_client_impl_netlib.inl
-    http_client_impl_curl.inl
+    http_helpers.h
     s11n.h
     s11n_types.h
     agent.cpp
@@ -34,6 +32,14 @@ set(SOURCES
     health.cpp
     kv.cpp
 )
+
+if (${USE_CPPNETLIB})
+    list(APPEND SOURCES "http_client_netlib.h")
+    list(APPEND SOURCES "http_client_netlib.cpp")
+else ()
+    list(APPEND SOURCES "http_client_curl.h")
+    list(APPEND SOURCES "http_client_curl.cpp")
+endif ()
 
 foreach(SRC ${HEADERS})
     list(APPEND SOURCES "${HEADERS_DIR}/${SRC}")
