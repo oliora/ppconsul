@@ -8,6 +8,7 @@
 
 #include <ppconsul/http_client.h>
 #include <boost/network/protocol/http/client.hpp>
+#include "http_helpers.h"
 
 
 namespace ppconsul { namespace netlib {
@@ -15,11 +16,16 @@ namespace ppconsul { namespace netlib {
     class HttpClient: public ppconsul::http::impl::Client
     {
     public:
-        virtual std::tuple<http::Status, ResponseHeaders, std::string> get(const std::string& url) override;
-        virtual std::pair<http::Status, std::string> put(const std::string& url, const std::string& data) override;
-        virtual std::pair<http::Status, std::string> del(const std::string& url) override;
+        HttpClient(const std::string& address);
+
+        std::tuple<http::Status, ResponseHeaders, std::string> get(const std::string& path, const std::string& query) override;
+        std::pair<http::Status, std::string> put(const std::string& path, const std::string& query, const std::string& data) override;
+        std::pair<http::Status, std::string> del(const std::string& path, const std::string& query) override;
 
     private:
+        std::string makeUrl(const std::string& path, const std::string& query) const { return ppconsul::http::impl::makeUrl(m_addr, path, query); }
+
+        std::string m_addr;
         boost::network::http::client m_client;
     };
 

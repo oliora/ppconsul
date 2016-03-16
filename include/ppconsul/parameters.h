@@ -76,14 +76,13 @@ namespace ppconsul { namespace parameters {
     }
 
     template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-    std::string makeUrl(const std::string& addr, const std::string& path, const Params&... params)
+    std::string makeUrl(const std::string& path, const Params&... params)
     {
         auto query = makeQuery(params...);
 
         std::string r;
-        r.reserve(addr.size() + path.size() + query.size() + 1); // 1 is for query prefix '?'
+        r.reserve(path.size() + query.size() + 1); // 1 is for query prefix '?'
 
-        r += addr;
         r += path;
         if (!query.empty())
         {

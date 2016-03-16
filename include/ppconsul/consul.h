@@ -77,7 +77,6 @@ namespace ppconsul {
 
         Consul(Consul &&op) PPCONSUL_NOEXCEPT
         : m_client(std::move(op.m_client))
-        , m_addr(std::move(op.m_addr))
         , m_dataCenter(std::move(op.m_dataCenter))
         , m_defaultToken(std::move(op.m_defaultToken))
         {}
@@ -85,7 +84,6 @@ namespace ppconsul {
         Consul& operator= (Consul &&op) PPCONSUL_NOEXCEPT
         {
             m_client = std::move(op.m_client);
-            m_addr = std::move(op.m_addr);
             m_dataCenter = std::move(op.m_dataCenter);
             m_defaultToken = std::move(op.m_defaultToken);
 
@@ -109,13 +107,13 @@ namespace ppconsul {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::string> get(http::Status& status, const std::string& path, const Params&... params)
         {
-            return get_impl(status, makeUrl(path, params...));
+            return get_impl(status, path, makeQuery(params...));
         }
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string put(http::Status& status, const std::string& path, const std::string& data, const Params&... params)
         {
-            return put_impl(status, makeUrl(path, params...), data);
+            return put_impl(status, path, makeQuery(params...), data);
         }
 
         // Throws BadStatus if !response_status.success()
@@ -125,7 +123,7 @@ namespace ppconsul {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string del(http::Status& status, const std::string& path, const Params&... params)
         {
-            return del_impl(status, makeUrl(path, params...));
+            return del_impl(status, path, makeQuery(params...));
         }
 
         // Throws BadStatus if !response_status.success()
@@ -136,18 +134,17 @@ namespace ppconsul {
         Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& addr);
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string makeUrl(const std::string& path, const Params&... params) const
+        std::string makeQuery(const Params&... params) const
         {
-            return parameters::makeUrl(m_addr, path, kw::dc = m_dataCenter, kw::token = m_defaultToken, params...);
+            return parameters::makeQuery(kw::dc = m_dataCenter, kw::token = m_defaultToken, params...);
         }
 
         // TODO: make impl funcs inline
-        Response<std::string> get_impl(http::Status& status, const std::string& url);
-        std::string put_impl(http::Status& status, const std::string& url, const std::string& data);
-        std::string del_impl(http::Status& status, const std::string& url);
+        Response<std::string> get_impl(http::Status& status, const std::string& paty, const std::string& query);
+        std::string put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data);
+        std::string del_impl(http::Status& status, const std::string& path, const std::string& query);
 
         std::unique_ptr<http::impl::Client> m_client;
-        std::string m_addr;
         std::string m_dataCenter;
 
         std::string m_defaultToken;
@@ -198,24 +195,24 @@ namespace ppconsul {
         return r;
     }
 
-    inline Response<std::string> Consul::get_impl(http::Status& status, const std::string& url)
+    inline Response<std::string> Consul::get_impl(http::Status& status, const std::string& path, const std::string& query)
     {
         Response<std::string> r;
-        std::tie(status, r.headers(), r.data()) = m_client->get(url);
+        std::tie(status, r.headers(), r.data()) = m_client->get(path, query);
         return r;
     }
 
-    inline std::string Consul::put_impl(http::Status& status, const std::string& url, const std::string& data)
+    inline std::string Consul::put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data)
     {
         std::string r;
-        std::tie(status, r) = m_client->put(url, data);
+        std::tie(status, r) = m_client->put(path, query, data);
         return r;
     }
 
-    inline std::string Consul::del_impl(http::Status& status, const std::string& url)
+    inline std::string Consul::del_impl(http::Status& status, const std::string& path, const std::string& query)
     {
         std::string r;
-        std::tie(status, r) = m_client->del(url);
+        std::tie(status, r) = m_client->del(path, query);
         return r;
     }
 

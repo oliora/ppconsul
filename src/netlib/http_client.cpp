@@ -6,6 +6,7 @@
 
 #include "http_client.h"
 #include "../http_helpers.h"
+#include <ppconsul/helpers.h>
 
 
 namespace ppconsul { namespace netlib {
@@ -35,23 +36,27 @@ namespace ppconsul { namespace netlib {
         }
     }
 
-    std::tuple<http::Status, ResponseHeaders, std::string> HttpClient::get(const std::string& url)
+    HttpClient::HttpClient(const std::string& address)
+    : m_addr(helpers::makeAddress(address))
+    {}
+
+    std::tuple<http::Status, ResponseHeaders, std::string> HttpClient::get(const std::string& path, const std::string& query)
     {
-        boost::network::http::client::request request(url);
+        boost::network::http::client::request request(makeUrl(path, query));
         auto response = m_client.get(request);
         return std::make_tuple(getStatus(response), getHeaders(response), body(response));
     }
 
-    std::pair<http::Status, std::string> HttpClient::put(const std::string& url, const std::string& data)
+    std::pair<http::Status, std::string> HttpClient::put(const std::string& path, const std::string& query, const std::string& data)
     {
-        boost::network::http::client::request request(url);
+        boost::network::http::client::request request(makeUrl(path, query));
         auto response = m_client.put(request, data);
         return std::make_pair(getStatus(response), body(response));
     }
 
-    std::pair<http::Status, std::string> HttpClient::del(const std::string& url)
+    std::pair<http::Status, std::string> HttpClient::del(const std::string& path, const std::string& query)
     {
-        boost::network::http::client::request request(url);
+        boost::network::http::client::request request(makeUrl(path, query));
         auto response = m_client.delete_(request);
         return std::make_pair(getStatus(response), body(response));
     }

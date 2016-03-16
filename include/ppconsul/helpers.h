@@ -26,6 +26,21 @@ namespace ppconsul { namespace helpers {
         return r;
     }
 
+    inline bool addressHasScheme(const std::string& addr)
+    {
+        return addr.find("://") != std::string::npos;
+    }
+
+    // Creates base URL like "<defaultScheme>://<addr>" if 'addr' has no scheme specified
+    // or just "<addr>" if 'addr' already has a scheme.
+    inline std::string makeAddress(const std::string& addr, const std::string& defaultScheme = "http")
+    {
+        if (addressHasScheme(addr))
+            return addr;
+
+        return defaultScheme + "://" + addr;
+    }
+
     /*class Base64Error: public ppconsul::Error
     {
     public:

@@ -68,6 +68,7 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
         ${Boost_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/ext
 )

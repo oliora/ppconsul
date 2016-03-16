@@ -16,15 +16,26 @@ Releases:
 + Don't expose json11 in headers
 + Add CMake 3 support
 + build library as shared (default) or static (choosen by option)
-
+- Suppress all warnings. Possibly enable -Werror
+- Add async API (cURL multi handle?) (postponed to 0.2)
 - More checks of received JSON data shape (?)
 - Simplify JSON interface (?)
-- Don't use regex for CURL headers (it's slow and creates dependency on Boost.Regex compiled library) (?)
+- Don't use regex for CURL headers (it creates dependency on Boost.Regex compiled library on gcc 4.8)
 - provide comparision operators (at least ==, !=) for all structs defined (postponed to 0.2)
 - Support 64bit integers in JSON (postponed to 0.2)
 - tests for consistency / default consistency (if possible)
 - pkg-config: add Libs.private and Requires
 
+=======
+### HTTP(S)
+? allow user to set CURLOPT_SSLENGINE and CURLOPT_SSLENGINE_DEFAULT (consul 0.2)
+? allow user to set CURLOPT_SSL_CIPHER_LIST
+    or set it by ourself to something highly secure (check what Consul supports) (consul 0.2)
+? allow user to set CURLOPT_ISSUERCERT (consul 0.2)
+? allow user to set CURLOPT_PINNEDPUBLICKEY (consul 0.2)
+? allow user to set CURLOPT_CRLFILE (consul 0.2)
+? allow user to set some other HTTP(S) options supported by cURL
+? use Consul::setOption() instead of adding all of this to TlsOptions?
 
 ### CI
 

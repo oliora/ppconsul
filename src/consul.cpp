@@ -12,15 +12,6 @@
 namespace ppconsul {
 
     namespace {
-        // Creates base URL like "http://<addr>" if 'addr' has no scheme specified
-        // or just "<addr>" if 'addr' contains any scheme.
-        inline std::string makeAddr(const std::string& addr)
-        {
-            if (addr.find("://") != std::string::npos)
-                return addr;
-            else
-                return "http://" + addr;
-        }
     }
 
     const char *BadStatus::what() const PPCONSUL_NOEXCEPT
@@ -46,8 +37,7 @@ namespace ppconsul {
     }
 
     Consul::Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& addr)
-    : m_client(new impl::HttpClient())
-    , m_addr(makeAddr(addr))
+    : m_client(new impl::HttpClient(addr))
     , m_dataCenter(dataCenter)
     , m_defaultToken(defaultToken)
     {}

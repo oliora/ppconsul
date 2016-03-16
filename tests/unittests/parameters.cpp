@@ -39,36 +39,42 @@ TEST_CASE("makeQuery", "[parameters]")
 
     CHECK(makeQuery() == "");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting") ==
+    CHECK(makeUrl("http://www.example.com/something/interesting") ==
         "http://www.example.com/something/interesting");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", p1 = "") ==
-        "http://www.example.com/something/interesting");
+    CHECK(makeUrl("/something/interesting") ==
+          "/something/interesting");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", p1 = "bla", p2 = 99, p1 = "wow") ==
-        "http://www.example.com/something/interesting?p2=99&p1=wow");
+    CHECK(makeUrl("/something/interesting", p1 = "") ==
+        "/something/interesting");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", p1 = "bla", p2 = 99, p1 = "") ==
-        "http://www.example.com/something/interesting?p2=99");
+    CHECK(makeUrl("http://www.example.com/something/interesting", p1 = "bla", p2 = 99, p1 = "wow") ==
+          "http://www.example.com/something/interesting?p2=99&p1=wow");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", p3 = true) ==
-        "http://www.example.com/something/interesting?boolean=1");
+    CHECK(makeUrl("/something/interesting", p1 = "bla", p2 = 99, p1 = "wow") ==
+        "/something/interesting?p2=99&p1=wow");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", p3 = false) ==
-        "http://www.example.com/something/interesting?boolean=0");
+    CHECK(makeUrl("/something/interesting", p1 = "bla", p2 = 99, p1 = "") ==
+        "/something/interesting?p2=99");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", p3 = false, p3 = true) ==
-        "http://www.example.com/something/interesting?boolean=1");
+    CHECK(makeUrl("/something/interesting", p3 = true) ==
+        "/something/interesting?boolean=1");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", p4 = Enum::Val1) ==
-        "http://www.example.com/something/interesting?val1");
+    CHECK(makeUrl("/something/interesting", p3 = false) ==
+        "/something/interesting?boolean=0");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", p4 = Enum::Default) ==
-        "http://www.example.com/something/interesting");
+    CHECK(makeUrl("/something/interesting", p3 = false, p3 = true) ==
+        "/something/interesting?boolean=1");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", p4 = Enum::Default, p1 = "bla") ==
-        "http://www.example.com/something/interesting?p1=bla");
+    CHECK(makeUrl("/something/interesting", p4 = Enum::Val1) ==
+        "/something/interesting?val1");
 
-    CHECK(makeUrl("http://www.example.com", "/something/interesting", p2=2, p4 = Enum::Val1, p3 = true, p1 = "bla") ==
-        "http://www.example.com/something/interesting?p2=2&val1&boolean=1&p1=bla");
+    CHECK(makeUrl("/something/interesting", p4 = Enum::Default) ==
+        "/something/interesting");
+
+    CHECK(makeUrl("/something/interesting", p4 = Enum::Default, p1 = "bla") ==
+        "/something/interesting?p1=bla");
+
+    CHECK(makeUrl("/something/interesting", p2=2, p4 = Enum::Val1, p3 = true, p1 = "bla") ==
+        "/something/interesting?p2=2&val1&boolean=1&p1=bla");
 }

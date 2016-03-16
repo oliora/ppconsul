@@ -7,23 +7,35 @@
 #pragma once
 
 #include <ppconsul/http_client.h>
+#include "http_helpers.h"
 #include <curl/curl.h>
 
 
 namespace ppconsul { namespace curl {
+
+    namespace detail
+    {
+        struct CurlEasyDeleter
+        {
+            void operator() (CURL *handle) const PPCONSUL_NOEXCEPT
+            {
+                curl_easy_cleanup(handle);
+            }
+        };
+    }
 
     class HttpClient: public ppconsul::http::impl::Client
     {
     public:
         using GetResponse = std::tuple<http::Status, ResponseHeaders, std::string>;
 
-        HttpClient();
+        HttpClient(const std::string& address);
 
         virtual ~HttpClient() override;
 
-        virtual GetResponse get(const std::string& url) override;
-        virtual std::pair<http::Status, std::string> put(const std::string& url, const std::string& data) override;
-        virtual std::pair<http::Status, std::string> del(const std::string& url) override;
+        GetResponse get(const std::string& path, const std::string& query) override;
+        std::pair<http::Status, std::string> put(const std::string& path, const std::string& query, const std::string& data) override;
+        std::pair<http::Status, std::string> del(const std::string& path, const std::string& query) override;
 
         HttpClient(const HttpClient&) = delete;
         HttpClient(HttpClient&&) = delete;
@@ -34,9 +46,14 @@ namespace ppconsul { namespace curl {
         template<class Opt, class T>
         void setopt(Opt opt, const T& t);
 
+        std::string makeUrl(const std::string& path, const std::string& query) const { return ppconsul::http::impl::makeUrl(m_addr, path, query); }
+
+        CURL *handle() const PPCONSUL_NOEXCEPT { return m_handle.get(); }
+
         void perform();
 
-        CURL *m_handle; // TODO: use unique_ptr<CURL, ...>
+        std::string m_addr;
+        std::unique_ptr<CURL, detail::CurlEasyDeleter> m_handle;
         char m_errBuffer[CURL_ERROR_SIZE]; // TODO: replace with unique_ptr<char[]> to allow move
     };
 

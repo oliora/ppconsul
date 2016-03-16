@@ -6,7 +6,7 @@
 
 cmake_minimum_required(VERSION 3.1)
 
-project(PPCONSUL VERSION 0.1)
+project(Ppconsul VERSION 0.1)
 
 option(BUILD_STATIC_LIB "Build Ppconsul as static library" OFF)
 option(USE_CPPNETLIB "Use cpp-netlib as HTTP backend (CURL is used by default)" OFF)
@@ -18,6 +18,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 
 if (${USE_CPPNETLIB})
+    #message(FATAL_ERROR "cpp-netlib support is removed, please check https://github.com/oliora/ppconsul/issues/11")
     add_definitions(-DPPCONSUL_USE_CPPNETLIB)
 endif ()
 
