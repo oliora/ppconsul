@@ -4,8 +4,8 @@
 //  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "http_client_curl.h"
-#include "http_helpers.h"
+#include "http_client.h"
+#include "../http_helpers.h"
 #include <algorithm>
 #include <tuple>
 #include <cassert>
@@ -17,7 +17,9 @@
 #include <boost/regex.hpp>
 #endif
 
-namespace ppconsul { namespace http { namespace impl {
+namespace ppconsul { namespace curl {
+
+    using namespace ppconsul::http::impl;
 
     namespace {
         struct CurlInitializer
@@ -82,7 +84,7 @@ namespace ppconsul { namespace http { namespace impl {
         size_t headerCallback(char *ptr, size_t size_, size_t nitems, void *outputResponse_)
         {
             const auto size = size_ * nitems;
-            auto outputResponse = reinterpret_cast<CurlHttpClient::GetResponse *>(outputResponse_);
+            auto outputResponse = reinterpret_cast<HttpClient::GetResponse *>(outputResponse_);
 
             if (parseStatus(std::get<0>(*outputResponse), ptr, size))
                 return size;
@@ -126,7 +128,7 @@ namespace ppconsul { namespace http { namespace impl {
         }
     }
 
-    CurlHttpClient::CurlHttpClient()
+    HttpClient::HttpClient()
     : m_handle(nullptr)
     {
         static const CurlInitializer g_initialized;
@@ -147,13 +149,13 @@ namespace ppconsul { namespace http { namespace impl {
         setopt(CURLOPT_READFUNCTION, &readCallback);
     }
 
-    CurlHttpClient::~CurlHttpClient()
+    HttpClient::~HttpClient()
     {
         if (m_handle)
             curl_easy_cleanup(m_handle);
     }
 
-    CurlHttpClient::GetResponse CurlHttpClient::get(const std::string& url)
+    HttpClient::GetResponse HttpClient::get(const std::string& url)
     {
         GetResponse r;
         std::get<2>(r).reserve(Buffer_Size);
@@ -169,7 +171,7 @@ namespace ppconsul { namespace http { namespace impl {
         return r;
     }
 
-    std::pair<http::Status, std::string> CurlHttpClient::put(const std::string& url, const std::string& data)
+    std::pair<http::Status, std::string> HttpClient::put(const std::string& url, const std::string& data)
     {
         ReadContext ctx(&data, 0u);
         
@@ -190,7 +192,7 @@ namespace ppconsul { namespace http { namespace impl {
         return r;
     }
 
-    std::pair<http::Status, std::string> CurlHttpClient::del(const std::string& url)
+    std::pair<http::Status, std::string> HttpClient::del(const std::string& url)
     {
         std::pair<http::Status, std::string> r;
         r.second.reserve(Buffer_Size);
@@ -207,7 +209,7 @@ namespace ppconsul { namespace http { namespace impl {
     }
 
     template<class Opt, class T>
-    inline void CurlHttpClient::setopt(Opt opt, const T& t)
+    inline void HttpClient::setopt(Opt opt, const T& t)
     {
         const auto err = curl_easy_setopt(m_handle, opt, t);
         if (err)
@@ -215,11 +217,11 @@ namespace ppconsul { namespace http { namespace impl {
     }
 
 
-    inline void CurlHttpClient::perform()
+    inline void HttpClient::perform()
     {
         const auto err = curl_easy_perform(m_handle);
         if (err)
             throwCurlError(err, m_errBuffer);
     }
 
-}}}
+}}

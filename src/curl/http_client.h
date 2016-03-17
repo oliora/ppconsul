@@ -6,29 +6,29 @@
 
 #pragma once
 
-#include "ppconsul/http_client.h"
+#include <ppconsul/http_client.h>
 #include <curl/curl.h>
 
 
-namespace ppconsul { namespace http { namespace impl {
+namespace ppconsul { namespace curl {
 
-    class CurlHttpClient: public Client
+    class HttpClient: public ppconsul::http::impl::Client
     {
     public:
         using GetResponse = std::tuple<http::Status, ResponseHeaders, std::string>;
 
-        CurlHttpClient();
+        HttpClient();
 
-        virtual ~CurlHttpClient() override;
+        virtual ~HttpClient() override;
 
         virtual GetResponse get(const std::string& url) override;
         virtual std::pair<http::Status, std::string> put(const std::string& url, const std::string& data) override;
         virtual std::pair<http::Status, std::string> del(const std::string& url) override;
 
-        CurlHttpClient(const CurlHttpClient&) = delete;
-        CurlHttpClient(CurlHttpClient&&) = delete;
-        CurlHttpClient& operator= (const CurlHttpClient&) = delete;
-        CurlHttpClient& operator= (CurlHttpClient&&) = delete;
+        HttpClient(const HttpClient&) = delete;
+        HttpClient(HttpClient&&) = delete;
+        HttpClient& operator= (const HttpClient&) = delete;
+        HttpClient& operator= (HttpClient&&) = delete;
 
     private:
         template<class Opt, class T>
@@ -40,6 +40,4 @@ namespace ppconsul { namespace http { namespace impl {
         char m_errBuffer[CURL_ERROR_SIZE]; // TODO: replace with unique_ptr<char[]> to allow move
     };
 
-    using HttpClient = CurlHttpClient;
-
-}}}
+}}

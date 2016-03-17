@@ -6,13 +6,13 @@
 
 #pragma once
 
-#include "ppconsul/http_client.h"
+#include <ppconsul/http_client.h>
 #include <boost/network/protocol/http/client.hpp>
 
 
-namespace ppconsul { namespace http { namespace impl {
+namespace ppconsul { namespace netlib {
     
-    class NetlibHttpClient: public Client
+    class HttpClient: public ppconsul::http::impl::Client
     {
     public:
         virtual std::tuple<http::Status, ResponseHeaders, std::string> get(const std::string& url) override;
@@ -23,7 +23,4 @@ namespace ppconsul { namespace http { namespace impl {
         boost::network::http::client m_client;
     };
 
-    
-    using HttpClient = NetlibHttpClient;
-
-}}}
+}}

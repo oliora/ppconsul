@@ -6,12 +6,7 @@
 
 #include "ppconsul/consul.h"
 #include "ppconsul/helpers.h"
-
-#if defined PPCONSUL_USE_CPPNETLIB
-#include "http_client_netlib.h"
-#else
-#include "http_client_curl.h"
-#endif
+#include "all_clients.h"
 
 
 namespace ppconsul {
@@ -51,7 +46,7 @@ namespace ppconsul {
     }
 
     Consul::Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& addr)
-    : m_client(new http::impl::HttpClient())
+    : m_client(new impl::HttpClient())
     , m_addr(makeAddr(addr))
     , m_dataCenter(dataCenter)
     , m_defaultToken(defaultToken)

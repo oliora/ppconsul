@@ -25,6 +25,7 @@ set(SOURCES
     http_helpers.h
     s11n.h
     s11n_types.h
+    all_clients.h
     agent.cpp
     catalog.cpp
     consul.cpp
@@ -34,11 +35,11 @@ set(SOURCES
 )
 
 if (${USE_CPPNETLIB})
-    list(APPEND SOURCES "http_client_netlib.h")
-    list(APPEND SOURCES "http_client_netlib.cpp")
+    list(APPEND SOURCES "netlib/http_client.h")
+    list(APPEND SOURCES "netlib/http_client.cpp")
 else ()
-    list(APPEND SOURCES "http_client_curl.h")
-    list(APPEND SOURCES "http_client_curl.cpp")
+    list(APPEND SOURCES "curl/http_client.h")
+    list(APPEND SOURCES "curl/http_client.cpp")
 endif ()
 
 foreach(SRC ${HEADERS})
