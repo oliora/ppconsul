@@ -22,6 +22,8 @@ macro(add_catch_test name)
     endif()
 endmacro()
 
+configure_file(consul.json.in consul.json)
+
 add_subdirectory(unittests) # to run unittests before consul ones
 
 add_subdirectory(agent)

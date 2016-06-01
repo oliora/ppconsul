@@ -36,10 +36,9 @@ namespace ppconsul {
         return m_what.c_str();
     }
 
-    Consul::Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& endpoint)
-    : m_client(new impl::HttpClient(helpers::ensureScheme(endpoint)))
+    Consul::Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& endpoint, const http::impl::TlsConfig& tlsConfig)
+    : m_client(new impl::HttpClient(helpers::ensureScheme(endpoint), tlsConfig))
     , m_dataCenter(dataCenter)
     , m_defaultToken(defaultToken)
     {}
-
 }

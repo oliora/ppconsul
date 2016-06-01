@@ -26,7 +26,6 @@ Releases:
 - tests for consistency / default consistency (if possible)
 - pkg-config: add Libs.private and Requires
 
-=======
 ### HTTP(S)
 ? allow user to set CURLOPT_SSLENGINE and CURLOPT_SSLENGINE_DEFAULT (consul 0.2)
 ? allow user to set CURLOPT_SSL_CIPHER_LIST
@@ -41,14 +40,12 @@ Releases:
 
 + build for 3 platforms (Windows, Linux, OSX)
 + run unit-tests
-+ run integration tests (-Windows, +Linux , +OSX)
-- operator << for std::duration for tests
-- split consul tests into different executables
++ run integration tests (+Windows, +Linux , +OSX)
++ operator << for std::duration for tests
++ split consul tests into different executables
 
 ### Consul
-- Change 'block-for' resolution from seconds to milliseconds
-
-+ Use milliseconds instead of seconds as base units for blocking queries
++ Change 'block-for' resolution from seconds to milliseconds
 - tests for default DC and default token (postponed to 0.2)
 
 

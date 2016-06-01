@@ -27,7 +27,7 @@ namespace ppconsul { namespace curl {
         {
             CurlInitializer()
             {
-                m_initialized = 0 == curl_global_init(CURL_GLOBAL_DEFAULT & ~CURL_GLOBAL_SSL);
+                m_initialized = 0 == curl_global_init(CURL_GLOBAL_DEFAULT | CURL_GLOBAL_SSL);
             }
 
             ~CurlInitializer()
@@ -148,6 +148,31 @@ namespace ppconsul { namespace curl {
         setopt(CURLOPT_NOPROGRESS, 1l);
         setopt(CURLOPT_WRITEFUNCTION, &writeCallback);
         setopt(CURLOPT_READFUNCTION, &readCallback);
+    }
+
+    HttpClient::HttpClient(const std::string& endpoint, const TlsConfig& tlsConfig)
+    : HttpClient(endpoint)
+    {
+        if (!tlsConfig.cert.empty())
+            setopt(CURLOPT_SSLCERT, tlsConfig.cert.c_str());
+        if (!tlsConfig.certType.empty())
+            setopt(CURLOPT_CAPATH, tlsConfig.certType.c_str());
+        if (!tlsConfig.key.empty())
+            setopt(CURLOPT_SSLKEY, tlsConfig.key.c_str());
+        if (!tlsConfig.keyType.empty())
+            setopt(CURLOPT_CAPATH, tlsConfig.certType.c_str());
+	if (!tlsConfig.caPath.empty())
+            setopt(CURLOPT_CAPATH, tlsConfig.caPath.c_str());
+        if (!tlsConfig.caInfo.empty())
+            setopt(CURLOPT_CAINFO, tlsConfig.caInfo.c_str());
+
+        if (tlsConfig.keyPass && *tlsConfig.keyPass)
+            setopt(CURLOPT_KEYPASSWD, tlsConfig.keyPass);
+
+	setopt(CURLOPT_SSL_VERIFYPEER, tlsConfig.verifyPeer ? 1 : 0);
+        setopt(CURLOPT_SSL_VERIFYHOST, tlsConfig.verifyHost ? 2 : 0);
+        if (tlsConfig.verifyStatus)
+            setopt(CURLOPT_SSL_VERIFYSTATUS, 1);
     }
 
     HttpClient::~HttpClient() = default;
