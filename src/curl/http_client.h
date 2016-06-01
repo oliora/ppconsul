@@ -9,6 +9,7 @@
 #include <ppconsul/http_client.h>
 #include "http_helpers.h"
 #include <curl/curl.h>
+#include <memory>
 
 
 namespace ppconsul { namespace curl {
@@ -30,6 +31,7 @@ namespace ppconsul { namespace curl {
         using GetResponse = std::tuple<http::Status, ResponseHeaders, std::string>;
 
         HttpClient(const std::string& endpoint);
+        HttpClient(const std::string& endpoint, const ppconsul::http::impl::TlsConfig& tlsConfig);
 
         virtual ~HttpClient() override;
 

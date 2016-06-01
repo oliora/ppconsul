@@ -33,6 +33,44 @@ namespace ppconsul {
         KWARGS_KEYWORD(consistency, Consistency)
         KWARGS_KEYWORD(block_for, BlockForValue)
 
+        namespace tls {
+            // Details about TLS options:
+            // - https://curl.haxx.se/libcurl/c/curl_easy_setopt.html
+            // - https://curl.haxx.se/docs/sslcerts.html
+
+            // Path or name of the client certificate file (CURLOPT_SSLCERT)
+            PPCONSUL_KEYWORD(cert, std::string)
+            // Type of the client SSL certificate (CURLOPT_SSLCERTTYPE)
+            PPCONSUL_KEYWORD(cert_type, std::string)
+            // Path or name of the client private key (CURLOPT_SSLKEY)
+            PPCONSUL_KEYWORD(key, std::string)
+            // Type of the private key file (CURLOPT_SSLKEYTYPE)
+            PPCONSUL_KEYWORD(key_type, std::string)
+            // Directory holding CA certificates (CURLOPT_CAPATH)
+            PPCONSUL_KEYWORD(ca_path, std::string)
+            // Path to CA bundle (CURLOPT_CAINFO)
+            PPCONSUL_KEYWORD(ca_info, std::string)
+            // Verify the peer's SSL certificate (CURLOPT_SSL_VERIFYPEER)
+            PPCONSUL_KEYWORD(verify_peer, bool)
+            // Verify the certificate's name against host  (CURLOPT_SSL_VERIFYHOST)
+            PPCONSUL_KEYWORD(verify_host, bool)
+            // Verify the certificate's status (CURLOPT_SSL_VERIFYSTATUS)
+            PPCONSUL_KEYWORD(verify_status, bool)
+
+            // Password for the client's private key or certificate file (CURLOPT_KEYPASSWD)
+	    // Note that it's a c-str rather than std::string. That's to make it possible
+	    // to keep the actual password in a specific location like in protected memory or
+	    // wiped-afer use memory block and so on.
+            PPCONSUL_KEYWORD(key_pass, const char *)
+        }
+
+        namespace groups {
+            KWARGS_KEYWORDS_GROUP(tls, (tls::cert, tls::cert_type,
+				        tls::key, tls::key_type, tls::key_pass,
+				        tls::ca_path, tls::ca_info,
+                                        tls::verify_peer, tls::verify_host, tls::verify_status))
+        }
+
         inline void printParameter(std::ostream& os, const Consistency& v, KWARGS_KW_TAG(consistency))
         {
             switch (v)
@@ -49,6 +87,11 @@ namespace ppconsul {
         }
     }
 
+    namespace impl {
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        http::impl::TlsConfig makeTlsConfig(const Params&... params);
+    }
+
     const char Default_Server_Endpoint[] = "http://127.0.0.1:8500";
 
     class Consul
@@ -57,16 +100,17 @@ namespace ppconsul {
         // Allowed parameters:
         // - dc - data center to use
         // - token - default token for all client requests (can be overloaded in every specific request)
+        // - groups::tls (tls::*) - TLS options
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Consul(const std::string& endpoint, const Params&... params)
         : Consul(kwargs::get_opt(kw::token, std::string(), params...),
                 kwargs::get_opt(kw::dc, std::string(), params...),
-                endpoint)
+                endpoint, impl::makeTlsConfig(params...))
         {
-            KWARGS_CHECK_IN_LIST(Params, (kw::dc, kw::token))
+            KWARGS_CHECK_IN_LIST(Params, (kw::dc, kw::token, kw::groups::tls))
         }
 
-        // Same as Consul(Default_Server_Endpoint, ...)
+        // Same as Consul(Default_Server_Endpoint, keywords...)
         // Allowed parameters:
         // - dc - data center to use
         // - token - default token for all requests
@@ -131,7 +175,7 @@ namespace ppconsul {
         std::string del(const std::string& path, const Params&... params);
 
     private:
-        Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& endpoint);
+        Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& endpoint, const http::impl::TlsConfig& tlsConfig);
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string makeQuery(const Params&... params) const
@@ -215,4 +259,23 @@ namespace ppconsul {
         return r;
     }
 
+    // Implementation
+    namespace impl {
+        template<class... Params, class>
+        inline http::impl::TlsConfig makeTlsConfig(const Params&... params)
+        {
+            http::impl::TlsConfig res;
+            res.cert = kwargs::get_opt(kw::tls::cert, std::string(), params...);
+	    res.certType = kwargs::get_opt(kw::tls::cert_type, std::string(), params...);
+            res.key = kwargs::get_opt(kw::tls::key, std::string(), params...);
+	    res.keyType = kwargs::get_opt(kw::tls::key_type, std::string(), params...);
+            res.caPath = kwargs::get_opt(kw::tls::ca_path, std::string(), params...);
+            res.caInfo = kwargs::get_opt(kw::tls::ca_info, std::string(), params...);
+            res.verifyPeer = kwargs::get_opt(kw::tls::verify_peer, true, params...);
+            res.verifyHost = kwargs::get_opt(kw::tls::verify_host, true, params...);
+            res.verifyStatus = kwargs::get_opt(kw::tls::verify_status, false, params...);
+            res.keyPass = kwargs::get_opt(kw::tls::key_pass, nullptr, params...);
+            return res;
+        }
+    }
 }

@@ -14,6 +14,26 @@
 
 namespace ppconsul { namespace http { namespace impl {
 
+    struct TlsConfig
+    {
+        TlsConfig() = default;
+
+        std::string cert;
+	std::string certType;
+        std::string key;
+	std::string keyType;
+        std::string caPath;
+        std::string caInfo;
+        bool verifyPeer = true;
+        bool verifyHost = true;
+        bool verifyStatus = false;
+
+        // Note that keyPass is c-str rather than std::string. That's to make it possible
+        // to keep the actual password in a specific location like in protected memory or
+        // wiped-afer use memory block and so on.
+        const char *keyPass;
+    };
+
     class Client
     {
     public:

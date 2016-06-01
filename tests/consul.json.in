@@ -1,0 +1,19 @@
+{
+    "datacenter": "ppconsul_test",
+    "enable_script_checks": true,
+    "log_level": "trace",
+    "ca_file": "${CMAKE_SOURCE_DIR}/tests/tls/ca/ca.cert",
+    "cert_file": "${CMAKE_SOURCE_DIR}/tests/tls/certs/consul.cert",
+    "key_file": "${CMAKE_SOURCE_DIR}/tests/tls/certs/consul.key",
+    "encrypt": "B2dD7ImCezplButFL27cFw==",
+    "verify_incoming": true,
+    "verify_outgoing": true,
+    "addresses": {
+        "http": "0.0.0.0",
+        "https": "0.0.0.0"
+    },
+    "ports": {
+        "http": 8500,
+        "https": 8080
+    }
+}

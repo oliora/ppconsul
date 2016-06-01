@@ -124,6 +124,21 @@ if (item)
     std::cout << item.key << "=" << item.value << "\n";
 ```
 
+Connect to Consul via TLS:
+
+```cpp
+#include "ppconsul/consul.h"
+
+using namespace ppconsul;
+
+Consul consul("https://localhost:8080",
+              kw::tls::cert="path/to/cert",
+              kw::tls::key="path/to/private/key",
+              kw::tls::ca_info="path/to/ca/cert");
+
+// Use consul ...
+```
+
 ## Documentation
 TBD
 
