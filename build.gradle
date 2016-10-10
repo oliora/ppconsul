@@ -23,7 +23,7 @@ model{
   binaries {
     all {
 	if (toolChain in Gcc) {
-		cppCompiler.args "-O2", "-march=native", "-pipe", "-c"
+		cppCompiler.args "-O2", "-march=native", "-pipe"
 	}
     }
   }
