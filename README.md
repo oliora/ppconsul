@@ -26,7 +26,7 @@ Please check [PPConsul build status](https://136.243.151.173:4433/project.html?p
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
 The library depends on:
-* [Boost](http://www.boost.org/) 1.55 or later [see note](#boost-version-note). PPConsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is supported only in GCC 4.9](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+* [Boost](http://www.boost.org/) 1.55 or later [see note](#boost-version-note). PPConsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is not supported in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
 * [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP. Note that the latter depends on compiled Boost libraries.
 
 The library includes code of the following 3rd party libraries (look at `ext` directory): 
@@ -131,9 +131,9 @@ TBD
 ### Get Dependencies
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [CMake](http://www.cmake.org/) 2.8.12 or above (earlier version may work as well unless you use Visual Studio compiler).
-* Install [Boost](http://www.boost.org/) 1.55 or later. You need compiled Boost libraries if you going to use cpp-netlib or GCC < 4.9, otherwise you need Boost headers only.
+* Install [Boost](http://www.boost.org/) 1.55 or later. You need compiled Boost libraries if you going to use cpp-netlib or GCC 4.8, otherwise you need Boost headers only.
 * Install either [libCURL](http://curl.haxx.se/libcurl/) (any version is OK) or [cpp-netlib](http://cpp-netlib.org/) 0.11 or above.
-* Install [Consul](http://consul.io) 0.4.0 or above. It's only needed to run tests.
+* Install [Consul](http://consul.io) 0.4.0 or above. *It's only needed to run tests.*
 
 ### Build
 
