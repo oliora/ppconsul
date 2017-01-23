@@ -5,6 +5,7 @@ The status of Consul HTTP API v1 coverage. Note that all implemented features ar
 ### Key/Value Store (KV)
 
 Everything is supported except the following:
+- Endpoint [`/v1/txn`](https://www.consul.io/docs/agent/http/kv.html#txn) (New in Consul 0.7)
 - ACL tokens
 - Lock acquiring / release. Will be implemented after Session endpoint.
 - Support of blocking queries is limited [[1]].
