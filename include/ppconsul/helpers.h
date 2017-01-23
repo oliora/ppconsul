@@ -38,4 +38,11 @@ namespace ppconsul { namespace helpers {
 
     // Encode string to be safely used as *part* of URL.
     std::string encodeUrl(const std::string&s);
+
+    inline std::string trim_eol(std::string s)
+    {
+        if (!s.empty() && s.back() == '\n')
+            s.resize(s.size() - 1);
+        return s;
+    }
 }}

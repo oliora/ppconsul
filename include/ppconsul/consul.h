@@ -210,7 +210,7 @@ namespace ppconsul {
     {
         std::string r;
         std::tie(status, r) = m_client->put(url, data);
-        return r;
+        return helpers::trim_eol(std::move(r));
     }
 
     inline std::string Consul::del_impl(http::Status& status, const std::string& url)
