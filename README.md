@@ -7,14 +7,14 @@ A C++ client library for [Consul](http://consul.io). Consul is a distributed too
 The goal of PPConsul is to:
 * Fully cover version 1 of Consul [HTTP API](http://www.consul.io/docs/agent/http.html). Please check the current [implementation status](status.md).
 * Provide simple, modular and effective API based on C++11.
-* Support different platforms. At the moment, Linux, Windows and OSX platforms supported.
+* Support different platforms. At the moment, Linux, Windows and macOS platforms supported.
 * Cover all the code with automated tests.
 * Have documentation.
 
 Note that this project is just started so it is under active developing, doesn't have a stable interface and was not tested enough.
 So if you are looking for something stable and ready to be used in production then it's better to come back later or help me growing this project to the quality level you need.
 
-Library tests are running against **Consul v0.6.3**. Library known to work with versions **0.4** and **0.5** as well although some tests may fail because of differences in Consul behavior.
+Library tests are currently running against **Consul v0.7.2**. Library is known to work with Consul starting from version **0.4** (earlier versions might work as well but it has never been tested) although some tests fail for older versions because of not-supported features.
 
 The library is written in C++11 and requires a quite modern compiler. Currently it has been tested with:
 * Windows: Visual Studio 2013 Update 3
@@ -26,7 +26,7 @@ Please check [PPConsul build status](https://136.243.151.173:4433/project.html?p
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
 The library depends on:
-* [Boost](http://www.boost.org/) 1.55 or later [see note](#boost-version-note). PPConsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is not supported in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+* [Boost](http://www.boost.org/) 1.55 or later. PPConsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is not supported in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
 * [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP. Note that the latter depends on compiled Boost libraries.
 
 The library includes code of the following 3rd party libraries (look at `ext` directory): 
@@ -34,9 +34,6 @@ The library includes code of the following 3rd party libraries (look at `ext` di
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
 
 For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
-
-##### Boost Version Note:
-Boost versions prior to 1.55 can not be used because of [Boost issue #8759](https://svn.boost.org/trac/boost/ticket/8759).
 
 ## Warm Up Examples
 
@@ -138,7 +135,7 @@ TBD
 ### Build
 
 Prepare project:  
-```
+```bash
 mkdir workspace
 cd workspace
 cmake ..
@@ -151,21 +148,70 @@ cmake ..
 
 *Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 
-Build on Linux/OSX:  
-`make`  
+Build on Linux/macOS:  
+```bash
+make
+```
 
 Build on Windows:  
-Either open solution file `workspace\ppconsul.sln` or build from the command line:  
-`cmake --build . --config Release`.
+Either open generated solution file `workspace\ppconsul.sln` in the Visual Studio or build from the command line:  
+```bash
+cmake --build . --config Release
+```
 
 ## How To Run Tests
+
+### Run Consul
+
+You need to run Consul with using of `ppconsul_test` datacenter. There is a helper script for this:  
+```bash
+tests/start_consul.sh start
+```
+
+If you have Consul 0.7 or above then it's probably easier to run it directly:  
+```bash
+consul agent -dev -datacenter=ppconsul_test
+```
+
+### Run Tests
+
+Run tests on Linux/macOS:  
+```bash
+cd workspace
+make test
+```
+
+Run tests on Windows:  
+Either build `RUN_TESTS` target in the Visual Studio or build from the command line:  
+```bash
+cd workspace
+ctest -C Release
+```
+
+There are the following environment variable used by the tests:
+
+|Name|Default Value|Description|
+|----|-------------|-----------|
+|`PPCONSUL_TEST_ADDR`|"127.0.0.1:8500"|The Consul network address|
+|`PPCONSUL_TEST_DC`|"ppconsul_test"|The Consul datacenter|
+
+### Known Problems
+
+Sometimes catalog tests failed on assertion `REQUIRE(index1 == resp1.headers().index());`. In this case, just rerun the tests.
+The reason for the failure is Consul's internal idempotent write which cause a spurious wakeup of waiting blocking query. Check the critical note under the blocking queries documentation at https://www.consul.io/docs/agent/http.html.
+
+## Using PPConsul In Your Application
 TBD
 
-## Bug Report
+For now you can check [`tests`](https://github.com/oliora/ppconsul/tree/master/tests) directory for PPConsul-dependent application examples.
+
+## Found a bag? Got a feature request? Need help with PPConsul?
 Use [issue tracker](https://github.com/oliora/ppconsul/issues).
 
 ## Contribute
-First of all, welcome on board! Please fork this repo, commit changes and create a pull request.
+First of all, welcome on board!
+
+To contribute, please fork this repo, make your changes and create a pull request.
 
 ## License
 The library released under [Boost Software License v1.0](http://www.boost.org/LICENSE_1_0.txt).
