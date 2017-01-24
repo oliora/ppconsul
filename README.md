@@ -17,11 +17,9 @@ So if you are looking for something stable and ready to be used in production th
 Library tests are currently running against **Consul v0.7.2**. Library is known to work with Consul starting from version **0.4** (earlier versions might work as well but it has never been tested) although some tests fail for older versions because of not-supported features.
 
 The library is written in C++11 and requires a quite modern compiler. Currently it has been tested with:
+* macOS: Clang 7 (Xcode 7), Clang 6 (Xcode 6), Clang 5 (Xcode 5) with libc++.
+* Ubuntu Linux: GCC 5.3, GCC 4.9, GCC 4.8.2 with stdlibc++
 * Windows: Visual Studio 2013 Update 3
-* OS X: Clang 7 (Xcode 7), Clang 6 (Xcode 6.1), Clang 5 (Xcode 5.1) all with libc++.
-* Linux: GCC 5.3, GCC 4.9, GCC 4.8.2
-
-Please check [Ppconsul build status](https://136.243.151.173:4433/project.html?projectId=Ppconsul&guest=1).
 
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
@@ -203,7 +201,7 @@ The reason for the failure is Consul's internal idempotent write which cause a s
 ## Using Ppconsul In Your Application
 TBD
 
-For now you can check [`tests`](https://github.com/oliora/ppconsul/tree/master/tests) directory for Ppconsul-dependent application examples.
+For now you can check [`tests`](https://github.com/oliora/ppconsul/tree/master/tests) directory for examples of Ppconsul-dependent applications.
 
 ## Found a bag? Got a feature request? Need help with Ppconsul?
 Use [issue tracker](https://github.com/oliora/ppconsul/issues).
