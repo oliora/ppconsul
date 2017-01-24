@@ -1,4 +1,4 @@
-//  Copyright (c) 2014-2016 Andrey Upadyshev <oliora@gmail.com>
+//  Copyright (c)  2014-2017 Andrey Upadyshev <oliora@gmail.com>
 //
 //  Use, modification and distribution are subject to the
 //  Boost Software License, Version 1.0. (See accompanying file
