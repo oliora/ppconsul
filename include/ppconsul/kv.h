@@ -256,9 +256,11 @@ namespace ppconsul { namespace kv {
         void put(const std::string& key, const std::string& value, const Params&... params)
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::keywords::groups::put))
-            if ("true" != m_consul.put(keyPath(key), value,
-                                       keywords::token = m_defaultToken, keywords::dc = m_defaultDc,
-                                       params...))
+            auto r = helpers::trim_eol(
+               m_consul.put(keyPath(key), value,
+                            keywords::token = m_defaultToken, keywords::dc = m_defaultDc,
+                            params...));
+            if ("true" != r)
                 throw UpdateError(key);
         }
 
@@ -269,9 +271,11 @@ namespace ppconsul { namespace kv {
         bool cas(const std::string& key, uint64_t cas, const std::string& value, const Params&... params)
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::keywords::groups::put))
-            return "true" == m_consul.put(keyPath(key), value,
-                                          keywords::token = m_defaultToken, keywords::dc = m_defaultDc,
-                                          keywords::cas = cas, params...);
+            auto r = helpers::trim_eol(
+                m_consul.put(keyPath(key), value,
+                    keywords::token = m_defaultToken, keywords::dc = m_defaultDc,
+                    keywords::cas = cas, params...));
+            return "true" == r;
         }
 
         // TODO: acquire/release session
