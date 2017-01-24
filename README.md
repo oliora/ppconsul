@@ -1,10 +1,10 @@
-# PPConsul
+# Ppconsul
 
 *Version 0.1*
 
 A C++ client library for [Consul](http://consul.io). Consul is a distributed tool for discovering and configuring services in your infrastructure.
 
-The goal of PPConsul is to:
+The goal of Ppconsul is to:
 * Fully cover version 1 of Consul [HTTP API](http://www.consul.io/docs/agent/http.html). Please check the current [implementation status](status.md).
 * Provide simple, modular and effective API based on C++11.
 * Support different platforms. At the moment, Linux, Windows and macOS platforms supported.
@@ -21,12 +21,12 @@ The library is written in C++11 and requires a quite modern compiler. Currently 
 * OS X: Clang 7 (Xcode 7), Clang 6 (Xcode 6.1), Clang 5 (Xcode 5.1) all with libc++.
 * Linux: GCC 5.3, GCC 4.9, GCC 4.8.2
 
-Please check [PPConsul build status](https://136.243.151.173:4433/project.html?projectId=Ppconsul&guest=1).
+Please check [Ppconsul build status](https://136.243.151.173:4433/project.html?projectId=Ppconsul&guest=1).
 
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
 The library depends on:
-* [Boost](http://www.boost.org/) 1.55 or later. PPConsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is not supported in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+* [Boost](http://www.boost.org/) 1.55 or later. Ppconsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is not supported in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
 * [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP. Note that the latter depends on compiled Boost libraries.
 
 The library includes code of the following 3rd party libraries (look at `ext` directory): 
@@ -200,12 +200,12 @@ There are the following environment variable used by the tests:
 Sometimes catalog tests failed on assertion `REQUIRE(index1 == resp1.headers().index());`. In this case, just rerun the tests.
 The reason for the failure is Consul's internal idempotent write which cause a spurious wakeup of waiting blocking query. Check the critical note under the blocking queries documentation at https://www.consul.io/docs/agent/http.html.
 
-## Using PPConsul In Your Application
+## Using Ppconsul In Your Application
 TBD
 
-For now you can check [`tests`](https://github.com/oliora/ppconsul/tree/master/tests) directory for PPConsul-dependent application examples.
+For now you can check [`tests`](https://github.com/oliora/ppconsul/tree/master/tests) directory for Ppconsul-dependent application examples.
 
-## Found a bag? Got a feature request? Need help with PPConsul?
+## Found a bag? Got a feature request? Need help with Ppconsul?
 Use [issue tracker](https://github.com/oliora/ppconsul/issues).
 
 ## Contribute

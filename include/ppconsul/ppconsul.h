@@ -6,7 +6,7 @@
 
 #pragma once
 
-// Meta header which includes all PPConsul headers needed to the library user
+// Meta header which includes all Ppconsul headers needed to the library user
 
 #include "ppconsul/config.h"
 
