@@ -42,6 +42,7 @@ Register, deregister and report the state of your service in Consul:
 #include "ppconsul/agent.h"
 
 using namespace ppconsul;
+using kw = ppconsul::agent::keywords;
 
 // Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
 Consul consul;
@@ -50,10 +51,10 @@ agent::Agent agent(consul);
 
 // Register a service with associated HTTP check:
 agent.registerService(
-    agent::keywords::name = "my-service",
-    agent::keywords::port = 9876,
-    agent::keywords::tags = {"tcp", "super_server"},
-    agent::keywords::check = agent::HttpCheck{"http://localhost:80/", std::chrono::seconds(2)}
+    kw::name = "my-service",
+    kw::port = 9876,
+    kw::tags = {"tcp", "super_server"},
+    kw::check = agent::HttpCheck{"http://localhost:80/", std::chrono::seconds(2)}
 );
 
 ...
@@ -65,10 +66,10 @@ agent.deregisterService("my-service");
 
 // Register a service with TTL
 agent.registerService(
-    agent::keywords::name = "my-service",
-    agent::keywords::port = 9876,
-    agent::keywords::id = "my-service-1",
-    agent::keywords::check = agent::TtlCheck{std::chrono::seconds(5)}
+    kw::name = "my-service",
+    kw::port = 9876,
+    kw::id = "my-service-1",
+    kw::check = agent::TtlCheck{std::chrono::seconds(5)}
 );
 
 // Report service is OK
@@ -84,6 +85,7 @@ Use Key-Value storage:
 #include "ppconsul/kv.h"
 
 using namespace ppconsul;
+using kw = ppconsul::kv::keywords;
 
 // Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
 Consul consul;
@@ -95,7 +97,7 @@ kv::Storage storage(consul);
 std::string something = storage.get("settings.something", "default-value");
 
 // Read the value of a key from the storage with consistency mode specified
-something = storage.get("settings.something", "default-value", keywords::consistency = Consistency::Consistent);
+something = storage.get("settings.something", "default-value", kw::consistency = Consistency::Consistent);
 
 // Erase a key from the storage
 storage.erase("settings.something-else");
@@ -111,7 +113,7 @@ Blocking query to Key-Value storage:
 kv::KeyValue item = storage.item("status.last-event-id");
 
 // Wait for the item change for no more than 1 minute:
-item = storage.item("status.last-event-id", keywords::block_for = {std::chrono::minutes(1), item.modifyIndex});
+item = storage.item("status.last-event-id", kw::block_for = {std::chrono::minutes(1), item.modifyIndex});
 
 // If key exists, print it:
 if (item)
