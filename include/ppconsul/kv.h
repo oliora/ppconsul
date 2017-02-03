@@ -57,6 +57,8 @@ namespace ppconsul { namespace kv {
         PPCONSUL_KEYWORD(recurse, bool)
         PPCONSUL_KEYWORD(keys, bool)
         PPCONSUL_KEYWORD(separator, std::string)
+        PPCONSUL_KEYWORD(acquire, std::string)
+        PPCONSUL_KEYWORD(release, std::string)
 
         namespace groups {
             KWARGS_KEYWORDS_GROUP(get, (consistency, dc, block_for, token))
@@ -285,6 +287,32 @@ namespace ppconsul { namespace kv {
                     kw::token = m_defaultToken, kw::dc = m_defaultDc, kw::cas = expectedIndex));
         }
 
+        // Acquire the lock. Returns true if the lock is acquired and value is set, returns false otherwise.
+        // Allowed parameters:
+        // - groups::put
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        bool lock(const std::string& key, const std::string& session, const std::string& value, const Params&... params)
+        {
+            KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::put))
+            return helpers::parseJsonBool(
+                m_consul.put(keyPath(key), value,
+                    kw::token = m_defaultToken, kw::dc = m_defaultDc,
+                    kw::acquire = session, params...));
+        }
+
+        // Acquire the lock. Returns true if the lock is acquired and value is set, returns false otherwise.
+        // Allowed parameters:
+        // - groups::put
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        bool unlock(const std::string& key, const std::string& session, const std::string& value, const Params&... params)
+        {
+            KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::put))
+            return helpers::parseJsonBool(
+                m_consul.put(keyPath(key), value,
+                    kw::token = m_defaultToken, kw::dc = m_defaultDc,
+                    kw::release = session, params...));
+        }
+
     private:
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<std::string>> get_keys_impl(const std::string& keyPrefix, const Params&... params) const;
@@ -301,6 +329,7 @@ namespace ppconsul { namespace kv {
         std::string m_defaultDc;
     };
 
+    // TODO: add ScopedLock
 
     // Implementation
 

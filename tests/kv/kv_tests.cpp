@@ -8,6 +8,7 @@
 
 #include "ppconsul/kv.h"
 #include "test_consul.h"
+#include <json11/json11.hpp> // TODO: remove
 #include <chrono>
 
 
@@ -783,4 +784,75 @@ TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")
     CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::milliseconds(500));
     CHECK(index1 != resp2.headers().index());
     CHECK(resp2.data().value == "value2");
+}
+
+namespace {
+    // TODO: remove this hacky way to create session when session endpoint is oficially supported
+    std::string createSession(ppconsul::Consul& consul)
+    {
+        std::string err;
+        auto obj = json11::Json::parse(consul.put("/v1/session/create", ""), err);
+        if (!err.empty())
+            return {};
+        return obj["ID"].string_value();
+    }
+}
+
+TEST_CASE("kv.lock_unlock", "[consul][kv][session]")
+{
+    auto consul = create_test_consul();
+    Kv kv(consul);
+
+    kv.erase("key1");
+    REQUIRE(!kv.count("key1"));
+
+    auto session1 = createSession(consul);
+    auto session2 = createSession(consul);
+
+    SECTION("successful lock-unlock")
+    {
+        SECTION("existing value")
+        {
+            kv.set("key1", "bla");
+        }
+
+        SECTION("nonexisting value")
+        {
+            REQUIRE(!kv.count("key1"));
+        }
+
+        REQUIRE(kv.lock("key1", session1, "test1"));
+
+        auto v = kv.item("key1");
+        REQUIRE(v);
+        REQUIRE(v.session == session1);
+        REQUIRE(v.value == "test1");
+
+        REQUIRE(kv.unlock("key1", session1, "test2"));
+
+        v = kv.item("key1");
+        REQUIRE(v);
+        REQUIRE(v.session == "");
+        REQUIRE(v.value == "test2");
+    }
+
+    SECTION("lock-unlock already locked")
+    {
+        REQUIRE(kv.lock("key1", session1, "test1"));
+        REQUIRE(!kv.lock("key1", session2, "test2"));
+
+        auto v = kv.item("key1");
+        REQUIRE(v);
+        REQUIRE(v.session == session1);
+        REQUIRE(v.value == "test1");
+
+        REQUIRE(!kv.unlock("key1", session2, "test3"));
+
+        v = kv.item("key1");
+        REQUIRE(v);
+        REQUIRE(v.session == session1);
+        REQUIRE(v.value == "test1");
+    }
+
+    // TODO: add more tests
 }
