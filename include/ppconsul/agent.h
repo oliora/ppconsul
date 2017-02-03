@@ -106,7 +106,7 @@ namespace ppconsul { namespace agent {
 
     using CheckParams = boost::variant<TtlCheck, ScriptCheck, HttpCheck, TcpCheck, DockerCheck>;
 
-    namespace keywords {
+    namespace kw {
         KWARGS_KEYWORD(name, std::string)
         KWARGS_KEYWORD(notes, std::string)
         KWARGS_KEYWORD(id, std::string)
@@ -114,21 +114,19 @@ namespace ppconsul { namespace agent {
         KWARGS_KEYWORD(port, uint16_t)
         KWARGS_KEYWORD(address, std::string)
         KWARGS_KEYWORD(tags, Tags)
+
+        PPCONSUL_PARAM(pool, Pool)
+        PPCONSUL_PARAM(note, std::string)
+
+        inline void printParameter(std::ostream& os, Pool v, KWARGS_KW_TAG(pool))
+        {
+            if (Pool::Wan == v)
+                os << "wan=1";
+        }
     }
 
 
     namespace impl {
-        namespace kws {
-            PPCONSUL_PARAM(pool, Pool)
-            PPCONSUL_PARAM(note, std::string)
-
-            inline void printParameter(std::ostream& os, Pool v, KWARGS_KW_TAG(pool))
-            {
-                if (Pool::Wan == v)
-                    os << "wan=1";
-            }
-        }
-
         struct CheckRegistrationData;
         struct ServiceRegistrationData;
 
@@ -159,7 +157,7 @@ namespace ppconsul { namespace agent {
 
         std::vector<Member> members(Pool pool = Pool::Lan) const
         {
-            return impl::parseMembers(m_consul.get("/v1/agent/members", impl::kws::pool = pool));
+            return impl::parseMembers(m_consul.get("/v1/agent/members", kw::pool = pool));
         }
         
         std::pair<Config, Member> self() const
@@ -169,7 +167,7 @@ namespace ppconsul { namespace agent {
 
         void join(const std::string& addr, Pool pool = Pool::Lan)
         {
-            m_consul.get("/v1/agent/join/" + helpers::encodeUrl(addr), impl::kws::pool = pool);
+            m_consul.get("/v1/agent/join/" + helpers::encodeUrl(addr), kw::pool = pool);
         }
 
         void forceLeave(const std::string& node)
@@ -197,8 +195,8 @@ namespace ppconsul { namespace agent {
         void registerCheck(std::string name, CheckParams check, Keywords&&... params)
         {
             registerCheck(
-                keywords::name = std::move(name),
-                keywords::check = std::move(check),
+                kw::name = std::move(name),
+                kw::check = std::move(check),
                 std::forward<Keywords>(params)...
             );
         }
@@ -268,7 +266,7 @@ namespace ppconsul { namespace agent {
         void registerService(std::string name, Keywords&&... params)
         {
             registerService(
-                keywords::name = std::move(name),
+                kw::name = std::move(name),
                 std::forward<Keywords>(params)...
             );
         }
@@ -283,8 +281,8 @@ namespace ppconsul { namespace agent {
         void registerService(std::string name, CheckParams check, Keywords&&... params)
         {
             registerService(
-                keywords::name = std::move(name),
-                keywords::check = std::move(check),
+                kw::name = std::move(name),
+                kw::check = std::move(check),
                 std::forward<Keywords>(params)...
             );
         }
@@ -297,7 +295,7 @@ namespace ppconsul { namespace agent {
     private:
         void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
         {
-            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), impl::kws::note = note);
+            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), kw::note = note);
         }
 
         // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`
@@ -317,13 +315,13 @@ namespace ppconsul { namespace agent {
         {
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
             CheckRegistrationData(Keywords&&... params)
-            : id(kwargs::get_opt(keywords::id, std::string(), std::forward<Keywords>(params)...))
-            , name(kwargs::get(keywords::name, std::forward<Keywords>(params)...))
-            , params(kwargs::get(keywords::check, std::forward<Keywords>(params)...))
-            , notes(kwargs::get_opt(keywords::notes, std::string(), std::forward<Keywords>(params)...))
+            : id(kwargs::get_opt(kw::id, std::string(), std::forward<Keywords>(params)...))
+            , name(kwargs::get(kw::name, std::forward<Keywords>(params)...))
+            , params(kwargs::get(kw::check, std::forward<Keywords>(params)...))
+            , notes(kwargs::get_opt(kw::notes, std::string(), std::forward<Keywords>(params)...))
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
-                    keywords::id, keywords::name, keywords::check, keywords::notes))
+                    kw::id, kw::name, kw::check, kw::notes))
             }
 
             std::string id;
@@ -342,36 +340,36 @@ namespace ppconsul { namespace agent {
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
             ServiceRegistrationData(std::true_type, Keywords&&... params)
-            : id(kwargs::get_opt(keywords::id, std::string(), std::forward<Keywords>(params)...))
-            , name(kwargs::get(keywords::name, std::forward<Keywords>(params)...))
-            , address(kwargs::get_opt(keywords::address, std::string(), std::forward<Keywords>(params)...))
-            , port(kwargs::get_opt(keywords::port, 0, std::forward<Keywords>(params)...))
-            , tags(kwargs::get_opt(keywords::tags, Tags(), std::forward<Keywords>(params)...))
+            : id(kwargs::get_opt(kw::id, std::string(), std::forward<Keywords>(params)...))
+            , name(kwargs::get(kw::name, std::forward<Keywords>(params)...))
+            , address(kwargs::get_opt(kw::address, std::string(), std::forward<Keywords>(params)...))
+            , port(kwargs::get_opt(kw::port, 0, std::forward<Keywords>(params)...))
+            , tags(kwargs::get_opt(kw::tags, Tags(), std::forward<Keywords>(params)...))
             , check({
-                kwargs::get(keywords::check, std::forward<Keywords>(params)...),
-                kwargs::get_opt(keywords::notes, std::string(), std::forward<Keywords>(params)...)})
+                kwargs::get(kw::check, std::forward<Keywords>(params)...),
+                kwargs::get_opt(kw::notes, std::string(), std::forward<Keywords>(params)...)})
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
-                    keywords::id, keywords::name, keywords::address, keywords::port, keywords::tags,
-                        keywords::check, keywords::notes))
+                    kw::id, kw::name, kw::address, kw::port, kw::tags,
+                        kw::check, kw::notes))
             }
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
             ServiceRegistrationData(std::false_type, Keywords&&... params)
-            : id(kwargs::get_opt(keywords::id, std::string(), std::forward<Keywords>(params)...))
-            , name(kwargs::get(keywords::name, std::forward<Keywords>(params)...))
-            , address(kwargs::get_opt(keywords::address, std::string(), std::forward<Keywords>(params)...))
-            , port(kwargs::get_opt(keywords::port, 0, std::forward<Keywords>(params)...))
-            , tags(kwargs::get_opt(keywords::tags, Tags(), std::forward<Keywords>(params)...))
+            : id(kwargs::get_opt(kw::id, std::string(), std::forward<Keywords>(params)...))
+            , name(kwargs::get(kw::name, std::forward<Keywords>(params)...))
+            , address(kwargs::get_opt(kw::address, std::string(), std::forward<Keywords>(params)...))
+            , port(kwargs::get_opt(kw::port, 0, std::forward<Keywords>(params)...))
+            , tags(kwargs::get_opt(kw::tags, Tags(), std::forward<Keywords>(params)...))
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
-                    keywords::id, keywords::name, keywords::address, keywords::port, keywords::tags))
+                    kw::id, kw::name, kw::address, kw::port, kw::tags))
             }
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
             ServiceRegistrationData(Keywords&&... params)
             : ServiceRegistrationData(
-                kwargs::has_keyword<decltype(keywords::check), Keywords...>{},
+                kwargs::has_keyword<decltype(kw::check), Keywords...>{},
                 std::forward<Keywords>(params)...)
             {}
 

@@ -41,20 +41,20 @@ Register, deregister and report the state of your service in Consul:
 ```cpp
 #include "ppconsul/agent.h"
 
-using namespace ppconsul;
-using kw = ppconsul::agent::keywords;
+using ppconsul::Consul;
+using namespace ppconsul::agent;
 
 // Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
 Consul consul;
 // We need the 'agent' endpoint for a service registration
-agent::Agent agent(consul);
+Agent agent(consul);
 
 // Register a service with associated HTTP check:
 agent.registerService(
     kw::name = "my-service",
     kw::port = 9876,
     kw::tags = {"tcp", "super_server"},
-    kw::check = agent::HttpCheck{"http://localhost:80/", std::chrono::seconds(2)}
+    kw::check = HttpCheck{"http://localhost:80/", std::chrono::seconds(2)}
 );
 
 ...
@@ -69,7 +69,7 @@ agent.registerService(
     kw::name = "my-service",
     kw::port = 9876,
     kw::id = "my-service-1",
-    kw::check = agent::TtlCheck{std::chrono::seconds(5)}
+    kw::check = TtlCheck{std::chrono::seconds(5)}
 );
 
 // Report service is OK
@@ -84,14 +84,15 @@ Use Key-Value storage:
 ```cpp
 #include "ppconsul/kv.h"
 
-using namespace ppconsul;
-using kw = ppconsul::kv::keywords;
+using ppconsul::Consul;
+using ppconsul::Consistency;
+using namespace ppconsul::kv;
 
 // Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
 Consul consul;
 
 // We need the 'kv' endpoint
-kv::Storage storage(consul);
+Storage storage(consul);
 
 // Read the value of a key from the storage
 std::string something = storage.get("settings.something", "default-value");
@@ -110,7 +111,7 @@ Blocking query to Key-Value storage:
 
 ```cpp
 // Get key-value item
-kv::KeyValue item = storage.item("status.last-event-id");
+KeyValue item = storage.item("status.last-event-id");
 
 // Wait for the item change for no more than 1 minute:
 item = storage.item("status.last-event-id", kw::block_for = {std::chrono::minutes(1), item.modifyIndex});

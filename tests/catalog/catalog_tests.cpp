@@ -13,13 +13,11 @@
 #include <thread>
 
 
-using ppconsul::catalog::Catalog;
+using namespace ppconsul::catalog;
+namespace agent = ppconsul::agent;
 using ppconsul::agent::Agent;
 using ppconsul::Node;
-namespace keywords = ppconsul::keywords;
-namespace agent = ppconsul::agent;
 using ppconsul::Consistency;
-namespace catalog = ppconsul::catalog;
 
 
 namespace {
@@ -91,19 +89,17 @@ TEST_CASE("catalog.nodes", "[consul][catalog][config]")
 
 TEST_CASE("catalog.nodes_blocking", "[consul][catalog][config][blocking]")
 {
-    using namespace ppconsul::keywords;
-
     auto consul = create_test_consul();
     Catalog catalog(consul);
 
     const auto selfMember = Agent(consul).self().second;
 
-    auto index1 = catalog.nodes(ppconsul::withHeaders, catalog::keywords::consistency = Consistency::Consistent).headers().index();
+    auto index1 = catalog.nodes(ppconsul::withHeaders, kw::consistency = Consistency::Consistent).headers().index();
 
     REQUIRE(index1);
 
     auto t1 = std::chrono::steady_clock::now();
-    auto resp1 = catalog.nodes(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
+    auto resp1 = catalog.nodes(ppconsul::withHeaders, kw::block_for = { std::chrono::seconds(5), index1 });
     REQUIRE(index1 == resp1.headers().index()); // otherwise someone else did some change. TODO: make test more stable
     CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
     
@@ -119,7 +115,7 @@ TEST_CASE("catalog.nodes_blocking", "[consul][catalog][config][blocking]")
 
     // Wait for already changed
     auto t2 = std::chrono::steady_clock::now();
-    auto resp2 = catalog.nodes(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), 0 });
+    auto resp2 = catalog.nodes(ppconsul::withHeaders, kw::block_for = { std::chrono::seconds(5), 0 });
     CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
     
     CHECK(resp1.data().size());
@@ -163,23 +159,23 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
     agent.deregisterService("service2");
     agent.deregisterService("service3");
     agent.registerService(
-        agent::keywords::name = Uniq_Name_1,
-        agent::keywords::port = 1234,
-        agent::keywords::tags = { "print", "udp" },
-        agent::keywords::id = "service1",
-        agent::keywords::address = "hostxxx1"
+        agent::kw::name = Uniq_Name_1,
+        agent::kw::port = 1234,
+        agent::kw::tags = { "print", "udp" },
+        agent::kw::id = "service1",
+        agent::kw::address = "hostxxx1"
     );
     agent.registerService(
-        agent::keywords::name = Uniq_Name_2,
-        agent::keywords::tags = { "copier", "udp" },
-        agent::keywords::id = "service2"
+        agent::kw::name = Uniq_Name_2,
+        agent::kw::tags = { "copier", "udp" },
+        agent::kw::id = "service2"
     );
     agent.registerService(
-        agent::keywords::name = Uniq_Name_1,
-        agent::keywords::port = 3456,
-        agent::keywords::tags = { "print", "secret" },
-        agent::keywords::id = "service3",
-        agent::keywords::address = "hostxxx2"
+        agent::kw::name = Uniq_Name_1,
+        agent::kw::port = 3456,
+        agent::kw::tags = { "print", "secret" },
+        agent::kw::id = "service3",
+        agent::kw::address = "hostxxx2"
     );
 
     sleep(2.0); // Give some time to propogate registered services to the catalog
@@ -225,12 +221,12 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
 
     SECTION("non existing service tag")
     {
-        CHECK(catalog.service(Uniq_Name_1, keywords::tag = Non_Existing_Tag_Name).empty());
+        CHECK(catalog.service(Uniq_Name_1, kw::tag = Non_Existing_Tag_Name).empty());
     }
 
     SECTION("service with tag")
     {
-        auto services1 = catalog.service(Uniq_Name_1, keywords::tag = "udp");
+        auto services1 = catalog.service(Uniq_Name_1, kw::tag = "udp");
 
         REQUIRE(services1.size() == 1);
 
@@ -241,7 +237,7 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
         CHECK(services1[0].second.tags == ppconsul::Tags({ "print", "udp" }));
         CHECK(services1[0].second.id == "service1");
 
-        auto services2 = catalog.service(Uniq_Name_1, keywords::tag = "print");
+        auto services2 = catalog.service(Uniq_Name_1, kw::tag = "print");
 
         REQUIRE(services2.size() == 2);
 
@@ -318,22 +314,22 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
     agent.deregisterService("service2");
     agent.deregisterService("service3");
     agent.registerService(
-        agent::keywords::name = Uniq_Name_1_Spec,
-        agent::keywords::port = 1234,
-        agent::keywords::tags = { "print", Tag_Spec },
-        agent::keywords::id = "service1"
+        agent::kw::name = Uniq_Name_1_Spec,
+        agent::kw::port = 1234,
+        agent::kw::tags = { "print", Tag_Spec },
+        agent::kw::id = "service1"
     );
     agent.registerService(
-        agent::keywords::name = Uniq_Name_2_Spec,
-        agent::keywords::port = 2345,
-        agent::keywords::tags = { "copier", Tag_Spec },
-        agent::keywords::id = "service2"
+        agent::kw::name = Uniq_Name_2_Spec,
+        agent::kw::port = 2345,
+        agent::kw::tags = { "copier", Tag_Spec },
+        agent::kw::id = "service2"
     );
     agent.registerService(
-        agent::keywords::name = Uniq_Name_1_Spec,
-        agent::keywords::port = 3456,
-        agent::keywords::tags = { "print", "secret" },
-        agent::keywords::id = "service3"
+        agent::kw::name = Uniq_Name_1_Spec,
+        agent::kw::port = 3456,
+        agent::kw::tags = { "print", "secret" },
+        agent::kw::id = "service3"
     );
 
     sleep(2.0); // Give some time to propogate registered services to the catalog
@@ -372,7 +368,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
 
     SECTION("service with tag")
     {
-        auto services1 = catalog.service(Uniq_Name_1_Spec, keywords::tag = Tag_Spec);
+        auto services1 = catalog.service(Uniq_Name_1_Spec, kw::tag = Tag_Spec);
 
         REQUIRE(services1.size() == 1);
 
@@ -382,7 +378,7 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
         CHECK(services1[0].second.tags == ppconsul::Tags({ "print", Tag_Spec }));
         CHECK(services1[0].second.id == "service1");
 
-        auto services2 = catalog.service(Uniq_Name_1_Spec, keywords::tag = "print");
+        auto services2 = catalog.service(Uniq_Name_1_Spec, kw::tag = "print");
 
         REQUIRE(services2.size() == 2);
 
@@ -404,8 +400,6 @@ TEST_CASE("catalog.services_special_chars", "[consul][catalog][services][special
 
 TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
 {
-    using namespace ppconsul::keywords;
-
     auto consul = create_test_consul();
     Catalog catalog(consul);
     Agent agent(consul);
@@ -417,28 +411,28 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
     agent.deregisterService("service2");
     agent.deregisterService("service3");
     agent.registerService(
-        agent::keywords::name = Uniq_Name_1,
-        agent::keywords::port = 1234,
-        agent::keywords::tags = { "print", "udp" },
-        agent::keywords::id = "service1"
+        agent::kw::name = Uniq_Name_1,
+        agent::kw::port = 1234,
+        agent::kw::tags = { "print", "udp" },
+        agent::kw::id = "service1"
     );
     agent.registerService(
-        agent::keywords::name = Uniq_Name_2,
-        agent::keywords::port = 2345,
-        agent::keywords::tags = { "copier", "udp" },
-        agent::keywords::id = "service2"
+        agent::kw::name = Uniq_Name_2,
+        agent::kw::port = 2345,
+        agent::kw::tags = { "copier", "udp" },
+        agent::kw::id = "service2"
     );
 
     sleep(2.0); // Give some time to propogate registered services to the catalog
 
     SECTION("services")
     {
-        auto index1 = catalog.services(ppconsul::withHeaders, catalog::keywords::consistency = Consistency::Consistent).headers().index();
+        auto index1 = catalog.services(ppconsul::withHeaders, kw::consistency = Consistency::Consistent).headers().index();
 
         REQUIRE(index1);
 
         auto t1 = std::chrono::steady_clock::now();
-        auto resp1 = catalog.services(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
+        auto resp1 = catalog.services(ppconsul::withHeaders, kw::block_for = { std::chrono::seconds(5), index1 });
         REQUIRE(index1 == resp1.headers().index()); // otherwise someone else did some change. TODO: make test more stable
         CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
 
@@ -446,16 +440,16 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
         CHECK(resp1.data().at(Uniq_Name_2) == ppconsul::Tags({ "copier", "udp" }));
 
         agent.registerService(
-            agent::keywords::name = Uniq_Name_1,
-            agent::keywords::port = 3456,
-            agent::keywords::tags = { "print", "secret" },
-            agent::keywords::id = "service3"
+            agent::kw::name = Uniq_Name_1,
+            agent::kw::port = 3456,
+            agent::kw::tags = { "print", "secret" },
+            agent::kw::id = "service3"
         );
 
         sleep(1.0); // Give some time to propogate to the catalog
 
         auto t2 = std::chrono::steady_clock::now();
-        auto resp2 = catalog.services(ppconsul::withHeaders, block_for = { std::chrono::seconds(5), index1 });
+        auto resp2 = catalog.services(ppconsul::withHeaders, kw::block_for = { std::chrono::seconds(5), index1 });
         CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
         CHECK(resp2.headers().index() >= index1);
 
@@ -465,12 +459,12 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
 
     SECTION("service")
     {
-        auto index1 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, catalog::keywords::consistency = Consistency::Consistent).headers().index();
+        auto index1 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, kw::consistency = Consistency::Consistent).headers().index();
 
         REQUIRE(index1);
 
         auto t1 = std::chrono::steady_clock::now();
-        auto resp1 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, block_for = { std::chrono::seconds(5), index1 });
+        auto resp1 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, kw::block_for = { std::chrono::seconds(5), index1 });
         REQUIRE(index1 == resp1.headers().index()); // otherwise someone else did some change. TODO: make test more stable
         CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
 
@@ -479,16 +473,16 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
         CHECK(resp1.data()[0].second.id == "service1");
 
         agent.registerService(
-            agent::keywords::name = Uniq_Name_1,
-            agent::keywords::port = 3456,
-            agent::keywords::tags = { "print", "secret" },
-            agent::keywords::id = "service3"
+            agent::kw::name = Uniq_Name_1,
+            agent::kw::port = 3456,
+            agent::kw::tags = { "print", "secret" },
+            agent::kw::id = "service3"
         );
 
         sleep(2.0); // Give some time to propogate to the catalog
 
         auto t2 = std::chrono::steady_clock::now();
-        auto resp2 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, block_for = { std::chrono::seconds(5), index1 });
+        auto resp2 = catalog.service(ppconsul::withHeaders, Uniq_Name_1, kw::block_for = { std::chrono::seconds(5), index1 });
         CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
         CHECK(index1 != resp2.headers().index());
 

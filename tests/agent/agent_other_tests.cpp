@@ -12,7 +12,7 @@
 #include <algorithm>
 
 
-using ppconsul::agent::Agent;
+using namespace ppconsul::agent;
 using ppconsul::CheckStatus;
 
 

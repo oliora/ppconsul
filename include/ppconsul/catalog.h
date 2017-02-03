@@ -17,11 +17,11 @@ namespace ppconsul { namespace catalog {
 
     typedef std::pair<Node, ServiceInfo> NodeService;
 
-    namespace keywords {
-        using ppconsul::keywords::consistency;
-        using ppconsul::keywords::block_for;
-        using ppconsul::keywords::dc;
-        using ppconsul::keywords::tag;
+    namespace kw {
+        using ppconsul::kw::consistency;
+        using ppconsul::kw::block_for;
+        using ppconsul::kw::dc;
+        using ppconsul::kw::tag;
 
         namespace groups {
             PPCONSUL_PARAMS_GROUP(get, (consistency, dc, block_for))
@@ -45,10 +45,10 @@ namespace ppconsul { namespace catalog {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Catalog(Consul& consul, const Params&... params)
         : m_consul(consul)
-        , m_defaultConsistency(kwargs::get_opt(keywords::consistency, Consistency::Default, params...))
-        , m_defaultDc(kwargs::get_opt(keywords::dc, std::string(), params...))
+        , m_defaultConsistency(kwargs::get_opt(kw::consistency, Consistency::Default, params...))
+        , m_defaultDc(kwargs::get_opt(kw::dc, std::string(), params...))
         {
-            KWARGS_CHECK_IN_LIST(Params, (keywords::consistency, keywords::dc))
+            KWARGS_CHECK_IN_LIST(Params, (kw::consistency, kw::dc))
         }
 
         std::vector<std::string> datacenters() const
@@ -133,9 +133,9 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<std::vector<Node>> Catalog::nodes(WithHeaders, const Params&... params) const
     {
-        KWARGS_CHECK_IN_LIST(Params, (keywords::groups::get));
+        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get));
         auto r = m_consul.get(withHeaders, "/v1/catalog/nodes",
-            keywords::consistency = m_defaultConsistency, keywords::dc = m_defaultDc,
+            kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
             params...);
         return makeResponse(r.headers(), impl::parseNodes(r.data()));
     }
@@ -143,9 +143,9 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<NodeServices> Catalog::node(WithHeaders, const std::string& name, const Params&... params) const
     {
-        KWARGS_CHECK_IN_LIST(Params, (keywords::groups::get));
+        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get));
         auto r = m_consul.get(withHeaders, "/v1/catalog/node/" + helpers::encodeUrl(name),
-            keywords::consistency = m_defaultConsistency, keywords::dc = m_defaultDc,
+            kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
             params...);
         return makeResponse(r.headers(), impl::parseNode(r.data()));
     }
@@ -153,9 +153,9 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<std::unordered_map<std::string, Tags>> Catalog::services(WithHeaders, const Params&... params) const
     {
-        KWARGS_CHECK_IN_LIST(Params, (keywords::groups::get));
+        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get));
         auto r = m_consul.get(withHeaders, "/v1/catalog/services",
-            keywords::consistency = m_defaultConsistency, keywords::dc = m_defaultDc,
+            kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
             params...);
         return makeResponse(r.headers(), impl::parseServices(r.data()));
     }
@@ -163,9 +163,9 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<std::vector<NodeService>> Catalog::service(WithHeaders, const std::string& name, const Params&... params) const
     {
-        KWARGS_CHECK_IN_LIST(Params, (keywords::groups::get, keywords::tag));
+        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get, kw::tag));
         auto r = m_consul.get(withHeaders, "/v1/catalog/service/" + helpers::encodeUrl(name),
-            keywords::consistency = m_defaultConsistency, keywords::dc = m_defaultDc,
+            kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
             params...);
         return makeResponse(r.headers(), impl::parseService(r.data()));
     }

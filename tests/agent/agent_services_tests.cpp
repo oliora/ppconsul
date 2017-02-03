@@ -10,10 +10,9 @@
 #include "test_consul.h"
 #include <thread>
 
-using ppconsul::agent::Agent;
+
+using namespace ppconsul::agent;
 using ppconsul::CheckStatus;
-using ppconsul::agent::serviceCheckId;
-namespace agent = ppconsul::agent;
 
 
 namespace {
@@ -57,7 +56,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
 
     SECTION("no check very simple")
     {
-        agent.registerService(agent::keywords::name = "service1");
+        agent.registerService(kw::name = "service1");
 
         const auto services = agent.services();
         REQUIRE(services.count("service1"));
@@ -72,7 +71,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
 
     SECTION("no check simple")
     {
-        agent.registerService(Unique_Id, agent::keywords::port = 1357, agent::keywords::tags = { "tag1" });
+        agent.registerService(Unique_Id, kw::port = 1357, kw::tags = { "tag1" });
 
         const auto services = agent.services();
         REQUIRE(services.count(Unique_Id));
@@ -89,11 +88,11 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
     SECTION("no check")
     {
         agent.registerService(
-            agent::keywords::name = "service1",
-            agent::keywords::port = 9876,
-            agent::keywords::tags = {"udp", "printer"},
-            agent::keywords::id = Unique_Id,
-            agent::keywords::address = "host12"
+            kw::name = "service1",
+            kw::port = 9876,
+            kw::tags = {"udp", "printer"},
+            kw::id = Unique_Id,
+            kw::address = "host12"
         );
 
         const auto services = agent.services();
@@ -109,7 +108,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
 
     SECTION("ttl simple")
     {
-        agent.registerService("service1", agent::TtlCheck{std::chrono::minutes(5)});
+        agent.registerService("service1", TtlCheck{std::chrono::minutes(5)});
 
         const auto services = agent.services();
         REQUIRE(services.count("service1"));
@@ -139,11 +138,12 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
     {
         agent.registerService(
             "service1",
-            agent::TtlCheck{std::chrono::minutes(1)},
-            agent::keywords::port = 9876,
-            agent::keywords::tags = { "udp", "printer" },
-            agent::keywords::id = Unique_Id,
-            agent::keywords::address = "host25.print"
+
+                              TtlCheck{std::chrono::minutes(1)},
+            kw::port = 9876,
+            kw::tags = { "udp", "printer" },
+            kw::id = Unique_Id,
+            kw::address = "host25.print"
         );
 
         const auto services = agent.services();
@@ -172,7 +172,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
 
     SECTION("script simple")
     {
-        agent.registerService("service1", agent::ScriptCheck{Non_Existing_Script_Name, std::chrono::minutes(1)});
+        agent.registerService("service1", ScriptCheck{Non_Existing_Script_Name, std::chrono::minutes(1)});
 
         const auto services = agent.services();
         REQUIRE(services.count("service1"));
@@ -204,11 +204,11 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
     {
         agent.registerService(
             "service1",
-            agent::ScriptCheck{Non_Existing_Script_Name, std::chrono::minutes(1)},
-            agent::keywords::port = 9876,
-            agent::keywords::tags = { "udp", "printer" },
-            agent::keywords::id = Unique_Id,
-            agent::keywords::address = "hooooosttts-adr"
+            ScriptCheck{Non_Existing_Script_Name, std::chrono::minutes(1)},
+            kw::port = 9876,
+            kw::tags = { "udp", "printer" },
+            kw::id = Unique_Id,
+            kw::address = "hooooosttts-adr"
         );
 
         const auto services = agent.services();
@@ -243,7 +243,7 @@ TEST_CASE("agent.service_deregistration_with_script", "[consul][agent][services]
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    agent.registerService("service1", agent::TtlCheck{std::chrono::seconds(10)});
+    agent.registerService("service1", TtlCheck{std::chrono::seconds(10)});
 
     REQUIRE(agent.services().count("service1"));
     REQUIRE(agent.checks().count(serviceCheckId("service1")));
@@ -267,7 +267,7 @@ TEST_CASE("agent.service_registration_special_chars", "[consul][agent][service][
 
     SECTION("ttl")
     {
-        agent.registerService(spec_name, agent::TtlCheck{std::chrono::minutes(5)});
+        agent.registerService(spec_name, TtlCheck{std::chrono::minutes(5)});
 
         const auto services = agent.services();
         REQUIRE(services.count(spec_name));
@@ -295,7 +295,7 @@ TEST_CASE("agent.service_registration_special_chars", "[consul][agent][service][
 
     SECTION("script")
     {
-        agent.registerService(spec_name, agent::ScriptCheck{Non_Existing_Script_Name, std::chrono::minutes(1)});
+        agent.registerService(spec_name, ScriptCheck{Non_Existing_Script_Name, std::chrono::minutes(1)});
 
         const auto services = agent.services();
         REQUIRE(services.count(spec_name));
@@ -331,7 +331,7 @@ TEST_CASE("agent.service_check_update", "[consul][agent][service][health]")
 
     agent.deregisterService("service1");
 
-    agent.registerService("service1", agent::TtlCheck{std::chrono::minutes(5)});
+    agent.registerService("service1", TtlCheck{std::chrono::minutes(5)});
     ppconsul::CheckInfo c = agent.checks().at(serviceCheckId("service1"));
     REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.output == "");

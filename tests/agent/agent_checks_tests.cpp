@@ -10,9 +10,8 @@
 #include "test_consul.h"
 #include <thread>
 
-using ppconsul::agent::Agent;
+using namespace ppconsul::agent;
 using ppconsul::CheckStatus;
-namespace agent = ppconsul::agent;
 
 
 namespace {
@@ -32,8 +31,8 @@ TEST_CASE("agent.check_deregistration", "[consul][agent][checks]")
     Agent agent(consul);
 
     agent.registerCheck(
-        agent::keywords::name = "check1",
-        agent::keywords::check = agent::TtlCheck{std::chrono::seconds(12)}
+        kw::name = "check1",
+        kw::check = TtlCheck{std::chrono::seconds(12)}
     );
     REQUIRE(agent.checks().count("check1"));
 
@@ -53,7 +52,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
 
     SECTION("ttl")
     {
-        agent.registerCheck("check1", agent::TtlCheck{std::chrono::seconds(180)});
+        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180)});
 
         const auto checks = agent.checks();
         REQUIRE(checks.count("check1"));
@@ -71,7 +70,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
 
     SECTION("ttl with notes")
     {
-        agent.registerCheck("check1", agent::TtlCheck{std::chrono::seconds(180)}, agent::keywords::notes = "some notes");
+        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180)}, kw::notes = "some notes");
 
         const auto checks = agent.checks();
         REQUIRE(checks.count("check1"));
@@ -89,7 +88,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
 
     SECTION("ttl with id")
     {
-        agent.registerCheck("check1", agent::TtlCheck{std::chrono::seconds(180)}, agent::keywords::id = Unique_Id, agent::keywords::notes = "other notes");
+        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180)}, kw::id = Unique_Id, kw::notes = "other notes");
 
         const auto checks = agent.checks();
         REQUIRE(checks.count(Unique_Id));
@@ -107,7 +106,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
 
     SECTION("script")
     {
-        agent.registerCheck("check1", agent::ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)});
+        agent.registerCheck("check1", ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)});
         sleep(0.5); // To get updated state and output
 
         const auto checks = agent.checks();
@@ -127,9 +126,9 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
     SECTION("script with notes")
     {
         agent.registerCheck(
-            agent::keywords::name = "check1",
-            agent::keywords::notes = "the notes",
-            agent::keywords::check = agent::ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)}
+            kw::name = "check1",
+            kw::notes = "the notes",
+            kw::check = ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)}
         );
         sleep(0.5); // To get updated state and output
 
@@ -149,7 +148,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
 
     SECTION("script with id")
     {
-        agent.registerCheck("check1", agent::ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(1)}, agent::keywords::notes = "the notes", agent::keywords::id = Unique_Id);
+        agent.registerCheck("check1", ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(1)}, kw::notes = "the notes", kw::id = Unique_Id);
         sleep(0.5); // To get updated state and output
 
         const auto checks = agent.checks();
@@ -179,7 +178,7 @@ TEST_CASE("agent.check_registration_special_chars", "[consul][agent][checks][spe
 
     SECTION("ttl")
     {
-        agent.registerCheck(spec_name, agent::TtlCheck{std::chrono::seconds(100)}, agent::keywords::notes = "note\n1\n2\n3\nsummary: bla bla");
+        agent.registerCheck(spec_name, TtlCheck{std::chrono::seconds(100)}, kw::notes = "note\n1\n2\n3\nsummary: bla bla");
 
         REQUIRE(agent.checks().count(spec_name));
         auto c = agent.checks().at(spec_name);
@@ -192,7 +191,7 @@ TEST_CASE("agent.check_registration_special_chars", "[consul][agent][checks][spe
 
     SECTION("script")
     {
-        agent.registerCheck(spec_name,  agent::ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)});
+        agent.registerCheck(spec_name,  ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)});
         sleep(0.5); // To get updated state and output
 
         REQUIRE(agent.checks().count(spec_name));
@@ -216,11 +215,11 @@ TEST_CASE("agent.http_check_registration", "[consul][agent][checks][http_check]"
 
     SECTION("default timeout")
     {
-        REQUIRE_NOTHROW(agent.registerCheck("check1", agent::HttpCheck{ "invalid.", std::chrono::minutes(5) }));
+        REQUIRE_NOTHROW(agent.registerCheck("check1", HttpCheck{ "invalid.", std::chrono::minutes(5) }));
     }
     SECTION("custom timeout")
     {
-        REQUIRE_NOTHROW(agent.registerCheck("check1", agent::HttpCheck{ "invalid.", std::chrono::minutes(5), std::chrono::milliseconds(500) }));
+        REQUIRE_NOTHROW(agent.registerCheck("check1", HttpCheck{ "invalid.", std::chrono::minutes(5), std::chrono::milliseconds(500) }));
     }
 }
 
@@ -236,12 +235,12 @@ TEST_CASE("agent.tcp_check_registration", "[consul][agent][checks][tcp_check]")
     {
         SECTION("default timeout")
         {
-            REQUIRE_NOTHROW(agent.registerCheck("check1", agent::TcpCheck{ "127.0.0.1:0", std::chrono::minutes(5) }));
+            REQUIRE_NOTHROW(agent.registerCheck("check1", TcpCheck{ "127.0.0.1:0", std::chrono::minutes(5) }));
         }
 
         SECTION("custom timeout")
         {
-            REQUIRE_NOTHROW(agent.registerCheck("check1", agent::TcpCheck{ "127.0.0.1:0", std::chrono::minutes(5), std::chrono::milliseconds(500) }));
+            REQUIRE_NOTHROW(agent.registerCheck("check1", TcpCheck{ "127.0.0.1:0", std::chrono::minutes(5), std::chrono::milliseconds(500) }));
         }
     }
 
@@ -249,12 +248,12 @@ TEST_CASE("agent.tcp_check_registration", "[consul][agent][checks][tcp_check]")
     {
         SECTION("default timeout")
         {
-            REQUIRE_NOTHROW(agent.registerCheck("check1", agent::TcpCheck{ "127.0.0.1", 0, std::chrono::minutes(5) }));
+            REQUIRE_NOTHROW(agent.registerCheck("check1", TcpCheck{ "127.0.0.1", 0, std::chrono::minutes(5) }));
         }
 
         SECTION("custom timeout")
         {
-            REQUIRE_NOTHROW(agent.registerCheck("check1", agent::TcpCheck{ "127.0.0.1", 0, std::chrono::minutes(5), std::chrono::milliseconds(500) }));
+            REQUIRE_NOTHROW(agent.registerCheck("check1", TcpCheck{ "127.0.0.1", 0, std::chrono::minutes(5), std::chrono::milliseconds(500) }));
         }
     }
 }
@@ -269,12 +268,12 @@ TEST_CASE("agent.docker_check_registration", "[consul][agent][checks][docker_che
 
     SECTION("default shell")
     {
-        REQUIRE_NOTHROW(agent.registerCheck("check1", agent::DockerCheck{ "example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5) }));
+        REQUIRE_NOTHROW(agent.registerCheck("check1", DockerCheck{ "example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5) }));
     }
 
     SECTION("custom shell")
     {
-        REQUIRE_NOTHROW(agent.registerCheck("check1", agent::DockerCheck{ "example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5), "/usr/bin/cpp_shell_of_the_future_3016" }));
+        REQUIRE_NOTHROW(agent.registerCheck("check1", DockerCheck{ "example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5), "/usr/bin/cpp_shell_of_the_future_3016" }));
     }
 }
 
@@ -286,7 +285,7 @@ TEST_CASE("agent.check_update", "[consul][agent][checks][health]")
     agent.deregisterCheck("check1");
     REQUIRE(!agent.checks().count("check1"));
 
-    agent.registerCheck("check1", agent::TtlCheck{std::chrono::minutes(5)}, agent::keywords::notes = "the check");
+    agent.registerCheck("check1", TtlCheck{std::chrono::minutes(5)}, kw::notes = "the check");
 
     ppconsul::CheckInfo c = agent.checks().at("check1");
     REQUIRE(c.status != CheckStatus::Passing);
@@ -332,25 +331,25 @@ TEST_CASE("agent.check_update_incorrect", "[consul][agent][checks][health]")
 
     SECTION("script")
     {
-        agent.registerCheck("check1" , agent::ScriptCheck{Non_Existing_Script_Name, std::chrono::minutes(5)});
+        agent.registerCheck("check1" , ScriptCheck{Non_Existing_Script_Name, std::chrono::minutes(5)});
 
         CHECK_THROWS_AS(agent.pass("check1"), ppconsul::Error);
     }
     SECTION("http")
     {
-        agent.registerCheck("check1", agent::HttpCheck{"invalid.", std::chrono::minutes(5)});
+        agent.registerCheck("check1", HttpCheck{"invalid.", std::chrono::minutes(5)});
 
         CHECK_THROWS_AS(agent.pass("check1"), ppconsul::Error);
     }
     SECTION("tcp")
     {
-        agent.registerCheck("check1" , agent::TcpCheck{"127.0.0.1:0", std::chrono::minutes(5)});
+        agent.registerCheck("check1" , TcpCheck{"127.0.0.1:0", std::chrono::minutes(5)});
 
         CHECK_THROWS_AS(agent.pass("check1"), ppconsul::Error);
     }
     SECTION("docker")
     {
-        agent.registerCheck("check1", agent::DockerCheck{"example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5)});
+        agent.registerCheck("check1", DockerCheck{"example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5)});
 
         CHECK_THROWS_AS(agent.pass("check1"), ppconsul::Error);
     }
@@ -364,7 +363,7 @@ TEST_CASE("agent.check_expired", "[consul][agent][checks][health]")
     agent.deregisterCheck("check1");
     REQUIRE(!agent.checks().count("check1"));
 
-    agent.registerCheck("check1", agent::TtlCheck{std::chrono::seconds(1)});
+    agent.registerCheck("check1", TtlCheck{std::chrono::seconds(1)});
     REQUIRE(agent.checks().count("check1"));
 
     sleep(1.5);
@@ -384,7 +383,7 @@ TEST_CASE("agent.check_update_special_chars", "[consul][agent][checks][health][s
     agent.deregisterCheck(spec_name);
     REQUIRE(!agent.checks().count(spec_name));
 
-    agent.registerCheck("check1", agent::TtlCheck{std::chrono::minutes(5)}, agent::keywords::notes = "the check");
+    agent.registerCheck("check1", TtlCheck{std::chrono::minutes(5)}, kw::notes = "the check");
 
     ppconsul::CheckInfo c = agent.checks().at("check1");
     REQUIRE(c.status != CheckStatus::Passing);

@@ -11,9 +11,8 @@
 #include <chrono>
 
 
-using ppconsul::kv::Storage;
-using ppconsul::kv::KeyValue;
-using namespace ppconsul::kv::keywords;
+using namespace ppconsul::kv;
+
 
 namespace 
 {
@@ -330,7 +329,7 @@ TEST_CASE("kv.put", "[consul][kv]")
 
     SECTION("put flags")
     {
-        kv.put("key24", "value13", flags=0x12345678);
+        kv.put("key24", "value13", kw::flags=0x12345678);
 
         {
             KeyValue v = kv.item("key24");
@@ -460,14 +459,14 @@ TEST_CASE("kv.cas", "[consul][kv]")
     {
         SECTION("change nonexisting")
         {
-            REQUIRE(!kv.cas("key2", 1, "value2", flags = 0x87654321));
+            REQUIRE(!kv.cas("key2", 1, "value2", kw::flags = 0x87654321));
             CHECK(!kv.count("key2"));
             CHECK(!kv.item("key2").valid());
         }
 
         SECTION("init without cas")
         {
-            kv.put("key1", "value1", flags = 0x87654321);
+            kv.put("key1", "value1", kw::flags = 0x87654321);
 
             {
                 KeyValue v = kv.item("key1");
@@ -483,7 +482,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
             SECTION("change with cas wrong")
             {
-                REQUIRE(!kv.cas("key1", 0, "value2", flags = 0xFC12DE56));
+                REQUIRE(!kv.cas("key1", 0, "value2", kw::flags = 0xFC12DE56));
                 CHECK(kv.item("key1").valid());
                 CHECK(kv.item("key1").value == "value1");
                 CHECK(kv.item("key1").flags == 0x87654321);
@@ -493,7 +492,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 auto cas = kv.item("key1").modifyIndex;
 
-                REQUIRE(kv.cas("key1", cas, "value2", flags = 0xFC12DE56));
+                REQUIRE(kv.cas("key1", cas, "value2", kw::flags = 0xFC12DE56));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -509,7 +508,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
         SECTION("init with cas")
         {
-            REQUIRE(kv.cas("key1", 0, "value1", flags = 0x87654321));
+            REQUIRE(kv.cas("key1", 0, "value1", kw::flags = 0x87654321));
             
             {
                 KeyValue v = kv.item("key1");
@@ -525,7 +524,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
             SECTION("change with put")
             {
-                kv.put("key1", "value2", flags = 0xFC12DE56);
+                kv.put("key1", "value2", kw::flags = 0xFC12DE56);
                 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -558,7 +557,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 auto cas = kv.item("key1").modifyIndex;
 
-                REQUIRE(kv.cas("key1", cas, "value2", flags = 0xFC12DE56));
+                REQUIRE(kv.cas("key1", cas, "value2", kw::flags = 0xFC12DE56));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -699,8 +698,6 @@ TEST_CASE("kv.index", "[consul][kv][headers]")
 
 TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
 {
-    using namespace ppconsul::kv::keywords;
-
     auto consul = create_test_consul();
     Storage kv(consul);
 
@@ -708,14 +705,14 @@ TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
     auto index1 = kv.item(ppconsul::withHeaders, "key1").headers().index();
 
     auto t1 = std::chrono::steady_clock::now();
-    auto resp1 = kv.item(ppconsul::withHeaders, "key1", block_for = {std::chrono::seconds(5), index1});
+    auto resp1 = kv.item(ppconsul::withHeaders, "key1", kw::block_for = {std::chrono::seconds(5), index1});
     CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::seconds(5));
     CHECK(index1 == resp1.headers().index());
     CHECK(resp1.data().value == "value1");
 
     kv.put("key1", "value2");
     auto t2 = std::chrono::steady_clock::now();
-    auto resp2 = kv.item(ppconsul::withHeaders, "key1", block_for = {std::chrono::seconds(5), index1});
+    auto resp2 = kv.item(ppconsul::withHeaders, "key1", kw::block_for = {std::chrono::seconds(5), index1});
     CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
     CHECK(index1 != resp2.headers().index());
     CHECK(resp2.data().value == "value2");
@@ -723,8 +720,6 @@ TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
 
 TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")
 {
-    using namespace ppconsul::kv::keywords;
-
     auto consul = create_test_consul();
     Storage kv(consul);
 
@@ -732,14 +727,14 @@ TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")
     auto index1 = kv.item(ppconsul::withHeaders, "key1").headers().index();
 
     auto t1 = std::chrono::steady_clock::now();
-    auto resp1 = kv.item(ppconsul::withHeaders, "key1", block_for = {std::chrono::milliseconds(500), index1});
+    auto resp1 = kv.item(ppconsul::withHeaders, "key1", kw::block_for = {std::chrono::milliseconds(500), index1});
     CHECK((std::chrono::steady_clock::now() - t1) >= std::chrono::milliseconds(500));
     CHECK(index1 == resp1.headers().index());
     CHECK(resp1.data().value == "value1");
 
     kv.put("key1", "value2");
     auto t2 = std::chrono::steady_clock::now();
-    auto resp2 = kv.item(ppconsul::withHeaders, "key1", block_for = {std::chrono::milliseconds(500), index1});
+    auto resp2 = kv.item(ppconsul::withHeaders, "key1", kw::block_for = {std::chrono::milliseconds(500), index1});
     CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::milliseconds(500));
     CHECK(index1 != resp2.headers().index());
     CHECK(resp2.data().value == "value2");
