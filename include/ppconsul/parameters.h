@@ -14,14 +14,11 @@
 #include <boost/fusion/include/for_each.hpp>
 
 
-#define PPCONSUL_PARAM_NO_NAME KWARGS_KEYWORD
-#define PPCONSUL_PARAMS_GROUP KWARGS_KEYWORDS_GROUP
-
-#define PPCONSUL_PARAM_NAMED(keyword, type, name_)   \
+#define PPCONSUL_KEYWORD_NAMED_(keyword, type, name_)   \
     KWARGS_KEYWORD(keyword, type)                    \
     inline const char *parameter_name(KWARGS_KW_TAG(keyword)) { return name_; }
 
-#define PPCONSUL_PARAM(keyword, type) PPCONSUL_PARAM_NAMED(keyword, type, BOOST_PP_STRINGIZE(keyword))
+#define PPCONSUL_KEYWORD(keyword, type) PPCONSUL_KEYWORD_NAMED_(keyword, type, BOOST_PP_STRINGIZE(keyword))
 
 
 namespace ppconsul { namespace parameters {

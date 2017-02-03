@@ -13,10 +13,10 @@ namespace {
 }
 
 namespace test_params {
-    PPCONSUL_PARAM(p1, std::string)
-    PPCONSUL_PARAM(p2, uint64_t)
-    PPCONSUL_PARAM_NAMED(p3, bool, "boolean")
-    PPCONSUL_PARAM_NO_NAME(p4, Enum)
+    PPCONSUL_KEYWORD(p1, std::string)
+    PPCONSUL_KEYWORD(p2, uint64_t)
+    PPCONSUL_KEYWORD_NAMED_(p3, bool, "boolean")
+    KWARGS_KEYWORD(p4, Enum)
 
     inline void printParameter(std::ostream& os, Enum v, KWARGS_KW_TAG(p4))
     {

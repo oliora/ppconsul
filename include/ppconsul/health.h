@@ -20,10 +20,10 @@ namespace ppconsul { namespace health {
         using ppconsul::kw::dc;
         using ppconsul::kw::tag;
 
-        PPCONSUL_PARAM(passing, bool);
+        PPCONSUL_KEYWORD(passing, bool);
 
         namespace groups {
-            PPCONSUL_PARAMS_GROUP(get, (consistency, dc, block_for));
+            KWARGS_KEYWORDS_GROUP(get, (consistency, dc, block_for));
         }
     }
 

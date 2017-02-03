@@ -27,11 +27,11 @@
 namespace ppconsul {
 
     namespace kw {
-        PPCONSUL_PARAM(dc, std::string)
-        PPCONSUL_PARAM(token, std::string)
-        PPCONSUL_PARAM_NO_NAME(consistency, Consistency)
-        PPCONSUL_PARAM_NO_NAME(block_for, BlockForValue)
-        PPCONSUL_PARAM(tag, std::string)
+        PPCONSUL_KEYWORD(dc, std::string)
+        PPCONSUL_KEYWORD(token, std::string)
+        PPCONSUL_KEYWORD(tag, std::string)
+        KWARGS_KEYWORD(consistency, Consistency)
+        KWARGS_KEYWORD(block_for, BlockForValue)
 
         inline void printParameter(std::ostream& os, const Consistency& v, KWARGS_KW_TAG(consistency))
         {

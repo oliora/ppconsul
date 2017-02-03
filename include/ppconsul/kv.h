@@ -52,15 +52,15 @@ namespace ppconsul { namespace kv {
         using ppconsul::kw::dc;
         using ppconsul::kw::token;
 
-        PPCONSUL_PARAM(cas, uint64_t)
-        PPCONSUL_PARAM(flags, uint64_t)
-        PPCONSUL_PARAM(recurse, bool)
-        PPCONSUL_PARAM(keys, bool)
-        PPCONSUL_PARAM(separator, std::string)
+        PPCONSUL_KEYWORD(cas, uint64_t)
+        PPCONSUL_KEYWORD(flags, uint64_t)
+        PPCONSUL_KEYWORD(recurse, bool)
+        PPCONSUL_KEYWORD(keys, bool)
+        PPCONSUL_KEYWORD(separator, std::string)
 
         namespace groups {
-            PPCONSUL_PARAMS_GROUP(get, (consistency, dc, block_for, token))
-            PPCONSUL_PARAMS_GROUP(put, (flags, token, dc))
+            KWARGS_KEYWORDS_GROUP(get, (consistency, dc, block_for, token))
+            KWARGS_KEYWORDS_GROUP(put, (flags, token, dc))
         }
     }
 

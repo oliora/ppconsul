@@ -24,7 +24,7 @@ namespace ppconsul { namespace catalog {
         using ppconsul::kw::tag;
 
         namespace groups {
-            PPCONSUL_PARAMS_GROUP(get, (consistency, dc, block_for))
+            KWARGS_KEYWORDS_GROUP(get, (consistency, dc, block_for))
         }
     }
 

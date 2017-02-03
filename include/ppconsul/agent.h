@@ -115,8 +115,8 @@ namespace ppconsul { namespace agent {
         KWARGS_KEYWORD(address, std::string)
         KWARGS_KEYWORD(tags, Tags)
 
-        PPCONSUL_PARAM(pool, Pool)
-        PPCONSUL_PARAM(note, std::string)
+        PPCONSUL_KEYWORD(pool, Pool)
+        PPCONSUL_KEYWORD(note, std::string)
 
         inline void printParameter(std::ostream& os, Pool v, KWARGS_KW_TAG(pool))
         {
