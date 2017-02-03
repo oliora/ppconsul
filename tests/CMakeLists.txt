@@ -40,3 +40,4 @@ add_subdirectory(catalog)
 add_subdirectory(kv)
 
 add_subdirectory(consul-get)
+add_subdirectory(doc_examples)
