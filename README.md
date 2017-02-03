@@ -27,7 +27,7 @@ The library depends on:
 * [Boost](http://www.boost.org/) 1.55 or later. Ppconsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is not supported in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
 * [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP. Note that the latter depends on compiled Boost libraries.
 
-The library includes code of the following 3rd party libraries (look at `ext` directory): 
+The library includes code of the following 3rd party libraries (look at `ext` directory):
 * Slightly tweaked [version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
 
@@ -92,29 +92,29 @@ using namespace ppconsul::kv;
 Consul consul;
 
 // We need the 'kv' endpoint
-Storage storage(consul);
+Kv kv(consul);
 
 // Read the value of a key from the storage
-std::string something = storage.get("settings.something", "default-value");
+std::string something = kv.get("settings.something", "default-value");
 
 // Read the value of a key from the storage with consistency mode specified
-something = storage.get("settings.something", "default-value", kw::consistency = Consistency::Consistent);
+something = kv.get("settings.something", "default-value", kw::consistency = Consistency::Consistent);
 
 // Erase a key from the storage
-storage.erase("settings.something-else");
+kv.erase("settings.something-else");
 
 // Set the value of a key
-storage.put("settings.something", "new-value");
+kv.set("settings.something", "new-value");
 ```
 
 Blocking query to Key-Value storage:
 
 ```cpp
-// Get key-value item
-KeyValue item = storage.item("status.last-event-id");
+// Get key+value+metadata item
+KeyValue item = kv.item("status.last-event-id");
 
 // Wait for the item change for no more than 1 minute:
-item = storage.item("status.last-event-id", kw::block_for = {std::chrono::minutes(1), item.modifyIndex});
+item = kv.item("status.last-event-id", kw::block_for = {std::chrono::minutes(1), item.modifyIndex});
 
 // If key exists, print it:
 if (item)
@@ -135,7 +135,7 @@ TBD
 
 ### Build
 
-Prepare project:  
+Prepare project:
 ```bash
 mkdir workspace
 cd workspace
@@ -149,13 +149,13 @@ cmake ..
 
 *Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 
-Build on Linux/macOS:  
+Build on Linux/macOS:
 ```bash
 make
 ```
 
-Build on Windows:  
-Either open generated solution file `workspace\ppconsul.sln` in the Visual Studio or build from the command line:  
+Build on Windows:
+Either open generated solution file `workspace\ppconsul.sln` in the Visual Studio or build from the command line:
 ```bash
 cmake --build . --config Release
 ```
@@ -164,26 +164,26 @@ cmake --build . --config Release
 
 ### Run Consul
 
-You need to run Consul with using of `ppconsul_test` datacenter. There is a helper script for this:  
+You need to run Consul with using of `ppconsul_test` datacenter. There is a helper script for this:
 ```bash
 tests/start_consul.sh start
 ```
 
-If you have Consul 0.7 or above then it's probably easier to run it directly:  
+If you have Consul 0.7 or above then it's probably easier to run it directly:
 ```bash
 consul agent -dev -datacenter=ppconsul_test
 ```
 
 ### Run Tests
 
-Run tests on Linux/macOS:  
+Run tests on Linux/macOS:
 ```bash
 cd workspace
 make test
 ```
 
-Run tests on Windows:  
-Either build `RUN_TESTS` target in the Visual Studio or build from the command line:  
+Run tests on Windows:
+Either build `RUN_TESTS` target in the Visual Studio or build from the command line:
 ```bash
 cd workspace
 ctest -C Release

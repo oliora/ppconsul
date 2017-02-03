@@ -5,6 +5,7 @@
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include "ppconsul/helpers.h"
+#include "s11n.h"
 
 extern "C" {
     #include <b64/cdecode.h>
@@ -76,4 +77,8 @@ namespace ppconsul { namespace helpers {
         return r;
     }
 
+    bool parseJsonBool(const std::string& s)
+    {
+        return s11n::parseJson<bool>(s);
+    }
 }}

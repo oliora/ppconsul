@@ -266,24 +266,24 @@ namespace kwargs {
         template<class... ArgsOrSequence>
         struct args_sequence_wrapper
         {
-            typedef typename args_storage<ArgsOrSequence...>::type Storage;
+            typedef typename args_storage<ArgsOrSequence...>::type Kv;
 
             template<class... T>
             args_sequence_wrapper(T&... t): m_s(t...) {}
 
             template<class Index>
-            auto operator()(Index) const -> decltype(boost::fusion::at<Index>(std::declval<const Storage&>()))
+            auto operator()(Index) const -> decltype(boost::fusion::at<Index>(std::declval<const Kv&>()))
             {
                 return boost::fusion::at<Index>(m_s);
             }
 
             template<class Index>
-            auto operator()(Index) -> decltype(boost::fusion::at<Index>(std::declval<Storage&>()))
+            auto operator()(Index) -> decltype(boost::fusion::at<Index>(std::declval<Kv&>()))
             {
                 return boost::fusion::at<Index>(m_s);
             }
 
-            Storage m_s;
+            Kv m_s;
         };
 
         template<class T>

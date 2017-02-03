@@ -14,19 +14,19 @@ void kv()
     Consul consul;
 
     // We need the 'kv' endpoint
-    Storage storage(consul);
+    Kv kv(consul);
 
     // Read the value of a key from the storage
-    std::string something = storage.get("settings.something", "default-value");
+    std::string something = kv.get("settings.something", "default-value");
 
     // Read the value of a key from the storage with consistency mode specified
-    something = storage.get("settings.something", "default-value", kw::consistency = Consistency::Consistent);
+    something = kv.get("settings.something", "default-value", kw::consistency = Consistency::Consistent);
 
     // Erase a key from the storage
-    storage.erase("settings.something-else");
+    kv.erase("settings.something-else");
 
     // Set the value of a key
-    storage.put("settings.something", "new-value");
+    kv.set("settings.something", "new-value");
 }
 
 void kv_blocking_query()
@@ -40,13 +40,13 @@ void kv_blocking_query()
     Consul consul;
 
     // We need the 'kv' endpoint
-    Storage storage(consul);
+    Kv kv(consul);
     
-    // Get key-value item
-    KeyValue item = storage.item("status.last-event-id");
+    // Get key+value+metadata item
+    KeyValue item = kv.item("status.last-event-id");
 
     // Wait for the item change for no more than 1 minute:
-    item = storage.item("status.last-event-id", kw::block_for = {std::chrono::minutes(1), item.modifyIndex});
+    item = kv.item("status.last-event-id", kw::block_for = {std::chrono::minutes(1), item.modifyIndex});
 
     // If key exists, print it:
     if (item)

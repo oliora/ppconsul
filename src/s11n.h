@@ -33,6 +33,11 @@ namespace ppconsul { namespace s11n {
         dst = static_cast<int>(src.int_value());
     }
 
+    inline void load(const Json& src, bool& dst)
+    {
+        dst = static_cast<int>(src.bool_value());
+    }
+
     inline void load(const Json& src, int& dst)
     {
         dst = static_cast<int>(src.int_value());
@@ -112,5 +117,4 @@ namespace ppconsul { namespace s11n {
         load(obj, t);
         return t;
     }
-
 }}

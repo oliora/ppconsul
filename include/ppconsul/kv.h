@@ -29,7 +29,7 @@ namespace ppconsul { namespace kv {
         std::string session;
     };
 
-    
+
     class UpdateError: public ppconsul::Error
     {
     public:
@@ -64,7 +64,7 @@ namespace ppconsul { namespace kv {
         }
     }
 
-    class Storage
+    class Kv
     {
     public:
         // Allowed parameters:
@@ -72,7 +72,7 @@ namespace ppconsul { namespace kv {
         // - token - default token for all requests
         // - dc - default dc for all requests
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        explicit Storage(Consul& consul, const Params&... params)
+        explicit Kv(Consul& consul, const Params&... params)
         : m_consul(consul)
         , m_defaultToken(kwargs::get_opt(kw::token, std::string(), params...))
         , m_defaultConsistency(kwargs::get_opt(kw::consistency, Consistency::Default, params...))
@@ -112,7 +112,7 @@ namespace ppconsul { namespace kv {
         void erase(const std::string& key)
         {
             m_consul.del(keyPath(key),
-                         kw::token = m_defaultToken, kw::dc = m_defaultDc);
+                kw::token = m_defaultToken, kw::dc = m_defaultDc);
         }
 
         void eraseAll(const std::string& keyPrefix)
@@ -253,32 +253,37 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        void put(const std::string& key, const std::string& value, const Params&... params)
+        void set(const std::string& key, const std::string& value, const Params&... params)
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::put))
-            auto r = helpers::trim_eol(
+            auto r = helpers::parseJsonBool(
                m_consul.put(keyPath(key), value,
                             kw::token = m_defaultToken, kw::dc = m_defaultDc,
                             params...));
-            if ("true" != r)
+            if (!r)
                 throw UpdateError(key);
         }
 
-        // Compare and set. Returns true if value was successfully set and false otherwise.
+        // Compare and set (CAS operation). Returns true if value was successfully set and false otherwise.
         // Allowed parameters:
         // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        bool cas(const std::string& key, uint64_t cas, const std::string& value, const Params&... params)
+        bool compareSet(const std::string& key, uint64_t expectedIndex, const std::string& value, const Params&... params)
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::put))
-            auto r = helpers::trim_eol(
+            return helpers::parseJsonBool(
                 m_consul.put(keyPath(key), value,
                     kw::token = m_defaultToken, kw::dc = m_defaultDc,
-                    kw::cas = cas, params...));
-            return "true" == r;
+                    kw::cas = expectedIndex, params...));
         }
 
-        // TODO: acquire/release session
+        // Compare and erase (CAS operation).
+        bool compareErase(const std::string& key, uint64_t expectedIndex)
+        {
+            return helpers::parseJsonBool(
+                m_consul.del(keyPath(key),
+                    kw::token = m_defaultToken, kw::dc = m_defaultDc, kw::cas = expectedIndex));
+        }
 
     private:
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
@@ -313,7 +318,7 @@ namespace ppconsul { namespace kv {
     }
 
     template<class... Params, class>
-    Response<KeyValue> Storage::item(WithHeaders, const std::string& key, const Params&... params) const
+    Response<KeyValue> Kv::item(WithHeaders, const std::string& key, const Params&... params) const
     {
         KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::get))
         http::Status s;
@@ -329,7 +334,7 @@ namespace ppconsul { namespace kv {
     }
 
     template<class... Params, class>
-    std::string Storage::get(const std::string& key, const std::string& defaultValue, const Params&... params) const
+    std::string Kv::get(const std::string& key, const std::string& defaultValue, const Params&... params) const
     {
         const auto kv = item(withHeaders, key, params...);
         if (!kv.data().valid())
@@ -339,7 +344,7 @@ namespace ppconsul { namespace kv {
     }
 
     template<class... Params, class>
-    Response<std::vector<KeyValue>> Storage::items(WithHeaders, const std::string& keyPrefix, const Params&... params) const
+    Response<std::vector<KeyValue>> Kv::items(WithHeaders, const std::string& keyPrefix, const Params&... params) const
     {
         KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::get))
         http::Status s;
@@ -355,7 +360,7 @@ namespace ppconsul { namespace kv {
     }
 
     template<class... Params, class>
-    Response<std::vector<std::string>> Storage::get_keys_impl(const std::string& keyPrefix, const Params&... params) const
+    Response<std::vector<std::string>> Kv::get_keys_impl(const std::string& keyPrefix, const Params&... params) const
     {
         http::Status s;
         auto r = m_consul.get(s, keyPath(keyPrefix),

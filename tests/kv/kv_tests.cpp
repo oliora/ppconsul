@@ -61,7 +61,7 @@ TEST_CASE("kv.valid KeyValue", "[consul][kv]")
 TEST_CASE("kv.erase and count", "[consul][kv]")
 {
     auto consul = create_test_consul();
-    Storage kv(consul);
+    Kv kv(consul);
 
     // Start from blank KV storage
     kv.clear();
@@ -71,8 +71,8 @@ TEST_CASE("kv.erase and count", "[consul][kv]")
 
     SECTION("clear")
     {
-        kv.put("key1", "value1");
-        kv.put("key2", "value2");
+        kv.set("key1", "value1");
+        kv.set("key2", "value2");
 
         REQUIRE(!kv.empty());
         REQUIRE(kv.size() == 2);
@@ -87,7 +87,7 @@ TEST_CASE("kv.erase and count", "[consul][kv]")
 
     SECTION("erase one")
     {
-        kv.put("key1", "value1");
+        kv.set("key1", "value1");
         REQUIRE(kv.count("key1"));
 
         kv.erase("key1");
@@ -96,10 +96,10 @@ TEST_CASE("kv.erase and count", "[consul][kv]")
 
     SECTION("erase all")
     {
-        kv.put("key1", "value1");
-        kv.put("key2", "value2");
-        kv.put("key3", "value3");
-        kv.put("otherkey1", "othervalue3");
+        kv.set("key1", "value1");
+        kv.set("key2", "value2");
+        kv.set("key3", "value3");
+        kv.set("otherkey1", "othervalue3");
         REQUIRE(kv.count("key1"));
         REQUIRE(kv.count("key2"));
         REQUIRE(kv.count("key3"));
@@ -117,17 +117,17 @@ TEST_CASE("kv.erase and count", "[consul][kv]")
 TEST_CASE("kv.get", "[consul][kv][headers]")
 {
     auto consul = create_test_consul();
-    Storage kv(consul);
+    Kv kv(consul);
     
     // Start from blank KV storage
     kv.clear();
     REQUIRE(kv.empty());
 
-    kv.put("key1", "value1");
-    kv.put("key2", "value2");
-    kv.put("key3", "value3");
-    kv.put("other/Key1", "other/Value1");
-    kv.put("other/Key2", "other/Value2");
+    kv.set("key1", "value1");
+    kv.set("key2", "value2");
+    kv.set("key3", "value3");
+    kv.set("other/Key1", "other/Value1");
+    kv.set("other/Key2", "other/Value2");
 
     REQUIRE(kv.size() == 5);
 
@@ -304,10 +304,10 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
     }
 }
 
-TEST_CASE("kv.put", "[consul][kv]")
+TEST_CASE("kv.set", "[consul][kv]")
 {
     auto consul = create_test_consul();
-    Storage kv(consul);
+    Kv kv(consul);
 
     // Start from blank KV storage
     kv.clear();
@@ -315,7 +315,7 @@ TEST_CASE("kv.put", "[consul][kv]")
 
     SECTION("put")
     {
-        kv.put("key42", "value31");
+        kv.set("key42", "value31");
         KeyValue v = kv.item("key42");
         REQUIRE(v.valid());
         CHECK(v.createIndex);
@@ -329,7 +329,7 @@ TEST_CASE("kv.put", "[consul][kv]")
 
     SECTION("put flags")
     {
-        kv.put("key24", "value13", kw::flags=0x12345678);
+        kv.set("key24", "value13", kw::flags=0x12345678);
 
         {
             KeyValue v = kv.item("key24");
@@ -343,17 +343,17 @@ TEST_CASE("kv.put", "[consul][kv]")
             CHECK(v.session == "");
         }
 
-        kv.put("key24", "value14");
+        kv.set("key24", "value14");
         CHECK(kv.item("key24").value == "value14");
         // Feature or bug of Consul: the flags are reseted after put without "?flags" specified
         //CHECK(kv.item("key24").flags == 0x12345678);
     }
 }
 
-TEST_CASE("kv.cas", "[consul][kv]")
+TEST_CASE("kv.compareSet", "[consul][kv]")
 {
     auto consul = create_test_consul();
-    Storage kv(consul);
+    Kv kv(consul);
 
     // Start from blank KV storage
     kv.clear();
@@ -363,14 +363,14 @@ TEST_CASE("kv.cas", "[consul][kv]")
     {
         SECTION("change nonexisting")
         {
-            REQUIRE(!kv.cas("key2", 1, "value2"));
+            REQUIRE(!kv.compareSet("key2", 1, "value2"));
             CHECK(!kv.count("key2"));
             CHECK(!kv.item("key2").valid());
         }
 
         SECTION("init without cas")
         {
-            kv.put("key1", "value1");
+            kv.set("key1", "value1");
             
             {
                 KeyValue v = kv.item("key1");
@@ -390,7 +390,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
             SECTION("change with cas wrong")
             {
-                REQUIRE(!kv.cas("key1", 0, "value2"));
+                REQUIRE(!kv.compareSet("key1", 0, "value2"));
                 CHECK(kv.item("key1").valid());
                 CHECK(kv.item("key1").value == "value1");
                 CHECK(kv.item("key1").flags == 0);
@@ -400,7 +400,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 auto cas = kv.item("key1").modifyIndex;
 
-                REQUIRE(kv.cas("key1", cas, "value2"));
+                REQUIRE(kv.compareSet("key1", cas, "value2"));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -416,14 +416,14 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
         SECTION("init with cas")
         {
-            REQUIRE(kv.cas("key1", 0, "value1"));
+            REQUIRE(kv.compareSet("key1", 0, "value1"));
             CHECK(kv.item("key1").value == "value1");
             CHECK(kv.item("key1").valid());
             CHECK(kv.item("key1").flags == 0);
 
             SECTION("change with put")
             {
-                kv.put("key1", "value2");
+                kv.set("key1", "value2");
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -440,7 +440,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 auto cas = kv.item("key1").modifyIndex;
 
-                REQUIRE(kv.cas("key1", cas, "value2"));
+                REQUIRE(kv.compareSet("key1", cas, "value2"));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -459,14 +459,14 @@ TEST_CASE("kv.cas", "[consul][kv]")
     {
         SECTION("change nonexisting")
         {
-            REQUIRE(!kv.cas("key2", 1, "value2", kw::flags = 0x87654321));
+            REQUIRE(!kv.compareSet("key2", 1, "value2", kw::flags = 0x87654321));
             CHECK(!kv.count("key2"));
             CHECK(!kv.item("key2").valid());
         }
 
         SECTION("init without cas")
         {
-            kv.put("key1", "value1", kw::flags = 0x87654321);
+            kv.set("key1", "value1", kw::flags = 0x87654321);
 
             {
                 KeyValue v = kv.item("key1");
@@ -482,7 +482,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
             SECTION("change with cas wrong")
             {
-                REQUIRE(!kv.cas("key1", 0, "value2", kw::flags = 0xFC12DE56));
+                REQUIRE(!kv.compareSet("key1", 0, "value2", kw::flags = 0xFC12DE56));
                 CHECK(kv.item("key1").valid());
                 CHECK(kv.item("key1").value == "value1");
                 CHECK(kv.item("key1").flags == 0x87654321);
@@ -492,7 +492,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 auto cas = kv.item("key1").modifyIndex;
 
-                REQUIRE(kv.cas("key1", cas, "value2", kw::flags = 0xFC12DE56));
+                REQUIRE(kv.compareSet("key1", cas, "value2", kw::flags = 0xFC12DE56));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -508,7 +508,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
         SECTION("init with cas")
         {
-            REQUIRE(kv.cas("key1", 0, "value1", kw::flags = 0x87654321));
+            REQUIRE(kv.compareSet("key1", 0, "value1", kw::flags = 0x87654321));
             
             {
                 KeyValue v = kv.item("key1");
@@ -524,7 +524,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
             SECTION("change with put")
             {
-                kv.put("key1", "value2", kw::flags = 0xFC12DE56);
+                kv.set("key1", "value2", kw::flags = 0xFC12DE56);
                 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -539,7 +539,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
 
             SECTION("change with put value only")
             {
-                kv.put("key1", "value2");
+                kv.set("key1", "value2");
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -557,7 +557,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 auto cas = kv.item("key1").modifyIndex;
 
-                REQUIRE(kv.cas("key1", cas, "value2", kw::flags = 0xFC12DE56));
+                REQUIRE(kv.compareSet("key1", cas, "value2", kw::flags = 0xFC12DE56));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -574,7 +574,7 @@ TEST_CASE("kv.cas", "[consul][kv]")
             {
                 auto cas = kv.item("key1").modifyIndex;
 
-                REQUIRE(kv.cas("key1", cas, "value2"));
+                REQUIRE(kv.compareSet("key1", cas, "value2"));
 
                 KeyValue v = kv.item("key1");
                 REQUIRE(v.valid());
@@ -591,10 +591,55 @@ TEST_CASE("kv.cas", "[consul][kv]")
     }
 }
 
+TEST_CASE("kv.compareErase", "[consul][kv]")
+{
+    auto consul = create_test_consul();
+    Kv kv(consul);
+
+    // Start from blank KV storage
+    kv.clear();
+    REQUIRE(kv.empty());
+
+    kv.set("key1", "bla");
+    KeyValue v = kv.item("key1");
+    REQUIRE(v);
+
+    SECTION("zero index does nothing")
+    {
+        REQUIRE(!kv.compareErase("key1", 0));
+        KeyValue v2 = kv.item("key1");
+        REQUIRE(v2);
+        REQUIRE(v2.modifyIndex == v.modifyIndex);
+        REQUIRE(v2.value == "bla");
+    }
+
+    SECTION("correct index")
+    {
+        REQUIRE(kv.compareErase("key1", v.modifyIndex));
+        REQUIRE(kv.count("key1") == 0);
+    }
+
+    SECTION("incorrect index")
+    {
+        kv.set("key1", "bla2");
+        KeyValue v1 = kv.item("key1");
+        REQUIRE(v1);
+        REQUIRE(v1.modifyIndex != v.modifyIndex);
+
+        REQUIRE(!kv.compareErase("key1", v.modifyIndex));
+
+        KeyValue v2 = kv.item("key1");
+        REQUIRE(v2);
+        REQUIRE(v2.modifyIndex == v1.modifyIndex);
+        REQUIRE(v2.value == "bla2");
+    }
+}
+
+
 TEST_CASE("kv.special chars", "[consul][kv][special chars]")
 {
     auto consul = create_test_consul();
-    Storage kv(consul);
+    Kv kv(consul);
 
     // Start from blank KV storage
     kv.clear();
@@ -602,7 +647,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
 
     SECTION("get1")
     {
-        kv.put("key{1}/&23\x03", "value1");
+        kv.set("key{1}/&23\x03", "value1");
         KeyValue v = kv.item("key{1}/&23\x03");
         REQUIRE(v.valid());
         CHECK(v.key == "key{1}/&23\x03");
@@ -612,7 +657,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
     SECTION("get2")
     {
         const auto key = std::string("key\x0-1-\x0", 8);
-        kv.put(key, "value2");
+        kv.set(key, "value2");
         KeyValue v = kv.item(key);
         REQUIRE(v.valid());
         CHECK(v.key == key);
@@ -621,10 +666,10 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
 
     SECTION("getSubKeys1")
     {
-        kv.put("key{1}\x2-1\x2&2-\x03", "value1");
-        kv.put("key{1}\x2-2\x2&2-\x04", "value2");
-        kv.put("key{1}\x2-3\x2&2-\x05", "value3");
-        kv.put("key{1}\x2-3\x2&2-\x06", "value4");
+        kv.set("key{1}\x2-1\x2&2-\x03", "value1");
+        kv.set("key{1}\x2-2\x2&2-\x04", "value2");
+        kv.set("key{1}\x2-3\x2&2-\x05", "value3");
+        kv.set("key{1}\x2-3\x2&2-\x06", "value4");
         REQUIRE(kv.size() == 4);
 
         auto keys = kv.subKeys("key{1}\x2", "\x2");
@@ -639,10 +684,10 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
         const auto keyPart = std::string("key{1}\r\n\t\x0", 10);
         const auto null = std::string("\x0", 1);
 
-        kv.put(keyPart + "-1\t" + null + "&2-\x03", "value1");
-        kv.put(keyPart + "-2" + null + "&2-\x04", "value2");
-        kv.put(keyPart + "-3" + null + "&2-\x05", "value3");
-        kv.put(keyPart + "-3" + null + "&2-\x06", "value4");
+        kv.set(keyPart + "-1\t" + null + "&2-\x03", "value1");
+        kv.set(keyPart + "-2" + null + "&2-\x04", "value2");
+        kv.set(keyPart + "-3" + null + "&2-\x05", "value3");
+        kv.set(keyPart + "-3" + null + "&2-\x06", "value4");
         REQUIRE(kv.size() == 4);
 
         auto keys = kv.subKeys(keyPart, null);
@@ -656,7 +701,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
     {
         const auto value = std::string("\x2-1\x2&2-\x03", 8);
 
-        kv.put("key1", value);
+        kv.set("key1", value);
 
         auto v = kv.item("key1");
         CHECK(v.valid());
@@ -667,7 +712,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
     {
         const auto value = std::string("&=\r\n\t 1\x0 -2\x0", 12);
 
-        kv.put("key2", value);
+        kv.set("key2", value);
 
         auto v = kv.item("key2");
         CHECK(v.valid());
@@ -678,7 +723,7 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
 TEST_CASE("kv.index", "[consul][kv][headers]")
 {
     auto consul = create_test_consul();
-    Storage kv(consul);
+    Kv kv(consul);
 
     kv.erase("key1");
     REQUIRE(!kv.count("key1"));
@@ -687,7 +732,7 @@ TEST_CASE("kv.index", "[consul][kv][headers]")
     auto modifyIndex1 = kv.items(ppconsul::withHeaders).headers().index();
     CHECK(kv.items(ppconsul::withHeaders).headers().index() == modifyIndex1);
     
-    kv.put("key1", "value1");
+    kv.set("key1", "value1");
     auto modifyIndex2 = kv.items(ppconsul::withHeaders).headers().index();
     CHECK(modifyIndex2 > modifyIndex1);
     
@@ -699,9 +744,9 @@ TEST_CASE("kv.index", "[consul][kv][headers]")
 TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
 {
     auto consul = create_test_consul();
-    Storage kv(consul);
+    Kv kv(consul);
 
-    kv.put("key1", "value1");
+    kv.set("key1", "value1");
     auto index1 = kv.item(ppconsul::withHeaders, "key1").headers().index();
 
     auto t1 = std::chrono::steady_clock::now();
@@ -710,7 +755,7 @@ TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
     CHECK(index1 == resp1.headers().index());
     CHECK(resp1.data().value == "value1");
 
-    kv.put("key1", "value2");
+    kv.set("key1", "value2");
     auto t2 = std::chrono::steady_clock::now();
     auto resp2 = kv.item(ppconsul::withHeaders, "key1", kw::block_for = {std::chrono::seconds(5), index1});
     CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
@@ -721,9 +766,9 @@ TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
 TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")
 {
     auto consul = create_test_consul();
-    Storage kv(consul);
+    Kv kv(consul);
 
-    kv.put("key1", "value1");
+    kv.set("key1", "value1");
     auto index1 = kv.item(ppconsul::withHeaders, "key1").headers().index();
 
     auto t1 = std::chrono::steady_clock::now();
@@ -732,7 +777,7 @@ TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")
     CHECK(index1 == resp1.headers().index());
     CHECK(resp1.data().value == "value1");
 
-    kv.put("key1", "value2");
+    kv.set("key1", "value2");
     auto t2 = std::chrono::steady_clock::now();
     auto resp2 = kv.item(ppconsul::withHeaders, "key1", kw::block_for = {std::chrono::milliseconds(500), index1});
     CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::milliseconds(500));
