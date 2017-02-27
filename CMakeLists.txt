@@ -71,11 +71,11 @@ else ()
     find_package(CURL REQUIRED)
 endif ()
 
-set(LIBB64_DIR "${CMAKE_SOURCE_DIR}/ext/b64")
+set(LIBB64_DIR "${PROJECT_SOURCE_DIR}/ext/b64")
 set(LIBB64_SOURCES "${LIBB64_DIR}/cdecode.h" "${LIBB64_DIR}/cdecode.c" "${LIBB64_DIR}/cencode.h" "${LIBB64_DIR}/cencode.c")
 
-set(CATCH_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/ext/catch")
-set(HEADERS_DIR "${CMAKE_SOURCE_DIR}/include/ppconsul")
+set(CATCH_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/ext/catch")
+set(HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/ppconsul")
 
 include_directories(include)
 include_directories(ext)
