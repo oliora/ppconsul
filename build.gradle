@@ -1,0 +1,166 @@
+buildscript {
+  repositories {
+    jcenter()
+  }
+}
+
+plugins {
+    id 'nebula.ospackage' version '3.4.0'
+}
+
+apply plugin: 'cpp'
+apply plugin: 'java'
+
+def packageName = 'ppconsul'
+def formation_one_path = '/opt/fds/formation_one'
+
+dependencies {
+  compile files('/usr/lib/x86_64-linux-gnu/libcurl.so.3')
+  compile files(formation_one_path + '/packages/boost-1.55/lib/libboost*.so')
+}
+
+model{
+  binaries {
+    all {
+	if (toolChain in Gcc) {
+		cppCompiler.args "-O2", "-march=native", "-pipe"
+	}
+    }
+  }
+
+  components{
+    ppconsul(NativeLibrarySpec) {
+      sources {
+        cpp {
+          source {
+            srcDirs "src", "include/ppconsul"
+            include "**/*.cpp, *.cpp, **/*.h, *.h"
+          }
+        }
+      }
+    }
+  }
+}
+
+ospackage {
+  url = 'https://github.com/fds-dev/ppconsul'
+  version = '0.1'
+  release = '20161007'
+  packageName = 'ppconsul-' + version + '-' + release
+  packageDescription = 'The ppconsul package for fds in order to perform consul service lookups from the native side'
+
+  from ('src/'){
+    into formation_one_path + '/packages/' + packageName + '/include'
+    include '*.h'
+    user 'root'
+    permissionGroup 'root'
+  }
+
+  from ('include/'){
+    into formation_one_path + '/packages/' + packageName + '/include'
+    include '*.h'
+    user 'root'
+    permissionGroup 'root'
+  }
+
+  from ('src/output') {
+    into formation_one_path + '/packages/' + packageName + '/lib'
+    include '*.a'
+    include '*.so'
+    include '*.so*'
+    user 'root'
+    permissionGroup 'root'
+  }
+}
+
+buildDeb {
+  arch = 'amd64'
+}
+
+buildRpm {
+  os = LINUX
+  arch = 'X86_64'
+}
+
+task cleanArtifacts(type:Exec){
+    commandLine 'make', 'clean'
+}
+
+task buildLibs( type:Exec ){
+    commandLine 'make'
+}
+
+task deployDeb( dependsOn: ['buildDeb' ] ) << {
+
+  if ( !project.hasProperty( 'username' ) || !project.hasProperty( 'password' ) ){
+    throw new GradleException( 'You must specify both a -Pusername and -Ppassword value.' )
+    return
+  }
+
+  def fullName = 'NONE'
+  new File( 'build/distributions' ).eachFile( { f ->
+
+    if ( f.name.startsWith( 'ppconsul' ) && f.name.endsWith( 'deb' ) ) {
+      fullName = f.name
+    }
+  })
+
+  if ( fullName == 'NONE' ){
+    return
+  }
+
+  def command = 'curl -v -X PUT http://' + username + ':' + password + '@bld-artifactory.formationds.com:8081/artifactory/formation-apt/pool/nightly/' + fullName + ';deb.distribution=platform;deb.component=nightly;deb.architecture=amd64 -T build/distributions/' + fullName
+
+  def proc = command.execute()
+
+  println command
+
+  proc.text.eachLine { line -> println line }
+
+  if ( proc.exitValue() ){
+    throw new GradleException( 'Artifact upload failed.' )
+  }
+}
+
+
+task deployRpm( dependsOn: ['buildRpm' ] ) << {
+
+  if ( !project.hasProperty( 'username' ) || !project.hasProperty( 'password' ) ){
+    throw new GradleException( 'You must specify both a -Pusername and -Ppassword value.' )
+    return
+  }
+
+  def fullName = 'NONE'
+  new File( 'build/distributions' ).eachFile( { f ->
+
+    println f.name
+
+    if ( f.name.startsWith( 'ppconsul' ) && f.name.endsWith( 'rpm' ) ) {
+      fullName = f.name
+      println "yep"
+    }
+  })
+
+  if ( fullName == 'NONE' ){
+    return
+  }
+
+  def command = 'curl -v -X PUT http://' + username + ':' + password + '@bld-artifactory.formationds.com:8081/artifactory/formation-yum/' + fullName + ' -T build/distributions/' + fullName
+
+  def proc = command.execute()
+
+  println command
+
+  proc.text.eachLine { line -> println line }
+
+  if ( proc.exitValue() ){
+    throw new GradleException( 'Artifact upload failed.' )
+  }
+}
+
+build.dependsOn buildLibs
+buildDeb.dependsOn build
+buildRpm.dependsOn build
+deployDeb.dependsOn buildDeb
+deployRpm.dependsOn buildRpm
+clean.dependsOn cleanArtifacts
