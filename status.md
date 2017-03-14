@@ -23,7 +23,6 @@ Endpoint is supported except the following:
 - Endpoint [`/v1/agent/leave`](https://www.consul.io/docs/agent/http/agent.html#agent_leave)
 - Endpoint [`/v1/agent/maintenance`](https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
 - Endpoint [`/v1/agent/service/maintenance`](https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
-- ACL tokens
 - Specify an initial status for checks (`"Status"` field)
 - Automatic unregistration of services associated with checks (`"DeregisterCriticalServiceAfter"` field)
 - Multiple checks associated with a single service.
@@ -45,9 +44,7 @@ Endpoint support is in progress.
 ### Key/Value Store (KV)
 
 Endpoint is supported except the following:
-- Endpoint [`/v1/txn`](https://www.consul.io/docs/agent/http/kv.html#txn)
-- ACL tokens
-- Lock acquiring / release. Will be implemented after Session endpoint.
+- Transaction endpoint [`/v1/txn`](https://www.consul.io/docs/agent/http/kv.html#txn)
 
 At the moment it's only possible to work with values as strings, but there is a plan to add a typed interface, something like `get<int>(key)`, `put(key, some_double)`, etc. 
 
