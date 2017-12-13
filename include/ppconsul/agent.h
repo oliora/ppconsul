@@ -167,12 +167,12 @@ namespace ppconsul { namespace agent {
 
         void join(const std::string& addr, Pool pool = Pool::Lan)
         {
-            m_consul.get("/v1/agent/join/" + helpers::encodeUrl(addr), kw::pool = pool);
+            m_consul.put("/v1/agent/join/" + helpers::encodeUrl(addr), "", kw::pool = pool);
         }
 
         void forceLeave(const std::string& node)
         {
-            m_consul.get("/v1/agent/force-leave/" + helpers::encodeUrl(node));
+            m_consul.put("/v1/agent/force-leave/" + helpers::encodeUrl(node), "");
         }
 
         std::unordered_map<std::string, CheckInfo> checks() const
@@ -203,7 +203,7 @@ namespace ppconsul { namespace agent {
 
         void deregisterCheck(const std::string& id)
         {
-            m_consul.get("/v1/agent/check/deregister/" + helpers::encodeUrl(id));
+            m_consul.put("/v1/agent/check/deregister/" + helpers::encodeUrl(id), "");
         }
 
         void pass(const std::string& checkId, const std::string& note = "")
@@ -289,13 +289,13 @@ namespace ppconsul { namespace agent {
 
         void deregisterService(const std::string& id)
         {
-            m_consul.get("/v1/agent/service/deregister/" + helpers::encodeUrl(id));
+            m_consul.put("/v1/agent/service/deregister/" + helpers::encodeUrl(id), "");
         }
 
     private:
         void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
         {
-            m_consul.get(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), kw::note = note);
+            m_consul.put(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), "", kw::note = note);
         }
 
         // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`

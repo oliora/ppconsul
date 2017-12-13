@@ -65,7 +65,15 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
         CHECK(m.name.find(selfMember.name + ".") == 0);
         CHECK(selfMember.address == m.address);
         CHECK(m.port);
-        CHECK(selfMember.tags == m.tags);
+
+        // As recently discovered, self have extra tags thus filter them out first
+        ppconsul::Properties filteredTags;
+        for (auto& tag: selfMember.tags)
+            if (m.tags.count(tag.first))
+                filteredTags.emplace(tag);
+        CHECK(!m.tags.empty());
+        CHECK(filteredTags == m.tags);
+
         CHECK(selfMember.status == m.status);
         CHECK(selfMember.protocolMin == m.protocolMin);
         CHECK(selfMember.protocolMin == m.protocolMin);

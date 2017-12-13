@@ -14,10 +14,10 @@ The goal of Ppconsul is to:
 Note that this project is just started so it is under active developing, doesn't have a stable interface and was not tested enough.
 So if you are looking for something stable and ready to be used in production then it's better to come back later or help me growing this project to the quality level you need.
 
-Library tests are currently running against **Consul v0.7.2**. Library is known to work with Consul starting from version **0.4** (earlier versions might work as well but it has never been tested) although some tests fail for older versions because of not-supported features.
+Library tests are currently running against **Consul v1.0.1**. Library is known to work with Consul starting from version **0.4** (earlier versions might work as well but it has never been tested) although some tests fail for older versions because of not-supported features.
 
 The library is written in C++11 and requires a quite modern compiler. Currently it has been tested with:
-* macOS: Clang 7 (Xcode 7), Clang 6 (Xcode 6), Clang 5 (Xcode 5) with libc++.
+* macOS: Clang 9 (Xcode 9.2) and below. Earlier version known to work is Clang 5 (Xcode 5)
 * Ubuntu Linux: GCC 5.3, GCC 4.9, GCC 4.8.2 with stdlibc++
 * Windows: Visual Studio 2013 Update 3
 
