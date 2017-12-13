@@ -164,12 +164,12 @@ cmake --build . --config Release
 
 ### Run Consul
 
-You need to run Consul with using of `ppconsul_test` datacenter. There is a helper script for this:
+For Consul 0.9 and above:
 ```bash
-tests/start_consul.sh start
+consul agent -dev -datacenter=ppconsul_test -enable-script-checks=true
 ```
 
-If you have Consul 0.7 or above then it's probably easier to run it directly:
+For Consul 0.7 and 0.8:
 ```bash
 consul agent -dev -datacenter=ppconsul_test
 ```
