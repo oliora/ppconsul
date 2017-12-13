@@ -56,16 +56,17 @@
 #include <memory>
 #include <initializer_list>
 
-#if defined _MSC_VER && _MSC_VER < 1900  // MS Visual Studio before VS2014
-    #define JSON11_NO_CXX11_NOEXCEPT
-#endif
+#ifdef _MSC_VER
+    #if _MSC_VER <= 1800 // VS 2013
+        #ifndef noexcept
+            #define noexcept throw()
+        #endif
 
-#if ! defined JSON11_NO_CXX11_NOEXCEPT
-    #define JSON11_NOEXCEPT noexcept
-#else
-    #define JSON11_NOEXCEPT
+        #ifndef snprintf
+            #define snprintf _snprintf_s
+        #endif
+    #endif
 #endif
-
 
 namespace json11 {
 
@@ -87,8 +88,8 @@ public:
     typedef std::map<std::string, Json> object;
 
     // Constructors for the various types of JSON value.
-    Json() JSON11_NOEXCEPT;                 // NUL
-    Json(std::nullptr_t) JSON11_NOEXCEPT;   // NUL
+    Json() noexcept;                // NUL
+    Json(std::nullptr_t) noexcept;  // NUL
     Json(double value);             // NUMBER
     Json(int value);                // NUMBER
     Json(bool value);               // BOOL
@@ -106,14 +107,14 @@ public:
 
     // Implicit constructor: map-like objects (std::map, std::unordered_map, etc)
     template <class M, typename std::enable_if<
-        std::is_constructible<std::string, typename M::key_type>::value
-        && std::is_constructible<Json, typename M::mapped_type>::value,
+        std::is_constructible<std::string, decltype(std::declval<M>().begin()->first)>::value
+        && std::is_constructible<Json, decltype(std::declval<M>().begin()->second)>::value,
             int>::type = 0>
     Json(const M & m) : Json(object(m.begin(), m.end())) {}
 
     // Implicit constructor: vector-like objects (std::list, std::vector, std::set, etc)
     template <class V, typename std::enable_if<
-        std::is_constructible<Json, typename V::value_type>::value,
+        std::is_constructible<Json, decltype(*std::declval<V>().begin())>::value,
             int>::type = 0>
     Json(const V & v) : Json(array(v.begin(), v.end())) {}
 
@@ -176,8 +177,17 @@ public:
     // Parse multiple objects, concatenated or separated by whitespace
     static std::vector<Json> parse_multi(
         const std::string & in,
+        std::string::size_type & parser_stop_pos,
         std::string & err,
         JsonParse strategy = JsonParse::STANDARD);
+
+    static inline std::vector<Json> parse_multi(
+        const std::string & in,
+        std::string & err,
+        JsonParse strategy = JsonParse::STANDARD) {
+        std::string::size_type parser_stop_pos;
+        return parse_multi(in, parser_stop_pos, err, strategy);
+    }
 
     bool operator== (const Json &rhs) const;
     bool operator<  (const Json &rhs) const;
