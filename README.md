@@ -24,11 +24,13 @@ The library is written in C++11 and requires a quite modern compiler. Currently 
 The newer versions of specified compilers should work fine but was not tested. Earlier versions of GCC and Clang may work. Visual Studio before 2013 definitely gives up.
 
 The library depends on:
-* [Boost](http://www.boost.org/) 1.55 or later. Ppconsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regex is not supported in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
-* [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP. Note that the latter depends on compiled Boost libraries.
+* [Boost](http://www.boost.org/) 1.55 or later. Ppconsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regular expressions are broken in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
+* [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP. The latter depends on compiled Boost libraries.
 
-The library includes code of the following 3rd party libraries (look at `ext` directory):
-* Slightly tweaked [version](https://github.com/oliora/json11) of [json11](https://github.com/dropbox/json11) library to deal with JSON.
+**Note that C++ Network Library support might be removed in near future. If you care, please share your thoughts in [Keep support for C++ Network Library](https://github.com/oliora/ppconsul/issues/11).**
+
+The library includes code of the following 3rd party libraries (check `ext` directory):
+* [json11](https://github.com/dropbox/json11) library to deal with JSON.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
 
 For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
@@ -202,12 +204,12 @@ Sometimes catalog tests failed on assertion `REQUIRE(index1 == resp1.headers().i
 The reason for the failure is Consul's internal idempotent write which cause a spurious wakeup of waiting blocking query. Check the critical note under the blocking queries documentation at https://www.consul.io/docs/agent/http.html.
 
 ## Using Ppconsul In Your Application
-TBD
+[TBD](https://github.com/oliora/ppconsul/issues/7)
 
 For now you can check [`tests`](https://github.com/oliora/ppconsul/tree/master/tests) directory for examples of Ppconsul-dependent applications.
 
 ## Found a bag? Got a feature request? Need help with Ppconsul?
-Use [issue tracker](https://github.com/oliora/ppconsul/issues).
+Use [issue tracker](https://github.com/oliora/ppconsul/issues) or/and drop an email to [oliora](https://github.com/oliora).
 
 ## Contribute
 First of all, welcome on board!
