@@ -133,7 +133,7 @@ TBD
 * Install [CMake](http://www.cmake.org/) 3.0 or above.
 * Install [Boost](http://www.boost.org/) 1.55 or later. You need compiled Boost libraries if you going to use cpp-netlib or GCC 4.8, otherwise you need Boost headers only.
 * Install either [libCURL](http://curl.haxx.se/libcurl/) (any version is OK) or [cpp-netlib](http://cpp-netlib.org/) 0.11 or above.
-* Install [Consul](http://consul.io) 0.4.0 or above. *It's only needed to run tests.*
+* If you want to run Ppconsul tests then install [Consul](http://consul.io) 0.4 or newer. *I recommend 0.7 or newer since they're easier to be run in development mode.*
 
 ### Build
 
@@ -176,6 +176,8 @@ For Consul 0.7 and 0.8:
 consul agent -dev -datacenter=ppconsul_test
 ```
 
+For earlier version of Consul follow its documentation on how to run it with `ppconsul_test` datacenter.
+
 ### Run Tests
 
 Run tests on Linux/macOS:
@@ -191,12 +193,14 @@ cd workspace
 ctest -C Release
 ```
 
-There are the following environment variable used by the tests:
+There are the following environment variable to configure tests:
 
 |Name|Default Value|Description|
 |----|-------------|-----------|
 |`PPCONSUL_TEST_ADDR`|"127.0.0.1:8500"|The Consul network address|
 |`PPCONSUL_TEST_DC`|"ppconsul_test"|The Consul datacenter|
+
+**Never set `PPCONSUL_TEST_DC` into a datacenter that you can't throw away because Ppconsul tests will alter it in many different ways.**
 
 ### Known Problems
 
