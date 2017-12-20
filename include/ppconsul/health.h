@@ -31,7 +31,7 @@ namespace ppconsul { namespace health {
 
     namespace impl {
         std::vector<CheckInfo> parseCheckInfos(const std::string& json);
-        NodeServiceChecks parseService(const std::string& json);
+        std::vector<NodeServiceChecks> parseService(const std::string& json);
         std::string to_string(CheckStatus state);
     }
     
@@ -87,7 +87,7 @@ namespace ppconsul { namespace health {
         // - kw::tag
         // - kw::passing
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<NodeServiceChecks> service(WithHeaders, const std::string& serviceName, const Params&... params) const;
+        Response<std::vector<NodeServiceChecks>> service(WithHeaders, const std::string& serviceName, const Params&... params) const;
 
         // Result contains data only.
         // Allowed parameters:
@@ -95,7 +95,7 @@ namespace ppconsul { namespace health {
         // - kw::tag
         // - kw::passing
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        NodeServiceChecks service(const std::string& serviceName, const Params&... params) const
+        std::vector<NodeServiceChecks> service(const std::string& serviceName, const Params&... params) const
         {
             return std::move(service(withHeaders, serviceName, params...).data());
         }
@@ -191,7 +191,7 @@ namespace ppconsul { namespace health {
     }
 
     template<class... Params, class>
-    Response<NodeServiceChecks> Health::service(WithHeaders, const std::string& serviceName, const Params&... params) const
+    Response<std::vector<NodeServiceChecks>> Health::service(WithHeaders, const std::string& serviceName, const Params&... params) const
     {
         KWARGS_CHECK_IN_LIST(Params, (kw::groups::get, kw::tag, kw::passing));
         auto r = m_consul.get(withHeaders, "/v1/health/service/" + helpers::encodeUrl(serviceName),

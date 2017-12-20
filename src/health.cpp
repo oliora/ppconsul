@@ -4,7 +4,6 @@
 //  Boost Software License, Version 1.0. (See accompanying file
 //  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-
 #include "ppconsul/health.h"
 #include "s11n_types.h"
 
@@ -21,16 +20,15 @@ namespace json11 {
 }
 
 namespace ppconsul { namespace health {
-
     namespace impl {
         std::vector<CheckInfo> parseCheckInfos(const std::string& json)
         {
             return s11n::parseJson<std::vector<CheckInfo>>(json);
         }
 
-        NodeServiceChecks parseService(const std::string& json)
+        std::vector<NodeServiceChecks> parseService(const std::string& json)
         {
-            return s11n::parseJson<NodeServiceChecks>(json);
+            return s11n::parseJson<std::vector<NodeServiceChecks>>(json);
         }
     }
 }}
