@@ -4,9 +4,14 @@
 #  Boost Software License, Version 1.0. (See accompanying file
 #  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0.2)
 
-project(ppconsul)
+set(PPCONSUL_MAJOR_VERSION 0)
+set(PPCONSUL_MINOR_VERSION 1)
+
+project(ppconsul
+VERSION ${PPCONSUL_MAJOR_VERSION}.${PPCONSUL_MINOR_VERSION}
+)
 
 option(USE_CPPNETLIB "Use cpp-netlib as HTTP backend (CURL is used by default)" OFF)
 
@@ -81,5 +86,12 @@ include_directories(include)
 include_directories(ext)
 
 add_subdirectory(ext/json11)
-add_subdirectory(src)
+add_subdirectory(ppconsul)
 add_subdirectory(tests)
+
+
+install(
+    DIRECTORY "${HEADERS_DIR}"
+    DESTINATION "include"
+    FILES_MATCHING PATTERN "*.h"
+    )
