@@ -6,14 +6,9 @@
 
 cmake_minimum_required(VERSION 3.0.2)
 
-set(PPCONSUL_MAJOR_VERSION 0)
-set(PPCONSUL_MINOR_VERSION 1)
-
-project(ppconsul
-VERSION ${PPCONSUL_MAJOR_VERSION}.${PPCONSUL_MINOR_VERSION}
-)
-
 option(USE_CPPNETLIB "Use cpp-netlib as HTTP backend (CURL is used by default)" OFF)
+
+include(GNUInstallDirs)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
@@ -86,9 +81,8 @@ include_directories(include)
 include_directories(ext)
 
 add_subdirectory(ext/json11)
-add_subdirectory(ppconsul)
+add_subdirectory(src)
 add_subdirectory(tests)
-
 
 install(
     DIRECTORY "${HEADERS_DIR}"

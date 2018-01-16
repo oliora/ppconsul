@@ -1,6 +1,6 @@
 # ppconsul pkg-config source file
 
 Name: ppconsul
-Description: ppconsul is a consul interface library inplemented in c++
+Description: C++ client for the Consul HTTP API
 Version: @PPCONSUL_VERSION@
 Libs: @ppconsul_libs@
