@@ -4,11 +4,11 @@
 #  Boost Software License, Version 1.0. (See accompanying file
 #  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required(VERSION 3.0)
-
-project(ppconsul)
+cmake_minimum_required(VERSION 3.0.2)
 
 option(USE_CPPNETLIB "Use cpp-netlib as HTTP backend (CURL is used by default)" OFF)
+
+include(GNUInstallDirs)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
@@ -83,3 +83,9 @@ include_directories(ext)
 add_subdirectory(ext/json11)
 add_subdirectory(src)
 add_subdirectory(tests)
+
+install(
+    DIRECTORY "${HEADERS_DIR}"
+    DESTINATION "include"
+    FILES_MATCHING PATTERN "*.h"
+    )
