@@ -1,6 +1,0 @@
-# json11 pkg-config source file
-
-Name: json11
-Description: json parsing requried for ppconsul
-Version: @JSON11_VERSION@
-Libs: @json11_libs@

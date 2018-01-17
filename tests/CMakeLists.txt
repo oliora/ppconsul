@@ -5,15 +5,13 @@
 #  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 macro(link_test_libs project_name)
-    target_link_libraries(${project_name} ppconsul)
-    target_link_libraries(${project_name} json11)
-    target_link_libraries(${project_name} ${Boost_LIBRARIES})
+    target_include_directories(${project_name} PRIVATE
+        ${Boost_INCLUDE_DIRS}
+        ${CMAKE_SOURCE_DIR}/ext
+        ${CMAKE_SOURCE_DIR}/tests
+    )
 
-    if (${USE_CPPNETLIB})
-        target_link_libraries(${project_name} ${CPPNETLIB_LIBRARIES})
-    else ()
-        target_link_libraries(${project_name} ${CURL_LIBRARIES})
-    endif ()
+    target_link_libraries(${project_name} ppconsul)
 endmacro()
 
 macro(add_catch_test name)
@@ -23,15 +21,6 @@ macro(add_catch_test name)
         add_test(NAME ${name} COMMAND ${name})
     endif()
 endmacro()
-
-include_directories(${CMAKE_CURRENT_LIST_DIR})
-include_directories(${Boost_INCLUDE_DIRS})
-
-if (${USE_CPPNETLIB})
-    include_directories(${CPPNETLIB_INCLUDE_DIRS})
-else ()
-    include_directories(${CURL_INCLUDE_DIR})
-endif ()
 
 add_subdirectory(unittests) # to run unittests before consul ones
 

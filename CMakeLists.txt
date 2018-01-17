@@ -4,8 +4,11 @@
 #  Boost Software License, Version 1.0. (See accompanying file
 #  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.1)
 
+project(ppconsul VERSION 0.1)
+
+option(BUILD_STATIC_LIB "Build Ppconsul as static library" OFF)
 option(USE_CPPNETLIB "Use cpp-netlib as HTTP backend (CURL is used by default)" OFF)
 
 include(GNUInstallDirs)
@@ -22,15 +25,14 @@ set(BOOST_MIN_VERSION 1.55) # Because of https://svn.boost.org/trac/boost/ticket
 set(USE_BOOST_REGEX OFF)
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-    execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (GCC_VERSION VERSION_LESS 4.9)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS VERSION_LESS 4.9)
         set(USE_BOOST_REGEX ON)
         message(STATUS "GCC ${GCC_VERSION} found. Note that using of GCC version less then 4.9 requires to link with Boost.Regex library")
     endif()
 elseif (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ftemplate-depth=256 -std=c++11 -stdlib=libc++")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ftemplate-depth=256")
 elseif (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 
@@ -77,15 +79,31 @@ set(LIBB64_SOURCES "${LIBB64_DIR}/cdecode.h" "${LIBB64_DIR}/cdecode.c" "${LIBB64
 set(CATCH_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/ext/catch")
 set(HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/ppconsul")
 
-include_directories(include)
-include_directories(ext)
-
 add_subdirectory(ext/json11)
 add_subdirectory(src)
 add_subdirectory(tests)
 
 install(
     DIRECTORY "${HEADERS_DIR}"
-    DESTINATION "include"
-    FILES_MATCHING PATTERN "*.h"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+
+install(EXPORT ${CMAKE_PROJECT_NAME} DESTINATION cmake FILE ${CMAKE_PROJECT_NAME}Config.cmake)
+export(EXPORT ${CMAKE_PROJECT_NAME} FILE ${CMAKE_PROJECT_NAME}Config.cmake)
+
+# Generate and install pkg-config file
+if (NOT WINDOWS OR CYGWIN)
+    if (BUILD_STATIC_LIB)
+        set(ppconsul_libs "-lppconsul -ljson11")
+    else()
+        set(ppconsul_libs "-lppconsul")
+    endif()
+
+    configure_file("${CMAKE_PROJECT_NAME}.pc.in" "${CMAKE_PROJECT_NAME}.pc" @ONLY)
+
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
     )
+endif()
+

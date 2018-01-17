@@ -130,10 +130,10 @@ TBD
 
 ### Get Dependencies
 * Get C++11 compatible compiler. See above for the list of supported compilers.
-* Install [CMake](http://www.cmake.org/) 3.0 or above.
+* Install [CMake](http://www.cmake.org/) 3.1 or above.
 * Install [Boost](http://www.boost.org/) 1.55 or later. You need compiled Boost libraries if you going to use cpp-netlib or GCC 4.8, otherwise you need Boost headers only.
 * Install either [libCURL](http://curl.haxx.se/libcurl/) (any version is OK) or [cpp-netlib](http://cpp-netlib.org/) 0.11 or above.
-* If you want to run Ppconsul tests then install [Consul](http://consul.io) 0.4 or newer. *I recommend 0.7 or newer since they're easier to be run in development mode.*
+* If you want to run Ppconsul tests then install [Consul](http://consul.io) 0.4 or newer. *I recommend 0.7 or newer since it's easier to run them in development mode.*
 
 ### Build
 

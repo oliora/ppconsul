@@ -15,7 +15,7 @@ Releases:
 + Blocking queries (simple)
 + Don't expose json11 in headers
 + Add CMake 3 support
-? build library as shared (default) or static (choosen by option)
++ build library as shared (default) or static (choosen by option)
 
 - More checks of received JSON data shape (?)
 - Simplify JSON interface (?)
@@ -23,6 +23,7 @@ Releases:
 - provide comparision operators (at least ==, !=) for all structs defined (postponed to 0.2)
 - Support 64bit integers in JSON (postponed to 0.2)
 - tests for consistency / default consistency (if possible)
+- pkg-config: add Libs.private and Requires
 
 
 ### CI
