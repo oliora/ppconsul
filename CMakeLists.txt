@@ -25,9 +25,9 @@ set(BOOST_MIN_VERSION 1.55) # Because of https://svn.boost.org/trac/boost/ticket
 set(USE_BOOST_REGEX OFF)
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS VERSION_LESS 4.9)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
         set(USE_BOOST_REGEX ON)
         message(STATUS "GCC ${GCC_VERSION} found. Note that using of GCC version less then 4.9 requires to link with Boost.Regex library")
     endif()
