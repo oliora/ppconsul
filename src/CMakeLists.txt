@@ -4,6 +4,8 @@
 #  Boost Software License, Version 1.0. (See accompanying file
 #  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+project(ppconsul)
+
 set(HEADERS
     agent.h
     catalog.h
@@ -46,50 +48,57 @@ foreach(SRC ${HEADERS})
     list(APPEND SOURCES "${HEADERS_DIR}/${SRC}")
 endforeach()
 
-include_directories(${Boost_INCLUDE_DIRS})
+if (BUILD_STATIC_LIB)
+    add_library(${PROJECT_NAME} STATIC
+        ${SOURCES}
+        ${LIBB64_SOURCES}
+    )
+else()
+    add_library(${PROJECT_NAME} SHARED
+        ${SOURCES}
+        ${LIBB64_SOURCES}
+    )
+endif()
+
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_auto_type cxx_decltype cxx_static_assert cxx_rvalue_references)
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
+        ${Boost_INCLUDE_DIRS}
+        ${CMAKE_SOURCE_DIR}/ext
+)
+
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+        json11
+        ${Boost_LIBRARIES}
+)
 
 if (${USE_CPPNETLIB})
-    include_directories(${CPPNETLIB_INCLUDE_DIRS})
+    target_include_directories(${PROJECT_NAME} PRIVATE ${CPPNETLIB_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${CPPNETLIB_LIBRARIES})
 else ()
-    include_directories(${CURL_INCLUDE_DIR})
+    target_include_directories(${PROJECT_NAME} PRIVATE ${CURL_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${CURL_LIBRARIES})
 endif ()
-
-set(PPCONSUL_MAJOR_VERSION 0)
-set(PPCONSUL_MINOR_VERSION 1)
-
-project(ppconsul
-VERSION ${PPCONSUL_MAJOR_VERSION}.${PPCONSUL_MINOR_VERSION}
-)
-add_library(${PROJECT_NAME} STATIC
-    ${SOURCES}
-    ${LIBB64_SOURCES}
-)
 
 source_group(${PROJECT_NAME} FILES ${SOURCES})
 source_group(libb64 FILES ${LIBB64_SOURCES})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER ${PROJECT_NAME})
-
-if (NOT WINDOWS OR CYGWIN)
-    set(ppconsul_libs -lppconsul)
-
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/ppconsul.pc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/ppconsul.pc
-        )
-
-    install(
-        FILES ${CMAKE_CURRENT_BINARY_DIR}/ppconsul.pc
-        DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig"
-        )
-endif()
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    VERSION ${PPCONSUL_VERSION}
+    SOVERSION ${PPCONSUL_VERSION}
+    FOLDER ${PROJECT_NAME}
+)
 
 install(
     TARGETS ${PROJECT_NAME}
-    LIBRARY DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}"
+    EXPORT ${CMAKE_PROJECT_NAME}
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    )
-
-
-
+)
