@@ -8,6 +8,8 @@ project(json11
     VERSION 0.1
     )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -dPIC")
+
 add_library(${PROJECT_NAME} STATIC json11.hpp json11.cpp)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_auto_type cxx_decltype cxx_static_assert cxx_rvalue_references)
