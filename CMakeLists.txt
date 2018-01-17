@@ -67,8 +67,8 @@ else ()
     endif ()
 
     if (NOT ${CURL_ROOT} STREQUAL "")
-    	set (CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CURL_ROOT}/include")
-	   set (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CURL_ROOT}/lib")
+        set (CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CURL_ROOT}/include")
+           set (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CURL_ROOT}/lib")
     endif ()
     find_package(CURL REQUIRED)
 endif ()
@@ -106,4 +106,3 @@ if (NOT WINDOWS OR CYGWIN)
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
     )
 endif()
-
