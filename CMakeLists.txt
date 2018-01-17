@@ -6,7 +6,7 @@
 
 cmake_minimum_required(VERSION 3.1)
 
-project(ppconsul VERSION 0.1)
+project(PPCONSUL VERSION 0.1)
 
 option(BUILD_STATIC_LIB "Build Ppconsul as static library" OFF)
 option(USE_CPPNETLIB "Use cpp-netlib as HTTP backend (CURL is used by default)" OFF)
@@ -88,8 +88,8 @@ install(
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
-install(EXPORT ${CMAKE_PROJECT_NAME} DESTINATION cmake FILE ${CMAKE_PROJECT_NAME}Config.cmake)
-export(EXPORT ${CMAKE_PROJECT_NAME} FILE ${CMAKE_PROJECT_NAME}Config.cmake)
+install(EXPORT ${CMAKE_PROJECT_NAME} DESTINATION cmake FILE ppconsulConfig.cmake)
+export(EXPORT ${CMAKE_PROJECT_NAME} FILE ppconsulConfig.cmake)
 
 # Generate and install pkg-config file
 if (NOT WINDOWS OR CYGWIN)
@@ -99,10 +99,10 @@ if (NOT WINDOWS OR CYGWIN)
         set(ppconsul_libs "-lppconsul")
     endif()
 
-    configure_file("${CMAKE_PROJECT_NAME}.pc.in" "${CMAKE_PROJECT_NAME}.pc" @ONLY)
+    configure_file(ppconsul.pc.in ppconsul.pc @ONLY)
 
     install(
-        FILES "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc"
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/ppconsul.pc"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
     )
 endif()
