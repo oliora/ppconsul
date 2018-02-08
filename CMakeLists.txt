@@ -18,7 +18,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 
 if (${USE_CPPNETLIB})
-    #message(FATAL_ERROR "cpp-netlib support is removed, please check https://github.com/oliora/ppconsul/issues/11")
     add_definitions(-DPPCONSUL_USE_CPPNETLIB)
 endif ()
 

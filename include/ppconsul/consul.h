@@ -139,7 +139,6 @@ namespace ppconsul {
             return parameters::makeQuery(kw::dc = m_dataCenter, kw::token = m_defaultToken, params...);
         }
 
-        // TODO: make impl funcs inline
         Response<std::string> get_impl(http::Status& status, const std::string& paty, const std::string& query);
         std::string put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data);
         std::string del_impl(http::Status& status, const std::string& path, const std::string& query);

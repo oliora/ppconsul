@@ -54,7 +54,7 @@ namespace ppconsul { namespace curl {
 
         std::string m_addr;
         std::unique_ptr<CURL, detail::CurlEasyDeleter> m_handle;
-        char m_errBuffer[CURL_ERROR_SIZE]; // TODO: replace with unique_ptr<char[]> to allow move
+        char m_errBuffer[CURL_ERROR_SIZE]; // Replace with unique_ptr<std::array<char, CURL_ERROR_SIZE>> if moving is needed
     };
 
 }}
