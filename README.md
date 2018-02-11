@@ -48,7 +48,7 @@ Register, deregister and report the state of your service in Consul:
 using ppconsul::Consul;
 using namespace ppconsul::agent;
 
-// Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
+// Create a consul client that uses default local endpoint `http://127.0.0.1:8500` and default data center
 Consul consul;
 // We need the 'agent' endpoint for a service registration
 Agent agent(consul);
@@ -92,7 +92,6 @@ using ppconsul::Consul;
 using ppconsul::Consistency;
 using namespace ppconsul::kv;
 
-// Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
 Consul consul;
 
 // We need the 'kv' endpoint

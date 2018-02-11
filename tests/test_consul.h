@@ -15,6 +15,6 @@ inline ppconsul::Consul create_test_consul()
 {
     auto addr = std::getenv("PPCONSUL_TEST_ADDR");
 
-    return ppconsul::Consul(addr ? addr : ppconsul::Default_Server_Address,
+    return ppconsul::Consul(addr ? addr : ppconsul::Default_Server_Endpoint,
         ppconsul::kw::dc = get_test_datacenter());
 }
