@@ -10,7 +10,7 @@ void kv()
     using ppconsul::Consistency;
     using namespace ppconsul::kv;
 
-    // Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
+    // Create a consul client that uses default local endpoint `http://127.0.0.1:8500` and default data center
     Consul consul;
 
     // We need the 'kv' endpoint
@@ -36,7 +36,7 @@ void kv_blocking_query()
     using ppconsul::Consul;
     using namespace ppconsul::kv;
 
-    // Create a consul client with using of a default address ("127.0.0.1:8500") and default DC
+    // Create a consul client that uses default local endpoint `http://127.0.0.1:8500` and default data center
     Consul consul;
 
     // We need the 'kv' endpoint

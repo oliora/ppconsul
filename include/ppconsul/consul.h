@@ -49,7 +49,7 @@ namespace ppconsul {
         }
     }
 
-    const char Default_Server_Address[] = "127.0.0.1:8500";
+    const char Default_Server_Endpoint[] = "http://127.0.0.1:8500";
 
     class Consul
     {
@@ -58,21 +58,21 @@ namespace ppconsul {
         // - dc - data center to use
         // - token - default token for all client requests (can be overloaded in every specific request)
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        explicit Consul(const std::string& addr, const Params&... params)
+        explicit Consul(const std::string& endpoint, const Params&... params)
         : Consul(kwargs::get_opt(kw::token, std::string(), params...),
                 kwargs::get_opt(kw::dc, std::string(), params...),
-                addr)
+                endpoint)
         {
             KWARGS_CHECK_IN_LIST(Params, (kw::dc, kw::token))
         }
 
-        // Same as Consul(Default_Server_Address, ...)
+        // Same as Consul(Default_Server_Endpoint, ...)
         // Allowed parameters:
         // - dc - data center to use
         // - token - default token for all requests
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Consul(const Params&... params)
-            : Consul(Default_Server_Address, params...)
+            : Consul(Default_Server_Endpoint, params...)
         {}
 
         Consul(Consul &&op) PPCONSUL_NOEXCEPT
@@ -131,7 +131,7 @@ namespace ppconsul {
         std::string del(const std::string& path, const Params&... params);
 
     private:
-        Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& addr);
+        Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& endpoint);
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string makeQuery(const Params&... params) const

@@ -36,8 +36,8 @@ namespace ppconsul { namespace netlib {
         }
     }
 
-    HttpClient::HttpClient(const std::string& address)
-    : m_addr(helpers::makeAddress(address))
+    HttpClient::HttpClient(const std::string& endpoint)
+    : m_endpoint(endpoint)
     {}
 
     std::tuple<http::Status, ResponseHeaders, std::string> HttpClient::get(const std::string& path, const std::string& query)

@@ -26,26 +26,19 @@ namespace ppconsul { namespace helpers {
         return r;
     }
 
-    inline bool addressHasScheme(const std::string& addr)
+    inline bool urlHasScheme(const std::string& url)
     {
-        return addr.find("://") != std::string::npos;
+        return url.find("://") != std::string::npos;
     }
 
-    // Creates base URL like "<defaultScheme>://<addr>" if 'addr' has no scheme specified
-    // or just "<addr>" if 'addr' already has a scheme.
-    inline std::string makeAddress(const std::string& addr, const std::string& defaultScheme = "http")
+    // Ensures that URL has scheme. Adds `defaultScheme` if no scheme is present yet.
+    inline std::string ensureScheme(const std::string& url, const std::string& defaultScheme = "http")
     {
-        if (addressHasScheme(addr))
-            return addr;
+        if (urlHasScheme(url))
+            return url;
 
-        return defaultScheme + "://" + addr;
+        return defaultScheme + "://" + url;
     }
-
-    /*class Base64Error: public ppconsul::Error
-    {
-    public:
-        virtual const char *what() const PPCONSUL_NOEXCEPT override { return "Wrong character in base64 string"; }
-    };*/
 
     // Note that implementation used is liberal to the input: it allows characters outside the alphabete and
     // incorrect padding.

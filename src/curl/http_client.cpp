@@ -129,8 +129,8 @@ namespace ppconsul { namespace curl {
         }
     }
 
-    HttpClient::HttpClient(const std::string& addr)
-    : m_addr(helpers::makeAddress(addr))
+    HttpClient::HttpClient(const std::string& endpoint)
+    : m_endpoint(endpoint)
     {
         static const CurlInitializer g_initialized;
 

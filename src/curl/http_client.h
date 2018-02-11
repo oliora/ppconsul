@@ -29,7 +29,7 @@ namespace ppconsul { namespace curl {
     public:
         using GetResponse = std::tuple<http::Status, ResponseHeaders, std::string>;
 
-        HttpClient(const std::string& address);
+        HttpClient(const std::string& endpoint);
 
         virtual ~HttpClient() override;
 
@@ -46,13 +46,13 @@ namespace ppconsul { namespace curl {
         template<class Opt, class T>
         void setopt(Opt opt, const T& t);
 
-        std::string makeUrl(const std::string& path, const std::string& query) const { return ppconsul::http::impl::makeUrl(m_addr, path, query); }
+        std::string makeUrl(const std::string& path, const std::string& query) const { return ppconsul::http::impl::makeUrl(m_endpoint, path, query); }
 
         CURL *handle() const PPCONSUL_NOEXCEPT { return m_handle.get(); }
 
         void perform();
 
-        std::string m_addr;
+        std::string m_endpoint;
         std::unique_ptr<CURL, detail::CurlEasyDeleter> m_handle;
         char m_errBuffer[CURL_ERROR_SIZE]; // Replace with unique_ptr<std::array<char, CURL_ERROR_SIZE>> if moving is needed
     };
