@@ -27,7 +27,7 @@ Versions of GCC prior 4.8 and Visual Studio prior 2013 give up because of lack o
 
 The library depends on:
 * [Boost](http://www.boost.org/) 1.55 or later. Ppconsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regular expressions are broken in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
-* [libCURL](http://curl.haxx.se/libcurl/) ~~or [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib)~~ to deal with HTTP. **Note that C++ Network Library support is removed. If you care, please share your thoughts in [Keep support for C++ Network Library](https://github.com/oliora/ppconsul/issues/11).**
+* [libCURL](http://curl.haxx.se/libcurl/) ~~or [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib)~~ to do HTTP/HTTPS. **Note that C++ Network Library support is removed. If you care, please share your thoughts in [Keep support for C++ Network Library](https://github.com/oliora/ppconsul/issues/11).**
 
 The library includes code of the following 3rd party libraries (check `ext` directory):
 * [json11](https://github.com/dropbox/json11) library to deal with JSON.
@@ -122,7 +122,7 @@ if (item)
     std::cout << item.key << "=" << item.value << "\n";
 ```
 
-Connect to Consul via TLS:
+Connect to Consul via HTTPS (TLS/SSL, whatever you call it):
 
 ```cpp
 #include "ppconsul/consul.h"
