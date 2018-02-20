@@ -27,9 +27,7 @@ Versions of GCC prior 4.8 and Visual Studio prior 2013 give up because of lack o
 
 The library depends on:
 * [Boost](http://www.boost.org/) 1.55 or later. Ppconsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regular expressions are broken in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
-* [libCURL](http://curl.haxx.se/libcurl/) **or** [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib) to deal with HTTP. The latter depends on compiled Boost libraries.
-
-**Note that C++ Network Library support might be removed in near future. If you care, please share your thoughts in [Keep support for C++ Network Library](https://github.com/oliora/ppconsul/issues/11).**
+* [libCURL](http://curl.haxx.se/libcurl/) ~~or [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib)~~ to deal with HTTP. **Note that C++ Network Library support is removed. If you care, please share your thoughts in [Keep support for C++ Network Library](https://github.com/oliora/ppconsul/issues/11).**
 
 The library includes code of the following 3rd party libraries (check `ext` directory):
 * [json11](https://github.com/dropbox/json11) library to deal with JSON.
@@ -148,7 +146,7 @@ TBD
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [CMake](http://www.cmake.org/) 3.1 or above.
 * Install [Boost](http://www.boost.org/) 1.55 or later. You need compiled Boost libraries if you going to use cpp-netlib or GCC 4.8, otherwise you need Boost headers only.
-* Install either [libCURL](http://curl.haxx.se/libcurl/) (any version is OK) or [cpp-netlib](http://cpp-netlib.org/) 0.11 or above.
+* Install [libCURL](http://curl.haxx.se/libcurl/) (any version should be fine).
 * If you want to run Ppconsul tests then install [Consul](http://consul.io) 0.4 or newer. *I recommend 0.7 or newer since it's easier to run them in development mode.*
 
 ### Build
@@ -160,7 +158,6 @@ cd workspace
 cmake ..
 ```
 
-* To use cpp-netlib instead of libCURL use `-DUSE_CPPNETLIB=1` when invoking CMake.
 * To change where the build looks for Boost, pass `-DBOOST_ROOT=<path_to_boost>` parameter to CMake or set `BOOST_ROOT` environment variable.
 * To change where the build looks for libCURL, pass `-DCURL_ROOT=<path_to_curl>` parameter to CMake or set `CURL_ROOT` environment variable.
 * To change the default install location pass `-DCMAKE_INSTALL_PREFIX=<prefix>` parameter to CMake.
