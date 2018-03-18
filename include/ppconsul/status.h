@@ -30,6 +30,11 @@ namespace ppconsul { namespace status {
 			return impl::parseLeader(m_consul.get("/v1/status/leader"));
 		}
 
+		bool isLeaderElected() const
+		{
+			return (leader() != "");
+		}
+
 		std::vector<std::string> peers() const
 		{
 			return impl::parsePeers(m_consul.get("/v1/status/peers"));

@@ -29,6 +29,7 @@ add_subdirectory(unittests) # to run unittests before consul ones
 add_subdirectory(agent)
 add_subdirectory(catalog)
 add_subdirectory(kv)
+add_subdirectory(status)
 
 add_subdirectory(consul-get)
 add_subdirectory(doc_examples)
