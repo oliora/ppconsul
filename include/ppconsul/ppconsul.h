@@ -14,3 +14,4 @@
 #include "ppconsul/kv.h"
 #include "ppconsul/agent.h"
 #include "ppconsul/catalog.h"
+#include "ppconsul/status.h"
