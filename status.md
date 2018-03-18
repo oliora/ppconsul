@@ -61,4 +61,5 @@ TBD
 TBD
 
 ### Status
-TBD
+
+Endpoint is supported
