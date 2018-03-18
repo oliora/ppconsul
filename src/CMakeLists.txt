@@ -34,6 +34,7 @@ set(SOURCES
     helpers.cpp
     health.cpp
     kv.cpp
+    status.cpp
 )
 
 if (${USE_CPPNETLIB})
