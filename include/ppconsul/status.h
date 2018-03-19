@@ -36,7 +36,7 @@ namespace ppconsul { namespace status {
 
         bool isLeaderElected() const
         {
-            return leader().is_initialized();
+            return leader() ? true : false;
         }
 
         std::vector<std::string> peers() const
