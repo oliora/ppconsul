@@ -58,9 +58,9 @@ namespace ppconsul {
             PPCONSUL_KEYWORD(verify_status, bool)
 
             // Password for the client's private key or certificate file (CURLOPT_KEYPASSWD)
-	    // Note that it's a c-str rather than std::string. That's to make it possible
-	    // to keep the actual password in a specific location like in protected memory or
-	    // wiped-afer use memory block and so on.
+            // Note that it's a c-str rather than std::string. That's to make it possible
+            // to keep the actual password in a specific location like protected or
+            // wiped-afer-use memory.
             PPCONSUL_KEYWORD(key_pass, const char *)
         }
 
