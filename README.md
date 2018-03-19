@@ -10,11 +10,9 @@ The goal of Ppconsul is to:
 * Support different platforms. At the moment, Linux, Windows and macOS platforms supported.
 * Cover all the code with automated tests.
 
-Note that this project is just started so it is under active developing, doesn't have a stable interface and was not tested enough.
-So if you are looking for something stable and ready to be used in production then it's better to come back later or help me growing
-this project to the quality level you need.
+Note that this project is under development and doesn't promise a stable interface.
 
-Library tests are currently running against **Consul v1.0.1**. Library is known to work with Consul starting from version **0.4** (earlier versions might work as well but it has never been tested) although some tests fail for older versions because of not-supported features.
+Library tests are currently running against **Consul v1.0.6**. Library is known to work with Consul starting from version **0.4** (earlier versions might work as well but such combinations has been never run) although some tests fail for older versions because of backward incompatible changes.
 
 The library is written in C++11 and requires a quite modern compiler. Currently it has been tested with:
 * macOS: Clang 9 (Xcode 9.2)
