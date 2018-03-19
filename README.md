@@ -186,7 +186,7 @@ If Makefile generator was used then you can also do:
 ```bash
 make install
 ```
-## How to Use Ppconsul
+## How to Use
 
 Build and install it first as described above.
 
