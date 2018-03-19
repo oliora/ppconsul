@@ -240,17 +240,14 @@ For earlier version of Consul follow its documentation on how to run it with `pp
 
 ### Run Tests
 
-Run tests on Linux/macOS:
+Build it first as described above then run
 ```bash
-cd workspace
-make test
+ctest -C Release
 ```
 
-Run tests on Windows:
-Either build `RUN_TESTS` target in the Visual Studio or build from the command line:
+If Makefile generator was used then you can also do:
 ```bash
-cd workspace
-ctest -C Release
+make test
 ```
 
 There are the following environment variable to configure tests:
