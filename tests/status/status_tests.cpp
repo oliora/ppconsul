@@ -20,22 +20,24 @@ TEST_CASE("status.leader", "[consul][status][leader]")
     auto consul = create_test_consul();
     Status status(consul);
 
-	auto leader = status.leader();
-	CHECK(leader == "127.0.0.1:8300");
+    auto leader = status.leader();
+    CHECK(leader.is_initialized()==true);
+    if (leader)
+        CHECK(*leader == "127.0.0.1:8300");
 
-	auto elected = status.isLeaderElected();
-	CHECK(elected == true);
+    auto elected = status.isLeaderElected();
+    CHECK(elected == true);
 
-	// TBD: Can this method be tested with consul having no leader elected?
-	// Expect leader() to return empty string in that case
+    // TBD: Can this method be tested with consul having no leader elected?
+    // Expect leader() to return empty string in that case
 }
 
 TEST_CASE("status.peers", "[consul][status][peers]")
 {
-	auto consul = create_test_consul();
+    auto consul = create_test_consul();
     Status status(consul);
 
-	auto peers = status.peers();
-	CHECK(peers.size() == 1);
-	CHECK(peers[0] == "127.0.0.1:8300");
+    auto peers = status.peers();
+    CHECK(peers.size() == 1);
+    CHECK(peers[0] == "127.0.0.1:8300");
 }

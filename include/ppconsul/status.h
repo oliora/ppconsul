@@ -9,41 +9,41 @@
 #include "ppconsul/consul.h"
 #include "ppconsul/helpers.h"
 #include "ppconsul/types.h"
+#include <boost/optional.hpp>
 
 namespace ppconsul { namespace status {
 
-	namespace impl {
-		std::string parseLeader(const std::string&);
+    namespace impl {
+        std::string parseLeader(const std::string&);
 
-		std::vector<std::string> parsePeers(const std::string&);
-	}
+        std::vector<std::string> parsePeers(const std::string&);
+    }
 
-	class Status 
-	{
-		public:
-		explicit Status(Consul &consul)
-		: m_consul(consul)
-		{}
+    class Status 
+    {
+    public:
+        explicit Status(Consul &consul)
+        : m_consul(consul)
+        {}
 
-		std::string leader() const
-		{
-			return impl::parseLeader(m_consul.get("/v1/status/leader"));
-		}
+        boost::optional<std::string> leader() const
+        {
+            auto leader = impl::parseLeader(m_consul.get("/v1/status/leader"));
+            return boost::optional<std::string>((leader != ""),leader);
+        }
 
-		bool isLeaderElected() const
-		{
-			return (leader() != "");
-		}
+        bool isLeaderElected() const
+        {
+            return leader().is_initialized();
+        }
 
-		std::vector<std::string> peers() const
-		{
-			return impl::parsePeers(m_consul.get("/v1/status/peers"));
-		}
+        std::vector<std::string> peers() const
+        {
+            return impl::parsePeers(m_consul.get("/v1/status/peers"));
+        }
 
-		private:
-		Consul &m_consul;
-	};
-
-
+    private:
+        Consul& m_consul;
+    };
 
 }}
