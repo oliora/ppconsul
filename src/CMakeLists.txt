@@ -92,8 +92,8 @@ source_group(${PROJECT_NAME} FILES ${SOURCES})
 source_group(libb64 FILES ${LIBB64_SOURCES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    VERSION ${PPCONSUL_VERSION}
-    SOVERSION ${PPCONSUL_VERSION}
+    VERSION ${Ppconsul_VERSION}
+    SOVERSION ${Ppconsul_VERSION}
     FOLDER ${PROJECT_NAME}
 )
 
