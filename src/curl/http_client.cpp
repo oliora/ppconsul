@@ -11,12 +11,24 @@
 #include <tuple>
 #include <cassert>
 #include <cstdlib>
+#include <stdexcept>
 
 #if !defined PPCONSUL_USE_BOOST_REGEX
 #include <regex>
 #else
 #include <boost/regex.hpp>
 #endif
+
+#if (LIBCURL_VERSION_MAJOR < 7)
+#error "Where did you get such an ancient libcurl?"
+#endif
+
+// CURLOPT_SSL_VERIFYSTATUS was added in libcurl 7.41.0
+// https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYSTATUS.html
+#if (LIBCURL_VERSION_MAJOR == 7 && LIBCURL_VERSION_MINOR < 41)
+#define PPCONSUL_DISABLE_SSL_VERIFYSTATUS
+#endif
+
 
 namespace ppconsul { namespace curl {
 
@@ -161,7 +173,7 @@ namespace ppconsul { namespace curl {
             setopt(CURLOPT_SSLKEY, tlsConfig.key.c_str());
         if (!tlsConfig.keyType.empty())
             setopt(CURLOPT_CAPATH, tlsConfig.certType.c_str());
-	if (!tlsConfig.caPath.empty())
+        if (!tlsConfig.caPath.empty())
             setopt(CURLOPT_CAPATH, tlsConfig.caPath.c_str());
         if (!tlsConfig.caInfo.empty())
             setopt(CURLOPT_CAINFO, tlsConfig.caInfo.c_str());
@@ -169,10 +181,17 @@ namespace ppconsul { namespace curl {
         if (tlsConfig.keyPass && *tlsConfig.keyPass)
             setopt(CURLOPT_KEYPASSWD, tlsConfig.keyPass);
 
-	setopt(CURLOPT_SSL_VERIFYPEER, tlsConfig.verifyPeer ? 1 : 0);
+        setopt(CURLOPT_SSL_VERIFYPEER, tlsConfig.verifyPeer ? 1 : 0);
         setopt(CURLOPT_SSL_VERIFYHOST, tlsConfig.verifyHost ? 2 : 0);
+
         if (tlsConfig.verifyStatus)
+        {
+#ifdef PPCONSUL_DISABLE_SSL_VERIFYSTATUS
+            throw std::runtime_error("Ppconsul was built without support for CURLOPT_SSL_VERIFYSTATUS");
+#else
             setopt(CURLOPT_SSL_VERIFYSTATUS, 1);
+#endif
+        }
     }
 
     HttpClient::~HttpClient() = default;

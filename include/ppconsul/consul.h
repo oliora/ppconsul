@@ -54,7 +54,7 @@ namespace ppconsul {
             PPCONSUL_KEYWORD(verify_peer, bool)
             // Verify the certificate's name against host  (CURLOPT_SSL_VERIFYHOST)
             PPCONSUL_KEYWORD(verify_host, bool)
-            // Verify the certificate's status (CURLOPT_SSL_VERIFYSTATUS)
+            // Verify the certificate's status (CURLOPT_SSL_VERIFYSTATUS, libcurl >= 7.41.0)
             PPCONSUL_KEYWORD(verify_status, bool)
 
             // Password for the client's private key or certificate file (CURLOPT_KEYPASSWD)
