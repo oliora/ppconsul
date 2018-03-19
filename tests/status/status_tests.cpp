@@ -10,6 +10,7 @@
 #include "test_consul.h"
 #include <thread>
 #include <algorithm>
+#include <boost/optional/optional_io.hpp>
 
 
 using namespace ppconsul::status;
@@ -21,12 +22,10 @@ TEST_CASE("status.leader", "[consul][status][leader]")
     Status status(consul);
 
     auto leader = status.leader();
-    CHECK(leader.is_initialized()==true);
-    if (leader)
-        CHECK(*leader == "127.0.0.1:8300");
+    CHECK(leader == get_test_leader());
 
     auto elected = status.isLeaderElected();
-    CHECK(elected == true);
+    CHECK(elected);
 
     // TBD: Can this method be tested with consul having no leader elected?
     // Expect leader() to return empty string in that case
@@ -38,6 +37,5 @@ TEST_CASE("status.peers", "[consul][status][peers]")
     Status status(consul);
 
     auto peers = status.peers();
-    CHECK(peers.size() == 1);
-    CHECK(peers[0] == "127.0.0.1:8300");
+    CHECK(peers == std::vector<std::string>{get_test_leader()});
 }
