@@ -8,16 +8,18 @@ Note that all implemented features are tested with automated integration tests.
 
 ### Blocking Queries
 
-Blocking query feature is supported in straitforward way: when API that supports blocking queries is called with keyword `block_for=` then the call blocks. There is no smart things like async non-block handling with calbacks, backgound polling etc. If you have any ideas/suggerstions of a convenient interface to work with blocking queries, you are welcome.
+Blocking query feature is supported in a straitforward way: when API that supports blocking queries is called with keyword `block_for=` then the call blocks. There is no smart things like async non-block handling with calbacks, backgound polling etc. If you have any ideas/suggerstions of a convenient interface to work with blocking queries, you are welcome.
 
 ## Endpoints
 
 ### ACLs
+
 TBD
 
 ### Agent
 
 Endpoint is supported except the following:
+- ACL tokens
 - Endpoint [`/v1/agent/reload`](https://www.consul.io/docs/agent/http/agent.html#agent_reload)
 - Endpoint [`/v1/agent/monitor`](https://www.consul.io/docs/agent/http/agent.html#agent_monitor)
 - Endpoint [`/v1/agent/leave`](https://www.consul.io/docs/agent/http/agent.html#agent_leave)
@@ -35,31 +37,48 @@ Endpoint is supported except the following:
 - Parameter `?near=` for querying nodes and services
 - Registration/deregistration. Please use the agent endpoint instead. There is no plan to support it any time soon unless requested by users.
 
-### Events
+### Coordinates
+
 TBD
 
-### Health Checks
-Endpoint support is in progress.
+### Events
 
-### Key/Value Store (KV)
+TBD
+
+### Health
+
+Endpoint support is in progress (code is here but not tests yet)
+
+Not supported:
+- ACL tokens
+
+### KV Store
 
 Endpoint is supported except the following:
-- Transaction endpoint [`/v1/txn`](https://www.consul.io/docs/agent/http/kv.html#txn)
+- ACL tokens
 
 At the moment it's only possible to work with values as strings, but there is a plan to add a typed interface, something like `get<int>(key)`, `put(key, some_double)`, etc. 
 
-### Network Coordinates
+### Operator
+
 TBD
 
-### Operator
+### Prepared Query
+
 TBD
 
 ### Sessions
+
 TBD
 
 ### Snapshots
+
 TBD
 
 ### Status
 
 Endpoint is supported
+
+### Transactions
+
+TBD
