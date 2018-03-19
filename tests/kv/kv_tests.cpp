@@ -646,58 +646,6 @@ TEST_CASE("kv.special chars", "[consul][kv][special chars]")
     kv.clear();
     REQUIRE(kv.empty());
 
-    SECTION("get1")
-    {
-        kv.set("key{1}/&23\x03", "value1");
-        KeyValue v = kv.item("key{1}/&23\x03");
-        REQUIRE(v.valid());
-        CHECK(v.key == "key{1}/&23\x03");
-        CHECK(v.value == "value1");
-    }
-    
-    SECTION("get2")
-    {
-        const auto key = std::string("key\x0-1-\x0", 8);
-        kv.set(key, "value2");
-        KeyValue v = kv.item(key);
-        REQUIRE(v.valid());
-        CHECK(v.key == key);
-        CHECK(v.value == "value2");
-    }
-
-    SECTION("getSubKeys1")
-    {
-        kv.set("key{1}\x2-1\x2&2-\x03", "value1");
-        kv.set("key{1}\x2-2\x2&2-\x04", "value2");
-        kv.set("key{1}\x2-3\x2&2-\x05", "value3");
-        kv.set("key{1}\x2-3\x2&2-\x06", "value4");
-        REQUIRE(kv.size() == 4);
-
-        auto keys = kv.subKeys("key{1}\x2", "\x2");
-        REQUIRE(keys.size() == 3);
-        CHECK(keys[0] == "key{1}\x2-1\x2");
-        CHECK(keys[1] == "key{1}\x2-2\x2");
-        CHECK(keys[2] == "key{1}\x2-3\x2");
-    }
-
-    SECTION("getSubKeys2")
-    {
-        const auto keyPart = std::string("key{1}\r\n\t\x0", 10);
-        const auto null = std::string("\x0", 1);
-
-        kv.set(keyPart + "-1\t" + null + "&2-\x03", "value1");
-        kv.set(keyPart + "-2" + null + "&2-\x04", "value2");
-        kv.set(keyPart + "-3" + null + "&2-\x05", "value3");
-        kv.set(keyPart + "-3" + null + "&2-\x06", "value4");
-        REQUIRE(kv.size() == 4);
-
-        auto keys = kv.subKeys(keyPart, null);
-        REQUIRE(keys.size() == 3);
-        CHECK(keys[0] == keyPart + "-1\t" + null);
-        CHECK(keys[1] == keyPart + "-2" + null);
-        CHECK(keys[2] == keyPart + "-3" + null);
-    }
-
     SECTION("value1")
     {
         const auto value = std::string("\x2-1\x2&2-\x03", 8);

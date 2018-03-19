@@ -166,45 +166,6 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
     }
 }
 
-TEST_CASE("agent.check_registration_special_chars", "[consul][agent][checks][special chars]")
-{
-    const auto spec_name = "check{1}\r\n\t\x0";
-
-    auto consul = create_test_consul();
-    Agent agent(consul);
-
-    agent.deregisterCheck(spec_name);
-    REQUIRE(!agent.checks().count(spec_name));
-
-    SECTION("ttl")
-    {
-        agent.registerCheck(spec_name, TtlCheck{std::chrono::seconds(100)}, kw::notes = "note\n1\n2\n3\nsummary: bla bla");
-
-        REQUIRE(agent.checks().count(spec_name));
-        auto c = agent.checks().at(spec_name);
-
-        CHECK(c.id == spec_name);
-        CHECK(c.name == spec_name);
-        CHECK(c.status != CheckStatus::Passing);
-        CHECK(c.notes == "note\n1\n2\n3\nsummary: bla bla");
-    }
-
-    SECTION("script")
-    {
-        agent.registerCheck(spec_name,  ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)});
-        sleep(0.5); // To get updated state and output
-
-        REQUIRE(agent.checks().count(spec_name));
-        auto c = agent.checks().at(spec_name);
-
-        CHECK(c.id == spec_name);
-        CHECK(c.name == spec_name);
-        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
-        // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
-        CHECK(c.notes == "");
-    }
-}
-
 TEST_CASE("agent.http_check_registration", "[consul][agent][checks][http_check]")
 {
     auto consul = create_test_consul();
@@ -373,26 +334,3 @@ TEST_CASE("agent.check_expired", "[consul][agent][checks][health]")
     CHECK(!c.output.empty());
 }
 
-TEST_CASE("agent.check_update_special_chars", "[consul][agent][checks][health][special chars]")
-{
-    const auto spec_name = "check{1}\r\n\t\x0";
-
-    auto consul = create_test_consul();
-    Agent agent(consul);
-
-    agent.deregisterCheck(spec_name);
-    REQUIRE(!agent.checks().count(spec_name));
-
-    agent.registerCheck("check1", TtlCheck{std::chrono::minutes(5)}, kw::notes = "the check");
-
-    ppconsul::CheckInfo c = agent.checks().at("check1");
-    REQUIRE(c.status != CheckStatus::Passing);
-    REQUIRE(c.notes == "the check");
-    REQUIRE(c.output == "");
-
-    agent.pass("check1", "status:\neverything passing!!!\n");
-    c = agent.checks().at("check1");
-    REQUIRE(c.status == CheckStatus::Passing);
-    REQUIRE(c.notes == "the check");
-    REQUIRE(c.output == "status:\neverything passing!!!\n");
-}
