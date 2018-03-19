@@ -22,14 +22,16 @@ namespace ppconsul { namespace status {
     class Status 
     {
     public:
-        explicit Status(Consul &consul)
+        explicit Status(Consul& consul)
         : m_consul(consul)
         {}
 
         boost::optional<std::string> leader() const
         {
             auto leader = impl::parseLeader(m_consul.get("/v1/status/leader"));
-            return boost::optional<std::string>((leader != ""),leader);
+            if (!leader.empty())
+                return std::move(leader);
+            return {};
         }
 
         bool isLeaderElected() const

@@ -259,6 +259,7 @@ There are the following environment variable to configure tests:
 |----|-------------|-----------|
 |`PPCONSUL_TEST_ADDR`|"127.0.0.1:8500"|The Consul network address|
 |`PPCONSUL_TEST_DC`|"ppconsul_test"|The Consul datacenter|
+|`PPCONSUL_TEST_LEADER_ADDR`|"127.0.0.1:8300"|The Consul raft leader address|
 
 **Never set `PPCONSUL_TEST_DC` into a datacenter that you can't throw away because Ppconsul tests will screw it up in many different ways.**
 
