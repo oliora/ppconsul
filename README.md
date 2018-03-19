@@ -165,15 +165,37 @@ cmake ..
 
 *Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 
-Build on Linux/macOS:
+Build:
+```bash
+cmake --build . --config Release
+```
+
+If Makefile generator was used then you can also do:
 ```bash
 make
 ```
 
-Build on Windows:
-Either open generated solution file `workspace\ppconsul.sln` in the Visual Studio or build from the command line:
+## How to Install
+
+Build it first as described above then run
 ```bash
-cmake --build . --config Release
+cmake --build . --config Release --target install
+```
+
+If Makefile generator was used then you can also do:
+```bash
+make install
+```
+## How to Use Ppconsul
+
+Build and install it first as described above.
+
+When installed, the library can be simply used in any CMake-based project as following:
+
+```
+find_package(ppconsul)
+add_executable(<your_app> ...)
+target_link_libraries(<your_app> ppconsul)
 ```
 
 ## How To Run Tests
@@ -214,17 +236,12 @@ There are the following environment variable to configure tests:
 |`PPCONSUL_TEST_ADDR`|"127.0.0.1:8500"|The Consul network address|
 |`PPCONSUL_TEST_DC`|"ppconsul_test"|The Consul datacenter|
 
-**Never set `PPCONSUL_TEST_DC` into a datacenter that you can't throw away because Ppconsul tests will alter it in many different ways.**
+**Never set `PPCONSUL_TEST_DC` into a datacenter that you can't throw away because Ppconsul tests will screw it up in many different ways.**
 
 ### Known Problems
 
 Sometimes catalog tests failed on assertion `REQUIRE(index1 == resp1.headers().index());`. In this case, just rerun the tests.
 The reason for the failure is Consul's internal idempotent write which cause a spurious wakeup of waiting blocking query. Check the critical note under the blocking queries documentation at https://www.consul.io/docs/agent/http.html.
-
-## Using Ppconsul In Your Application
-[TBD](https://github.com/oliora/ppconsul/issues/7)
-
-For now you can check [`tests`](https://github.com/oliora/ppconsul/tree/master/tests) directory for examples of Ppconsul-dependent applications.
 
 ## Found a bag? Got a feature request? Need help with Ppconsul?
 Use [issue tracker](https://github.com/oliora/ppconsul/issues) or/and drop an email to [oliora](https://github.com/oliora).
