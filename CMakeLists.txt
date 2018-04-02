@@ -8,7 +8,11 @@ cmake_minimum_required(VERSION 3.1)
 
 project(Ppconsul VERSION 0.1)
 
-option(BUILD_STATIC_LIB "Build Ppconsul as static library" OFF)
+if (WIN32)
+    option(BUILD_STATIC_LIB "Build Ppconsul as static library" ON)
+else()
+    option(BUILD_STATIC_LIB "Build Ppconsul as static library" OFF)
+endif()
 option(USE_CPPNETLIB "Use cpp-netlib as HTTP backend (CURL is used by default)" OFF)
 
 include(GNUInstallDirs)
@@ -79,6 +83,10 @@ set(LIBB64_SOURCES "${LIBB64_DIR}/cdecode.h" "${LIBB64_DIR}/cdecode.c" "${LIBB64
 set(CATCH_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/ext/catch")
 set(HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/ppconsul")
 
+if (WIN32 AND NOT BUILD_STATIC_LIB)
+    message(FATAL_ERROR "Building Ppconsul as dynamic library on Windows is not supported, see https://github.com/oliora/ppconsul/issues/25")
+endif()
+
 add_subdirectory(ext/json11)
 add_subdirectory(src)
 add_subdirectory(tests)
@@ -92,7 +100,7 @@ install(EXPORT ${CMAKE_PROJECT_NAME} DESTINATION cmake FILE ppconsulConfig.cmake
 export(EXPORT ${CMAKE_PROJECT_NAME} FILE ppconsulConfig.cmake)
 
 # Generate and install pkg-config file
-if (NOT WINDOWS OR CYGWIN)
+if (NOT WIN32 OR CYGWIN)
     if (BUILD_STATIC_LIB)
         set(ppconsul_libs "-lppconsul -ljson11")
     else()

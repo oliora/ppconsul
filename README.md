@@ -183,7 +183,9 @@ cmake ..
 * To change where the build looks for Boost, pass `-DBOOST_ROOT=<path_to_boost>` parameter to CMake or set `BOOST_ROOT` environment variable.
 * To change where the build looks for libCURL, pass `-DCURL_ROOT=<path_to_curl>` parameter to CMake or set `CURL_ROOT` environment variable.
 * To change the default install location, pass `-DCMAKE_INSTALL_PREFIX=<prefix>` parameter.
-* To build Ppconsul as static library, pass `-DBUILD_STATIC_LIB=ON` parameter. Note that in this case you will have to link with json11 static library as well. json11 library is build as part of Ppconsul build.
+* To build Ppconsul as static library, pass `-DBUILD_STATIC_LIB=ON` parameter.
+  Note that in this case you will have to link with json11 static library as well. json11 library is build as part of Ppconsul build.
+  On Windows, Ppconsul is built as static library by default, see https://github.com/oliora/ppconsul/issues/25.
 
 *Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 
