@@ -69,6 +69,19 @@ namespace ppconsul { namespace agent {
         duration timeout;
     };
 
+	struct GrpcCheck
+	{
+		GrpcCheck() = default;
+
+		GrpcCheck(std::string url, const duration& interval, const duration& timeout = duration::zero())
+				: url(std::move(url)), interval(interval), timeout(timeout), tls(false) {}
+
+		std::string url;
+		duration interval;
+		duration timeout;
+		bool tls;
+	};
+
     namespace impl {
         inline std::string makeTcpAddress(const char *host, uint16_t port)
         {
@@ -104,7 +117,7 @@ namespace ppconsul { namespace agent {
         std::string shell;
     };
 
-    using CheckParams = boost::variant<TtlCheck, ScriptCheck, HttpCheck, TcpCheck, DockerCheck>;
+    using CheckParams = boost::variant<TtlCheck, ScriptCheck, GrpcCheck, HttpCheck, TcpCheck, DockerCheck>;
 
     namespace kw {
         KWARGS_KEYWORD(name, std::string)

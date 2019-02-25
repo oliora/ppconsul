@@ -115,3 +115,13 @@ if (NOT WIN32 OR CYGWIN)
     )
 endif()
 
+# generate test consul application ppconsul/cmake-build-debug/output
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(ppconsul REQUIRED ppconsul)
+
+add_executable(consul_simple_test tests/ppconsul_simple_test.cpp)
+target_link_libraries(consul_simple_test
+        PRIVATE
+        grpc
+        ${ppconsul_LIBRARIES}
+)

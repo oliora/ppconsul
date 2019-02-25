@@ -82,6 +82,15 @@ namespace impl {
                     dst()["timeout"] = to_json(c.timeout);
             }
 
+			void operator() (const GrpcCheck& c) const
+			{
+				dst()["grpc_use_tls"] = c.tls;
+				dst()["grpc"] = c.url;
+				dst()["interval"] = to_json(c.interval);
+				if (c.timeout != decltype(c.timeout)::zero())
+					dst()["timeout"] = to_json(c.timeout);
+			}
+
             void operator() (const TcpCheck& c) const
             {
                 dst()["tcp"] = c.address;
