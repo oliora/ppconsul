@@ -73,13 +73,24 @@ namespace ppconsul { namespace agent {
 	{
 		GrpcCheck() = default;
 
-		GrpcCheck(std::string url, const duration& interval, const duration& timeout = duration::zero())
-				: url(std::move(url)), interval(interval), timeout(timeout), tls(false) {}
+		GrpcCheck(std::string a_strUrl,
+				std::string a_strServiceID,
+				const duration& interval,
+				const duration& deregisterCriticalServiceAfter,
+				const duration& timeout = duration::zero()):
+		    url(std::move(a_strUrl)),
+		    serviceID(std::move(a_strServiceID)),
+			interval(interval),
+			deregisterCriticalServiceAfter(deregisterCriticalServiceAfter),
+			timeout(timeout),
+			tls(false){}
 
 		std::string url;
+		std::string serviceID;
 		duration interval;
+		duration deregisterCriticalServiceAfter;
 		duration timeout;
-		bool tls;
+        bool tls;
 	};
 
     namespace impl {

@@ -89,6 +89,8 @@ namespace impl {
 				dst()["interval"] = to_json(c.interval);
 				if (c.timeout != decltype(c.timeout)::zero())
 					dst()["timeout"] = to_json(c.timeout);
+                dst ()["DeregisterCriticalServiceAfter"] = to_json(c.deregisterCriticalServiceAfter);
+                dst()["ServiceID"] = c.serviceID;
 			}
 
             void operator() (const TcpCheck& c) const
@@ -147,7 +149,7 @@ namespace impl {
         Json::object o {
             { "ID", check.id },
             { "Name", check.name },
-            { "Notes", check.notes }
+            { "Notes", check.notes },
         };
 
         save(o, check.params);
