@@ -35,9 +35,9 @@ namespace ppconsul { namespace catalog {
     
 namespace impl {
 
-    std::vector<std::string> parseDatacenters(const std::string& json)
+    StringList parseDatacenters(const std::string& json)
     {
-        return s11n::parseJson<std::vector<std::string>>(json);
+        return s11n::parseJson<StringList>(json);
     }
 
     std::vector<Node> parseNodes(const std::string& json)

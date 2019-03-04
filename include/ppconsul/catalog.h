@@ -29,7 +29,7 @@ namespace ppconsul { namespace catalog {
     }
 
     namespace impl {
-        std::vector<std::string> parseDatacenters(const std::string& json);
+        StringList parseDatacenters(const std::string& json);
         std::vector<Node> parseNodes(const std::string& json);
         NodeServices parseNode(const std::string& json);
         std::unordered_map<std::string, Tags> parseServices(const std::string& json);
@@ -51,7 +51,7 @@ namespace ppconsul { namespace catalog {
             KWARGS_CHECK_IN_LIST(Params, (kw::consistency, kw::dc))
         }
 
-        std::vector<std::string> datacenters() const
+        StringList datacenters() const
         {
             return impl::parseDatacenters(m_consul.get("/v1/catalog/datacenters"));
         }

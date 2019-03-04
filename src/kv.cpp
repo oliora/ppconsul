@@ -29,9 +29,9 @@ namespace ppconsul { namespace kv {
 
 namespace impl {
 
-    std::vector<std::string> parseKeys(const std::string& resp)
+    StringList parseKeys(const std::string& resp)
     {
-        return s11n::parseJson<std::vector<std::string>>(resp);
+        return s11n::parseJson<StringList>(resp);
     }
 
     std::vector<KeyValue> parseValues(const std::string& resp)

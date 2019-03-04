@@ -67,7 +67,7 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
         CHECK(m.port);
 
         // As recently discovered, self have extra tags thus filter them out first
-        ppconsul::Properties filteredTags;
+        ppconsul::Metadata filteredTags;
         for (auto& tag: selfMember.tags)
             if (m.tags.count(tag.first))
                 filteredTags.emplace(tag);

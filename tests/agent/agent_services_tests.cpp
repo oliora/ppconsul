@@ -142,8 +142,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
     {
         agent.registerService(
             "service1",
-
-                              TtlCheck{std::chrono::minutes(1)},
+            TtlCheck{std::chrono::minutes(1)},
             kw::port = 9876,
             kw::tags = { "udp", "printer" },
             kw::meta = {{"version", "2.1"}},
@@ -175,6 +174,16 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(c.serviceId == Unique_Id);
         CHECK(c.serviceName == "service1");
     }
+}
+
+// Script check is only useful in Consul 0.x
+TEST_CASE("agent.service_registration_script_check_0_x", "[!hide][consul][agent][services][consul_0_x]")
+{
+    auto consul = create_test_consul();
+    Agent agent(consul);
+
+    agent.deregisterService("service1");
+    agent.deregisterService(Unique_Id);
 
     SECTION("script simple")
     {
@@ -244,7 +253,83 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
     }
 }
 
-TEST_CASE("agent.service_deregistration_with_script", "[consul][agent][services]")
+TEST_CASE("agent.service_registration_command_check", "[consul][agent][services]")
+{
+    auto consul = create_test_consul();
+    Agent agent(consul);
+
+    agent.deregisterService("service1");
+    agent.deregisterService(Unique_Id);
+
+    SECTION("script simple")
+    {
+        agent.registerService("service1", CommandCheck{{Non_Existing_Script_Name}, std::chrono::minutes(1)});
+
+        const auto services = agent.services();
+        REQUIRE(services.count("service1"));
+        const auto & s = services.at("service1");
+
+        CHECK(s.id == "service1");
+        CHECK(s.name == "service1");
+        CHECK(s.address == "");
+        CHECK(s.port == 0);
+        CHECK(s.tags == ppconsul::Tags());
+
+        sleep(0.5); // To get updated state and output
+
+        const auto checks = agent.checks();
+        REQUIRE(checks.count(serviceCheckId("service1")));
+        const auto & c = checks.at(serviceCheckId("service1"));
+
+        CHECK(c.id == serviceCheckId("service1"));
+        CHECK(c.node == agent.self().second.name);
+        CHECK(!c.name.empty());
+        CHECK(c.notes.empty());
+        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
+        // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
+        CHECK(c.serviceId == "service1");
+        CHECK(c.serviceName == "service1");
+    }
+
+    SECTION("script")
+    {
+        agent.registerService(
+            "service1",
+            CommandCheck{{Non_Existing_Script_Name, "--param"}, std::chrono::minutes(1)},
+            kw::port = 9876,
+            kw::tags = { "udp", "printer" },
+            kw::id = Unique_Id,
+            kw::address = "hooooosttts-adr"
+        );
+
+        const auto services = agent.services();
+        REQUIRE(services.count(Unique_Id));
+        const auto & s = services.at(Unique_Id);
+
+        CHECK(s.id == Unique_Id);
+        CHECK(s.name == "service1");
+        CHECK(s.address == "hooooosttts-adr");
+        CHECK(s.port == 9876);
+        CHECK(s.tags == ppconsul::Tags({ "udp", "printer" }));
+
+        sleep(0.5); // To get updated state and output
+
+        const auto checks = agent.checks();
+        REQUIRE(checks.count(serviceCheckId(Unique_Id)));
+        const auto & c = checks.at(serviceCheckId(Unique_Id));
+
+        CHECK(c.id == serviceCheckId(Unique_Id));
+        CHECK(c.node == agent.self().second.name);
+        CHECK(!c.name.empty());
+        CHECK(c.notes.empty());
+        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
+        // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
+        CHECK(c.serviceId == Unique_Id);
+        CHECK(c.serviceName == "service1");
+    }
+}
+
+TEST_CASE("agent.service_deregistration_with_check", "[consul][agent][services]")
 {
     auto consul = create_test_consul();
     Agent agent(consul);

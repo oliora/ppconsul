@@ -13,6 +13,7 @@
 
 
 using namespace ppconsul::kv;
+using ppconsul::StringList;
 
 
 namespace 
@@ -265,39 +266,39 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
 
     SECTION("get keys")
     {
-        CHECK(kv.keys(Non_Existing_Key) == std::vector<std::string>());
-        CHECK(kv.subKeys(Non_Existing_Key, "/") == std::vector<std::string>());
-        CHECK(kv.keys("key") == std::vector<std::string>({"key1", "key2", "key3"}));
-        CHECK(kv.keys("other/Key") == std::vector<std::string>({ "other/Key1", "other/Key2" }));
-        CHECK(kv.subKeys("", "/") == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
-        CHECK(kv.subKeys("", "e") == std::vector<std::string>({ "ke", "othe" }));
+        CHECK(kv.keys(Non_Existing_Key) == StringList());
+        CHECK(kv.subKeys(Non_Existing_Key, "/") == StringList());
+        CHECK(kv.keys("key") == StringList({"key1", "key2", "key3"}));
+        CHECK(kv.keys("other/Key") == StringList({ "other/Key1", "other/Key2" }));
+        CHECK(kv.subKeys("", "/") == StringList({ "key1", "key2", "key3", "other/" }));
+        CHECK(kv.subKeys("", "e") == StringList({ "ke", "othe" }));
     }
 
     SECTION("get keys with headers")
     {
-        ppconsul::Response<std::vector<std::string>> v0 = kv.keys(ppconsul::withHeaders, Non_Existing_Key);
-        CHECK(v0.data() == std::vector<std::string>());
+        ppconsul::Response<StringList> v0 = kv.keys(ppconsul::withHeaders, Non_Existing_Key);
+        CHECK(v0.data() == StringList());
         CHECK(v0.headers().valid());
         CHECK(v0.headers().index());
         CHECK(v0.headers().knownLeader());
         CHECK(v0.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v1 = kv.keys(ppconsul::withHeaders, "key");
-        CHECK(v1.data() == std::vector<std::string>({ "key1", "key2", "key3" }));
+        ppconsul::Response<StringList> v1 = kv.keys(ppconsul::withHeaders, "key");
+        CHECK(v1.data() == StringList({ "key1", "key2", "key3" }));
         CHECK(v1.headers().valid());
         CHECK(v1.headers().index());
         CHECK(v1.headers().knownLeader());
         CHECK(v1.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v2 = kv.subKeys(ppconsul::withHeaders, Non_Existing_Key, "/");
-        CHECK(v2.data() == std::vector<std::string>());
+        ppconsul::Response<StringList> v2 = kv.subKeys(ppconsul::withHeaders, Non_Existing_Key, "/");
+        CHECK(v2.data() == StringList());
         CHECK(v2.headers().valid());
         CHECK(v2.headers().index());
         CHECK(v2.headers().knownLeader());
         CHECK(v2.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v3 = kv.subKeys(ppconsul::withHeaders, "", "/");
-        CHECK(v3.data() == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
+        ppconsul::Response<StringList> v3 = kv.subKeys(ppconsul::withHeaders, "", "/");
+        CHECK(v3.data() == StringList({ "key1", "key2", "key3", "other/" }));
         CHECK(v3.headers().valid());
         CHECK(v3.headers().index());
         CHECK(v3.headers().knownLeader());

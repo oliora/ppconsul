@@ -34,9 +34,11 @@ namespace ppconsul {
 
     typedef std::unordered_set<std::string> Tags;
 
-    typedef std::unordered_map<std::string, std::string> Properties;
+    using Metadata = std::unordered_map<std::string, std::string>;
 
-    typedef std::unordered_map<std::string, std::string> Metadata;
+    using Properties = Metadata;  // Just for backward compatibility
+
+    using StringList = std::vector<std::string>;
 
     struct Node
     {

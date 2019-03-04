@@ -194,7 +194,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> subKeys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
+        Response<StringList> subKeys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::get))
             return get_keys_impl(keyPrefix, kv::kw::separator = separator, params...);
@@ -205,7 +205,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<std::string> subKeys(const std::string& keyPrefix, const std::string& separator, const Params&... params) const
+        StringList subKeys(const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
             return std::move(subKeys(withHeaders, keyPrefix, separator, params...).data());
         }
@@ -215,7 +215,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const Params&... params) const
+        Response<StringList> keys(WithHeaders, const std::string& keyPrefix, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::get))
             return get_keys_impl(keyPrefix, params...);
@@ -226,7 +226,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<std::string> keys(const std::string& prefix, const Params&... params) const
+        StringList keys(const std::string& prefix, const Params&... params) const
         {
             return std::move(keys(withHeaders, prefix, params...).data());
         }
@@ -236,7 +236,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> keys(WithHeaders, const Params&... params) const
+        Response<StringList> keys(WithHeaders, const Params&... params) const
         {
             return keys(withHeaders, std::string(), params...);
         }
@@ -246,7 +246,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<std::string> keys(const Params&... params) const
+        StringList keys(const Params&... params) const
         {
             return keys(std::string(), params...);
         }
@@ -315,7 +315,7 @@ namespace ppconsul { namespace kv {
 
     private:
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> get_keys_impl(const std::string& keyPrefix, const Params&... params) const;
+        Response<StringList> get_keys_impl(const std::string& keyPrefix, const Params&... params) const;
 
         std::string keyPath(const std::string& key) const
         {
@@ -334,7 +334,7 @@ namespace ppconsul { namespace kv {
     // Implementation
 
     namespace impl {
-        std::vector<std::string> parseKeys(const std::string& resp);
+        StringList parseKeys(const std::string& resp);
         std::vector<KeyValue> parseValues(const std::string& resp);
     }
 
@@ -389,7 +389,7 @@ namespace ppconsul { namespace kv {
     }
 
     template<class... Params, class>
-    Response<std::vector<std::string>> Kv::get_keys_impl(const std::string& keyPrefix, const Params&... params) const
+    Response<StringList> Kv::get_keys_impl(const std::string& keyPrefix, const Params&... params) const
     {
         http::Status s;
         auto r = m_consul.get(s, keyPath(keyPrefix),

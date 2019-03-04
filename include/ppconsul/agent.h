@@ -24,7 +24,7 @@ namespace ppconsul { namespace agent {
         std::string name;
         std::string address;
         uint16_t port = 0;
-        Properties tags;
+        Metadata tags;
         int status = 0;
         int protocolMin = 0;
         int protocolMax = 0;
@@ -46,6 +46,9 @@ namespace ppconsul { namespace agent {
         duration ttl;
     };
 
+    // This check type is deprecated in Consul 1.0 and removed somewhen later.
+    // Use `CommandCheck` check type instead.
+    // See https://www.consul.io/api/agent/check.html#args
     struct ScriptCheck
     {
         ScriptCheck() = default;
@@ -54,6 +57,19 @@ namespace ppconsul { namespace agent {
         : script(std::move(script)), interval(interval) {}
 
         std::string script;
+        duration interval;
+        duration timeout;
+    };
+
+    // Not supported before Consul 1.0
+    struct CommandCheck
+    {
+        CommandCheck() = default;
+
+        CommandCheck(StringList args, duration interval)
+        : args(std::move(args)), interval(interval) {}
+
+        StringList args;
         duration interval;
     };
 
@@ -91,11 +107,14 @@ namespace ppconsul { namespace agent {
         duration timeout;
     };
 
-    struct DockerCheck
+    // This check type is deprecated in Consul 1.0 and removed somewhen later.
+    // Use `CommandCheck` check type instead.
+    // See https://www.consul.io/api/agent/check.html#args
+    struct DockerScriptCheck
     {
-        DockerCheck() = default;
+        DockerScriptCheck() = default;
 
-        DockerCheck(std::string containerId, std::string script, const duration& interval, std::string shell = "")
+        DockerScriptCheck(std::string containerId, std::string script, const duration& interval, std::string shell = "")
         : containerId(std::move(containerId)), script(std::move(script)), interval(interval), shell(std::move(shell)) {}
 
         std::string containerId;
@@ -104,7 +123,21 @@ namespace ppconsul { namespace agent {
         std::string shell;
     };
 
-    using CheckParams = boost::variant<TtlCheck, ScriptCheck, HttpCheck, TcpCheck, DockerCheck>;
+    // Not supported before Consul 1.0
+    struct DockerCommandCheck
+    {
+        DockerCommandCheck() = default;
+
+        DockerCommandCheck(std::string containerId, StringList args, const duration& interval, std::string shell = "")
+        : containerId(std::move(containerId)), args(std::move(args)), interval(interval), shell(std::move(shell)) {}
+
+        std::string containerId;
+        StringList args;
+        duration interval;
+        std::string shell;
+    };
+
+    using CheckParams = boost::variant<TtlCheck, ScriptCheck, CommandCheck, HttpCheck, TcpCheck, DockerScriptCheck, DockerCommandCheck>;
 
     namespace kw {
         KWARGS_KEYWORD(name, std::string)

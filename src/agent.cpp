@@ -54,6 +54,11 @@ namespace impl {
             return os.str();
         }
 
+        s11n::Json::array to_json(const StringList& strings)
+        {
+            return s11n::Json::array(strings.begin(), strings.end());
+        }
+
         s11n::Json::array to_json(const Tags& tags)
         {
             return s11n::Json::array(tags.begin(), tags.end());
@@ -79,6 +84,12 @@ namespace impl {
                 dst()["interval"] = to_json(c.interval);
             }
 
+            void operator() (const CommandCheck& c) const
+            {
+                dst()["args"] = to_json(c.args);
+                dst()["interval"] = to_json(c.interval);
+            }
+
             void operator() (const HttpCheck& c) const
             {
                 dst()["http"] = c.url;
@@ -95,11 +106,19 @@ namespace impl {
                     dst()["timeout"] = to_json(c.timeout);
             }
 
-            void operator() (const DockerCheck& c) const
+            void operator() (const DockerScriptCheck& c) const
             {
                 dst()["docker_container_id"] = c.containerId;
                 dst()["shell"] = c.shell;
                 dst()["script"] = c.script;
+                dst()["interval"] = to_json(c.interval);
+            }
+
+            void operator() (const DockerCommandCheck& c) const
+            {
+                dst()["docker_container_id"] = c.containerId;
+                dst()["shell"] = c.shell;
+                dst()["args"] = to_json(c.args);
                 dst()["interval"] = to_json(c.interval);
             }
 
