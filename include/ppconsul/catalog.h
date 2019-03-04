@@ -13,9 +13,9 @@
 
 namespace ppconsul { namespace catalog {
 
-    typedef std::pair<Node, std::map<std::string, ServiceInfo>> NodeServices;
+    using NodeServices = std::pair<Node, std::map<std::string, ServiceInfo>>;
 
-    typedef std::pair<Node, ServiceInfo> NodeService;
+    using NodeService = std::pair<Node, ServiceInfo>;
 
     namespace kw {
         using ppconsul::kw::consistency;

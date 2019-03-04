@@ -42,7 +42,7 @@ namespace ppconsul {
     struct Response
     {
     public:
-        typedef Data DataType;
+        using DataType = Data;
 
         Response()
         {}

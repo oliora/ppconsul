@@ -85,7 +85,7 @@ namespace ppconsul { namespace curl {
 
         enum { Buffer_Size = 16384 };
 
-        typedef std::pair<const std::string *, size_t> ReadContext;
+        using ReadContext = std::pair<const std::string *, size_t>;
 
         size_t headerStatusCallback(char *ptr, size_t size_, size_t nitems, void *outputStatus)
         {

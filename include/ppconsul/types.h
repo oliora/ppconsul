@@ -30,9 +30,9 @@ namespace ppconsul {
 
     using duration = std::chrono::milliseconds;
 
-    typedef std::pair<std::chrono::milliseconds, uint64_t> BlockForValue;
+    using BlockForValue = std::pair<std::chrono::milliseconds, uint64_t>;
 
-    typedef std::set<std::string> Tags;
+    using Tags = std::set<std::string>;
 
     using Metadata = std::map<std::string, std::string>;
 
