@@ -31,7 +31,7 @@ The library includes code of the following 3rd party libraries (check `ext` dire
 * [json11](https://github.com/dropbox/json11) library to deal with JSON.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
 
-For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
+For unit tests, the library uses [Catch2](https://github.com/catchorg/Catch2) framework. Many thanks to Phil Nash for this great product.
 
 ## Warm Up Examples
 
