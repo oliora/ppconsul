@@ -105,7 +105,7 @@ public:
     template <class T, class = decltype(&T::to_json)>
     Json(const T & t) : Json(t.to_json()) {}
 
-    // Implicit constructor: map-like objects (std::map, std::unordered_map, etc)
+    // Implicit constructor: map-like objects (std::map, std::map, etc)
     template <class M, typename std::enable_if<
         std::is_constructible<std::string, decltype(std::declval<M>().begin()->first)>::value
         && std::is_constructible<Json, decltype(std::declval<M>().begin()->second)>::value,

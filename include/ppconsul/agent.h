@@ -166,8 +166,8 @@ namespace ppconsul { namespace agent {
 
         std::vector<Member> parseMembers(const std::string& json);
         std::pair<Config, Member> parseSelf(const std::string& json);
-        std::unordered_map<std::string, CheckInfo> parseChecks(const std::string& json);
-        std::unordered_map<std::string, ServiceInfo> parseServices(const std::string& json);
+        std::map<std::string, CheckInfo> parseChecks(const std::string& json);
+        std::map<std::string, ServiceInfo> parseServices(const std::string& json);
 
         std::string checkRegistrationJson(const CheckRegistrationData& check);
         std::string serviceRegistrationJson(const ServiceRegistrationData& service);
@@ -209,7 +209,7 @@ namespace ppconsul { namespace agent {
             m_consul.put("/v1/agent/force-leave/" + helpers::encodeUrl(node), "");
         }
 
-        std::unordered_map<std::string, CheckInfo> checks() const
+        std::map<std::string, CheckInfo> checks() const
         {
             return impl::parseChecks(m_consul.get("/v1/agent/checks"));
         }
@@ -273,7 +273,7 @@ namespace ppconsul { namespace agent {
             updateServiceCheck(serviceId, CheckStatus::Critical, note);
         }
 
-        std::unordered_map<std::string, ServiceInfo> services() const
+        std::map<std::string, ServiceInfo> services() const
         {
             return impl::parseServices(m_consul.get("/v1/agent/services"));
         }

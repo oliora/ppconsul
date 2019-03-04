@@ -50,9 +50,9 @@ namespace impl {
         return s11n::parseJson<NodeServices>(json);
     }
 
-    std::unordered_map<std::string, Tags> parseServices(const std::string& json)
+    std::map<std::string, Tags> parseServices(const std::string& json)
     {
-        return s11n::parseJson<std::unordered_map<std::string, Tags>>(json);
+        return s11n::parseJson<std::map<std::string, Tags>>(json);
     }
 
     std::vector<NodeService> parseService(const std::string& json)

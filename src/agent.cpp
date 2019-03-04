@@ -145,14 +145,14 @@ namespace impl {
         return s11n::parseJson<std::pair<Config, Member>>(json);
     }
 
-    std::unordered_map<std::string, CheckInfo> parseChecks(const std::string& json)
+    std::map<std::string, CheckInfo> parseChecks(const std::string& json)
     {
-        return s11n::parseJson<std::unordered_map<std::string, CheckInfo>>(json);
+        return s11n::parseJson<std::map<std::string, CheckInfo>>(json);
     }
 
-    std::unordered_map<std::string, ServiceInfo> parseServices(const std::string& json)
+    std::map<std::string, ServiceInfo> parseServices(const std::string& json)
     {
-        return s11n::parseJson<std::unordered_map<std::string, ServiceInfo>>(json);
+        return s11n::parseJson<std::map<std::string, ServiceInfo>>(json);
     }
 
     std::string checkRegistrationJson(const CheckRegistrationData& check)

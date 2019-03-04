@@ -9,8 +9,8 @@
 #include "ppconsul/config.h"
 #include <string>
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
+#include <map>
+#include <set>
 #include <utility>
 #include <chrono>
 #include <stdint.h>
@@ -32,11 +32,9 @@ namespace ppconsul {
 
     typedef std::pair<std::chrono::milliseconds, uint64_t> BlockForValue;
 
-    typedef std::unordered_set<std::string> Tags;
+    typedef std::set<std::string> Tags;
 
-    using Metadata = std::unordered_map<std::string, std::string>;
-
-    using Properties = Metadata;  // Just for backward compatibility
+    using Metadata = std::map<std::string, std::string>;
 
     using StringList = std::vector<std::string>;
 
