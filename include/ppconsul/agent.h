@@ -114,6 +114,7 @@ namespace ppconsul { namespace agent {
         KWARGS_KEYWORD(port, uint16_t)
         KWARGS_KEYWORD(address, std::string)
         KWARGS_KEYWORD(tags, Tags)
+        KWARGS_KEYWORD(meta, Metadata)
 
         PPCONSUL_KEYWORD(pool, Pool)
         PPCONSUL_KEYWORD(note, std::string)
@@ -345,13 +346,14 @@ namespace ppconsul { namespace agent {
             , address(kwargs::get_opt(kw::address, std::string(), std::forward<Keywords>(params)...))
             , port(kwargs::get_opt(kw::port, 0, std::forward<Keywords>(params)...))
             , tags(kwargs::get_opt(kw::tags, Tags(), std::forward<Keywords>(params)...))
+            , meta(kwargs::get_opt(kw::meta, Metadata{}, std::forward<Keywords>(params)...))
             , check({
                 kwargs::get(kw::check, std::forward<Keywords>(params)...),
                 kwargs::get_opt(kw::notes, std::string(), std::forward<Keywords>(params)...)})
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
-                    kw::id, kw::name, kw::address, kw::port, kw::tags,
-                        kw::check, kw::notes))
+                    kw::id, kw::name, kw::address, kw::port, kw::tags, kw::meta,
+                    kw::check, kw::notes))
             }
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
@@ -361,9 +363,10 @@ namespace ppconsul { namespace agent {
             , address(kwargs::get_opt(kw::address, std::string(), std::forward<Keywords>(params)...))
             , port(kwargs::get_opt(kw::port, 0, std::forward<Keywords>(params)...))
             , tags(kwargs::get_opt(kw::tags, Tags(), std::forward<Keywords>(params)...))
+            , meta(kwargs::get_opt(kw::meta, Metadata{}, std::forward<Keywords>(params)...))
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
-                    kw::id, kw::name, kw::address, kw::port, kw::tags))
+                    kw::id, kw::name, kw::address, kw::port, kw::tags, kw::meta))
             }
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
@@ -378,6 +381,7 @@ namespace ppconsul { namespace agent {
             std::string address;
             uint16_t port = 0;
             Tags tags;
+            Metadata meta;
 
             boost::optional<Check> check;
         };

@@ -59,6 +59,11 @@ namespace impl {
             return s11n::Json::array(tags.begin(), tags.end());
         }
 
+        s11n::Json::object to_json(const Metadata& meta)
+        {
+            return s11n::Json::object(meta.begin(), meta.end());
+        }
+
         struct CheckConfigSaver: boost::static_visitor<>
         {
             CheckConfigSaver(s11n::Json::object& dst): dst_(&dst) {}
@@ -154,6 +159,7 @@ namespace impl {
             { "ID", service.id },
             { "Name", service.name },
             { "Tags", to_json(service.tags) },
+            { "Meta", to_json(service.meta) },
             { "Address", service.address },
             { "Port", service.port }
         };

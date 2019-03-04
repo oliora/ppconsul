@@ -20,6 +20,7 @@ namespace ppconsul {
         load(src, dst.address, "Address");
         load(src, dst.port, "Port");
         load(src, dst.tags, "Tags");
+        load(src, dst.meta, "Meta");
     }
 
     inline void load(const s11n::Json& src, Node& dst)

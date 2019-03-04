@@ -67,6 +67,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.address == "");
         CHECK(s.port == 0);
         CHECK(s.tags == ppconsul::Tags());
+        CHECK(s.meta == ppconsul::Metadata{});
     }
 
     SECTION("no check simple")
@@ -82,6 +83,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.address == "");
         CHECK(s.port == 1357);
         CHECK(s.tags == ppconsul::Tags({ "tag1" }));
+        CHECK(s.meta == ppconsul::Metadata{});
     }
 
 
@@ -91,6 +93,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
             kw::name = "service1",
             kw::port = 9876,
             kw::tags = {"udp", "printer"},
+            kw::meta = {{"version", "2.1"}, {"critical", "1"}},
             kw::id = Unique_Id,
             kw::address = "host12"
         );
@@ -104,6 +107,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.address == "host12");
         CHECK(s.port == 9876);
         CHECK(s.tags == ppconsul::Tags({ "udp", "printer" }));
+        CHECK(s.meta == ppconsul::Metadata({{"version", "2.1"}, {"critical", "1"}}));
     }
 
     SECTION("ttl simple")
@@ -142,6 +146,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
                               TtlCheck{std::chrono::minutes(1)},
             kw::port = 9876,
             kw::tags = { "udp", "printer" },
+            kw::meta = {{"version", "2.1"}},
             kw::id = Unique_Id,
             kw::address = "host25.print"
         );
@@ -155,6 +160,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(s.address == "host25.print");
         CHECK(s.port == 9876);
         CHECK(s.tags == ppconsul::Tags({ "udp", "printer" }));
+        CHECK(s.meta == ppconsul::Metadata({{"version", "2.1"}}));
 
         const auto checks = agent.checks();
         REQUIRE(checks.count(serviceCheckId(Unique_Id)));

@@ -36,6 +36,8 @@ namespace ppconsul {
 
     typedef std::unordered_map<std::string, std::string> Properties;
 
+    typedef std::unordered_map<std::string, std::string> Metadata;
+
     struct Node
     {
         std::string node;
@@ -71,6 +73,7 @@ namespace ppconsul {
         std::string address;
         uint16_t port;
         Tags tags;
+        Metadata meta;
     };
 
     struct WithHeaders {};
