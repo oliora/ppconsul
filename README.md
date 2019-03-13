@@ -144,6 +144,18 @@ if (item)
     std::cout << item.key << "=" << item.value << "\n";
 ```
 
+Abort blocking queries:
+
+```cpp
+Consul consul(kw::enable_stop = true); // Must be enabled at construction time
+Kv kv(consul);
+
+// Issue blocking queries, similarly to example above, on background threads etc.
+
+// Stop all pending requests, e.g. at shutdown. Also prevents any future ones being initiated.
+consul.stop();
+```
+
 Connect to Consul via HTTPS (TLS/SSL, whatever you call it):
 
 ```cpp

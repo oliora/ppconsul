@@ -10,6 +10,7 @@
 #include "test_consul.h"
 #include <json11/json11.hpp> // TODO: remove
 #include <chrono>
+#include <thread>
 
 
 using namespace ppconsul::kv;
@@ -711,6 +712,35 @@ TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
     CHECK((std::chrono::steady_clock::now() - t2) < std::chrono::seconds(2));
     CHECK(index1 != resp2.headers().index());
     CHECK(resp2.data().value == "value2");
+}
+
+TEST_CASE("kv.abort-blocking-query", "[consul][kv][blocking]")
+{
+    auto consul = create_test_consul(ppconsul::kw::enable_stop = true);
+    Kv kv(consul);
+
+    kv.set("key1", "value1");
+    auto index1 = kv.item(ppconsul::withHeaders, "key1").headers().index();
+
+    const auto t1 = std::chrono::steady_clock::now();
+    std::exception_ptr exception;
+    auto monitorThread = std::thread(
+        [&]()
+        {
+            try
+            {
+                kv.item(ppconsul::withHeaders, "key1", kw::block_for = {std::chrono::seconds(5), index1});
+            }
+            catch (const std::exception&)
+            {
+                exception = std::current_exception();
+            }
+        });
+
+    consul.stop();
+    monitorThread.join();
+    CHECK((std::chrono::steady_clock::now() - t1) < std::chrono::seconds(1));
+    CHECK_THROWS_AS(std::rethrow_exception(exception), ppconsul::OperationAborted);
 }
 
 TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")

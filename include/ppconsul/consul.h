@@ -30,6 +30,7 @@ namespace ppconsul {
         PPCONSUL_KEYWORD(dc, std::string)
         PPCONSUL_KEYWORD(token, std::string)
         PPCONSUL_KEYWORD(tag, std::string)
+        PPCONSUL_KEYWORD(enable_stop, bool)
         KWARGS_KEYWORD(consistency, Consistency)
         KWARGS_KEYWORD(block_for, BlockForValue)
 
@@ -101,13 +102,16 @@ namespace ppconsul {
         // - dc - data center to use
         // - token - default token for all client requests (can be overloaded in every specific request)
         // - groups::tls (tls::*) - TLS options
+        // - enable_stop - configures client such that stop() may be used
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Consul(const std::string& endpoint, const Params&... params)
         : Consul(kwargs::get_opt(kw::token, std::string(), params...),
-                kwargs::get_opt(kw::dc, std::string(), params...),
-                endpoint, impl::makeTlsConfig(params...))
+                 kwargs::get_opt(kw::dc, std::string(), params...),
+                 endpoint,
+                 impl::makeTlsConfig(params...),
+                 kwargs::get_opt(kw::enable_stop, false, params...))
         {
-            KWARGS_CHECK_IN_LIST(Params, (kw::dc, kw::token, kw::groups::tls))
+            KWARGS_CHECK_IN_LIST(Params, (kw::dc, kw::token, kw::groups::tls, kw::enable_stop))
         }
 
         // Same as Consul(Default_Server_Endpoint, keywords...)
@@ -174,8 +178,11 @@ namespace ppconsul {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string del(const std::string& path, const Params&... params);
 
+        void stop();
+
     private:
-        Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& endpoint, const http::impl::TlsConfig& tlsConfig);
+        Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& endpoint,
+               const http::impl::TlsConfig& tlsConfig, bool enableStop);
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string makeQuery(const Params&... params) const
@@ -259,6 +266,11 @@ namespace ppconsul {
         return r;
     }
 
+    inline void Consul::stop()
+    {
+        m_client->stop();
+    }
+
     // Implementation
     namespace impl {
         template<class... Params, class>
@@ -266,9 +278,9 @@ namespace ppconsul {
         {
             http::impl::TlsConfig res;
             res.cert = kwargs::get_opt(kw::tls::cert, std::string(), params...);
-	    res.certType = kwargs::get_opt(kw::tls::cert_type, std::string(), params...);
+        res.certType = kwargs::get_opt(kw::tls::cert_type, std::string(), params...);
             res.key = kwargs::get_opt(kw::tls::key, std::string(), params...);
-	    res.keyType = kwargs::get_opt(kw::tls::key_type, std::string(), params...);
+        res.keyType = kwargs::get_opt(kw::tls::key_type, std::string(), params...);
             res.caPath = kwargs::get_opt(kw::tls::ca_path, std::string(), params...);
             res.caInfo = kwargs::get_opt(kw::tls::ca_info, std::string(), params...);
             res.verifyPeer = kwargs::get_opt(kw::tls::verify_peer, true, params...);
