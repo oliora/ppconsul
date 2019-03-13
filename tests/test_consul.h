@@ -11,12 +11,16 @@ inline std::string get_test_datacenter()
     return datacenter ? datacenter : "ppconsul_test";
 }
 
-inline ppconsul::Consul create_test_consul()
+template<class... AdditionalParams>
+inline ppconsul::Consul create_test_consul(AdditionalParams&&... additionalParams)
 {
     auto addr = std::getenv("PPCONSUL_TEST_ADDR");
 
-    return ppconsul::Consul(addr ? addr : ppconsul::Default_Server_Endpoint,
-        ppconsul::kw::dc = get_test_datacenter());
+    return ppconsul::Consul(
+        addr ? addr : ppconsul::Default_Server_Endpoint,
+        ppconsul::kw::dc = get_test_datacenter(),
+        std::forward<AdditionalParams>(additionalParams)...
+    );
 }
 
 inline std::string get_test_leader()
