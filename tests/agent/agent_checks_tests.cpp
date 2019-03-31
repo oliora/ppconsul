@@ -32,7 +32,7 @@ TEST_CASE("agent.check_deregistration", "[consul][agent][checks]")
 
     agent.registerCheck(
         kw::name = "check1",
-        kw::check = TtlCheck{std::chrono::seconds(12)}
+        kw::check = TtlCheck{std::chrono::seconds(12),std::chrono::seconds(30)}
     );
     REQUIRE(agent.checks().count("check1"));
 
@@ -52,7 +52,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
 
     SECTION("ttl")
     {
-        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180)});
+        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180), std::chrono::seconds(240)});
 
         const auto checks = agent.checks();
         REQUIRE(checks.count("check1"));
@@ -70,7 +70,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
 
     SECTION("ttl with notes")
     {
-        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180)}, kw::notes = "some notes");
+        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180), std::chrono::seconds(240)}, kw::notes = "some notes");
 
         const auto checks = agent.checks();
         REQUIRE(checks.count("check1"));
@@ -88,7 +88,7 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
 
     SECTION("ttl with id")
     {
-        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180)}, kw::id = Unique_Id, kw::notes = "other notes");
+        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180), std::chrono::seconds(240)}, kw::id = Unique_Id, kw::notes = "other notes");
 
         const auto checks = agent.checks();
         REQUIRE(checks.count(Unique_Id));
@@ -246,7 +246,7 @@ TEST_CASE("agent.check_update", "[consul][agent][checks][health]")
     agent.deregisterCheck("check1");
     REQUIRE(!agent.checks().count("check1"));
 
-    agent.registerCheck("check1", TtlCheck{std::chrono::minutes(5)}, kw::notes = "the check");
+    agent.registerCheck("check1", TtlCheck{std::chrono::minutes(5), std::chrono::minutes(6)}, kw::notes = "the check");
 
     ppconsul::CheckInfo c = agent.checks().at("check1");
     REQUIRE(c.status != CheckStatus::Passing);
@@ -324,7 +324,7 @@ TEST_CASE("agent.check_expired", "[consul][agent][checks][health]")
     agent.deregisterCheck("check1");
     REQUIRE(!agent.checks().count("check1"));
 
-    agent.registerCheck("check1", TtlCheck{std::chrono::seconds(1)});
+    agent.registerCheck("check1", TtlCheck{std::chrono::seconds(1), std::chrono::seconds(10)});
     REQUIRE(agent.checks().count("check1"));
 
     sleep(1.5);

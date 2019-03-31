@@ -40,10 +40,12 @@ namespace ppconsul { namespace agent {
     {
         TtlCheck() = default;
 
-        explicit TtlCheck(const duration& ttl)
-        : ttl(ttl) {}
+        explicit TtlCheck(const duration& ttl,
+                          const duration& deregisterCriticalServiceAfter)
+        : ttl(ttl), deregisterCriticalServiceAfter(deregisterCriticalServiceAfter){}
 
         duration ttl;
+        duration deregisterCriticalServiceAfter;
     };
 
     struct ScriptCheck
@@ -203,6 +205,8 @@ namespace ppconsul { namespace agent {
         {
             return impl::parseChecks(m_consul.get("/v1/agent/checks"));
         }
+
+
 
         // Allowed parameters:
         // - name - the check's name (required)

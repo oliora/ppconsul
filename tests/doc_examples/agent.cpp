@@ -31,7 +31,7 @@ void agent_service()
                           kw::name = "my-service",
                           kw::port = 9876,
                           kw::id = "my-service-1",
-                          kw::check = TtlCheck{std::chrono::seconds(5)}
+                          kw::check = TtlCheck{std::chrono::seconds(5), std::chrono::seconds(20)}
                           );
 
     // Report service is OK

@@ -66,6 +66,7 @@ namespace impl {
             void operator() (const TtlCheck& c) const
             {
                 dst()["ttl"] = to_json(c.ttl);
+                dst()["DeregisterCriticalServiceAfter"] = to_json(c.deregisterCriticalServiceAfter);
             }
 
             void operator() (const ScriptCheck& c) const
@@ -89,7 +90,7 @@ namespace impl {
 				dst()["interval"] = to_json(c.interval);
 				if (c.timeout != decltype(c.timeout)::zero())
 					dst()["timeout"] = to_json(c.timeout);
-                dst ()["DeregisterCriticalServiceAfter"] = to_json(c.deregisterCriticalServiceAfter);
+                dst()["DeregisterCriticalServiceAfter"] = to_json(c.deregisterCriticalServiceAfter);
                 dst()["ServiceID"] = c.serviceID;
 			}
 
