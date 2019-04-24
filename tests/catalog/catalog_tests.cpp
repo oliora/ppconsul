@@ -24,9 +24,6 @@ namespace {
     const auto Uniq_Name_1 = "B0D8A57F-0A73-4C6A-926A-262088B00B76";
     const auto Uniq_Name_2 = "749E5A49-4202-4995-AD5B-A3F28E19ADC1";
     const auto Uniq_Name_3 = "8d097c82-e9fb-471e-9479-c6b03313ab61";
-    const auto Uniq_Name_1_Spec = "\r\nB0D8A57F-0A73-4C6A-926A-262088B00B76{}";
-    const auto Uniq_Name_2_Spec = "{}749E5A49-4202-4995-AD5B-A3F28E19ADC1\r\n";
-    const auto Tag_Spec = "{}bla\r\n";
     const auto Non_Existing_Service_Name = "D0087276-8F85-4612-AC88-8871DB15B2A7";
     const auto Non_Existing_Tag_Name = Non_Existing_Service_Name;
     const auto Non_Existing_Node_Name = Non_Existing_Service_Name;
