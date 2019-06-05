@@ -835,3 +835,111 @@ TEST_CASE("kv.lock_unlock", "[consul][kv][session]")
 
     // TODO: add more tests
 }
+
+TEST_CASE("kv.transactions", "[consul][kv][transactions]")
+{
+    auto consul = create_test_consul();
+    Kv kv(consul);
+
+    SECTION("empty transaction")
+    {
+        auto v = kv.commit({});
+        REQUIRE(v.empty());
+    }
+
+    SECTION("simple operations")
+    {
+        auto v = kv.commit({
+            txn_ops::Set{"key1", "one", 42},
+            txn_ops::Get{"key1"},
+            txn_ops::Erase{"key1"},
+            txn_ops::CheckNotExists{"key1"},
+        });
+
+        REQUIRE(v.size() == 2);
+
+        CHECK(v[0].key == "key1");
+        CHECK(v[0].flags == 42);
+        CHECK(v[0].value == "");
+
+        CHECK(v[1].key == "key1");
+        CHECK(v[1].flags == 42);
+        CHECK(v[1].value == "one");
+    }
+
+    SECTION("index-checking operations")
+    {
+        auto v1 = kv.commit({
+            txn_ops::Set{"key1", "ichi", 111},
+            txn_ops::Set{"key2", "ni",   222},
+            txn_ops::Set{"key3", "san",  333},
+        });
+        REQUIRE(v1.size() == 3);
+
+        CHECK(v1[0].key == "key1");
+        CHECK(v1[0].flags == 111);
+        CHECK(v1[0].value == "");
+
+        CHECK(v1[1].key == "key2");
+        CHECK(v1[1].flags == 222);
+        CHECK(v1[1].value == "");
+
+        CHECK(v1[2].key == "key3");
+        CHECK(v1[2].flags == 333);
+        CHECK(v1[2].value == "");
+
+        auto v2 = kv.commit({
+            txn_ops::CompareSet{"key1", v1[0].modifyIndex, "x", 27},
+            txn_ops::CompareErase{"key2", v1[1].modifyIndex},
+            txn_ops::CheckIndex{"key3", v1[2].modifyIndex},
+        });
+        REQUIRE(v2.size() == 2);
+
+        CHECK(v2[0].key == "key1");
+        CHECK(v2[0].flags == 27);
+        CHECK(v2[0].value == "");
+
+        CHECK(v2[1].key == "key3");
+        CHECK(v2[1].flags == 333);
+        CHECK(v2[1].value == "");
+
+        kv.erase("key1");
+        kv.erase("key3");
+    }
+
+    SECTION("tree operations")
+    {
+        auto v1 = kv.commit({
+            txn_ops::Set{"key1", "ichi", 123},
+            txn_ops::Set{"key2", "ni",   456},
+            txn_ops::Set{"key3", "san",  789},
+        });
+        REQUIRE(v1.size() == 3);
+
+        auto v2 = kv.commit({
+            txn_ops::GetAll{"key"},
+            txn_ops::EraseAll{"key"},
+        });
+        REQUIRE(v2.size() == 3);
+
+        CHECK(v2[0].key == "key1");
+        CHECK(v2[0].flags == 123);
+        CHECK(v2[0].value == "ichi");
+
+        CHECK(v2[1].key == "key2");
+        CHECK(v2[1].flags == 456);
+        CHECK(v2[1].value == "ni");
+
+        CHECK(v2[2].key == "key3");
+        CHECK(v2[2].flags == 789);
+        CHECK(v2[2].value == "san");
+    }
+
+    SECTION("transaction errors")
+    {
+        REQUIRE_THROWS_AS(
+            kv.commit({txn_ops::Get{"key1"}}),
+            TxnAborted
+        );
+    }
+}
