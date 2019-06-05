@@ -28,6 +28,20 @@ TEST_CASE("helpers.base64decode", "[base64]")
     CHECK_NOTHROW(decodeBase64("Ym\x15xhL\x0WJsYQ==")); // Not a real test, just be sure that it's not fail
 }
 
+TEST_CASE("helpers.base64encode", "[base64]")
+{
+    using ppconsul::helpers::encodeBase64;
+
+    CHECK(encodeBase64("") == "");
+    CHECK(encodeBase64("sure.") == "c3VyZS4=");
+    CHECK(encodeBase64("sure") == "c3VyZQ==");
+    CHECK(encodeBase64("sur") == "c3Vy");
+    CHECK(encodeBase64("su") == "c3U=");
+    CHECK(encodeBase64("s") == "cw==");
+    CHECK(encodeBase64("bla-bl") == "YmxhLWJs");
+    CHECK(encodeBase64("bla-bla") == "YmxhLWJsYQ==");
+}
+
 TEST_CASE("helpers.url encode", "[url]")
 {
     using ppconsul::helpers::encodeUrl;
