@@ -7,8 +7,8 @@
 #include <catch/catch.hpp>
 
 #include "ppconsul/kv.h"
+#include "ppconsul/sessions.h"
 #include "test_consul.h"
-#include <json11/json11.hpp> // TODO: remove
 #include <chrono>
 #include <thread>
 
@@ -765,18 +765,6 @@ TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")
     CHECK(resp2.data().value == "value2");
 }
 
-namespace {
-    // TODO: remove this hacky way to create session when session endpoint is oficially supported
-    std::string createSession(ppconsul::Consul& consul)
-    {
-        std::string err;
-        auto obj = json11::Json::parse(consul.put("/v1/session/create", ""), err);
-        if (!err.empty())
-            return {};
-        return obj["ID"].string_value();
-    }
-}
-
 TEST_CASE("kv.lock_unlock", "[consul][kv][session]")
 {
     auto consul = create_test_consul();
@@ -785,8 +773,10 @@ TEST_CASE("kv.lock_unlock", "[consul][kv][session]")
     kv.erase("key1");
     REQUIRE(!kv.count("key1"));
 
-    auto session1 = createSession(consul);
-    auto session2 = createSession(consul);
+    ppconsul::sessions::Sessions sessions(consul);
+
+    auto session1 = sessions.create();
+    auto session2 = sessions.create();
 
     SECTION("successful lock-unlock")
     {

@@ -20,6 +20,7 @@ set(HEADERS
     parameters.h
     ppconsul.h
     response.h
+    sessions.h
     types.h
 )
 
@@ -34,6 +35,7 @@ set(SOURCES
     helpers.cpp
     health.cpp
     kv.cpp
+    sessions.cpp
     status.cpp
 )
 
