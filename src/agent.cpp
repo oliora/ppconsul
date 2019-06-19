@@ -47,12 +47,7 @@ namespace ppconsul { namespace agent {
 namespace impl {
 
     namespace {
-        std::string to_json(const std::chrono::milliseconds& ms)
-        {
-            std::ostringstream os;
-            os << ms.count() << "ms";
-            return os.str();
-        }
+        using s11n::to_json;
 
         s11n::Json::array to_json(const StringList& strings)
         {

@@ -20,20 +20,27 @@ namespace ppconsul { namespace sessions {
     };
 
     namespace kw {
-        using ppconsul::kw::consistency;
-        using ppconsul::kw::block_for;
         using ppconsul::kw::dc;
         using ppconsul::kw::token;
 
+        KWARGS_KEYWORD(name, std::string)
+        KWARGS_KEYWORD(node, std::string)
+        KWARGS_KEYWORD(lock_delay, std::chrono::seconds)
+        KWARGS_KEYWORD(behavior, InvalidationBehavior)
+        KWARGS_KEYWORD(ttl, std::chrono::seconds)
+
         namespace groups {
-            KWARGS_KEYWORDS_GROUP(get, (consistency, dc, block_for, token))
             KWARGS_KEYWORDS_GROUP(put, (dc, token))
         }
     }
 
     namespace impl {
-        std::string createBodyJson(const std::string &node, std::chrono::seconds lockDelay,
-                                   InvalidationBehavior behavior, std::chrono::seconds ttl);
+        std::string createBodyJson(const std::string &name,
+                                   const std::string &node,
+                                   std::chrono::seconds lockDelay,
+                                   InvalidationBehavior behavior,
+                                   std::chrono::seconds ttl);
+
         std::string parseCreateResponse(const std::string &resp);
     }
 
@@ -41,36 +48,27 @@ namespace ppconsul { namespace sessions {
     {
     public:
         // Allowed parameters:
-        // - consistency - default consistency for all requests
         // - token - default token for all requests
         // - dc - default dc for all requests
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         explicit Sessions(Consul& consul, const Params&... params)
         : m_consul(consul)
         , m_defaultToken(kwargs::get_opt(kw::token, std::string(), params...))
-        , m_defaultConsistency(kwargs::get_opt(kw::consistency, Consistency::Default, params...))
         , m_defaultDc(kwargs::get_opt(kw::dc, std::string(), params...))
         {
-            KWARGS_CHECK_IN_LIST(Params, (kw::consistency, kw::token, kw::dc))
+            KWARGS_CHECK_IN_LIST(Params, (kw::token, kw::dc))
         }
 
         // Create a new session. Returns the ID of the created session.
         // Allowed parameters:
+        // - name - a human-readable name for the session
+        // - node - the name of the node (current agent by default)
+        // - lock_delay - the duration for the lock delay (15s by default)
+        // - behavior - the behavior to take when the session is invalidated (release by default)
+        // - ttl - session TTL
         // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string create(const std::string &node = "",
-                           std::chrono::seconds lockDelay = std::chrono::seconds{15},
-                           InvalidationBehavior behavior = InvalidationBehavior::Release,
-                           std::chrono::seconds ttl = std::chrono::seconds{0},
-                           const Params&... params)
-        {
-            KWARGS_CHECK_IN_LIST(Params, (kw::groups::put))
-
-            return impl::parseCreateResponse(m_consul.put(
-                "/v1/session/create",
-                impl::createBodyJson(node, lockDelay, behavior, ttl),
-                kw::token = m_defaultToken, kw::dc = m_defaultDc, params...));
-        }
+        std::string create(const Params&... params);
 
         // Renew an existing session by its ID. Note that this operation only makes sense if the session has a TTL.
         // Allowed parameters:
@@ -102,8 +100,30 @@ namespace ppconsul { namespace sessions {
         Consul& m_consul;
 
         std::string m_defaultToken;
-        Consistency m_defaultConsistency;
         std::string m_defaultDc;
     };
 
+
+    // Implementation
+
+    template<class... Params, class>
+    std::string Sessions::create(const Params&... params)
+    {
+        KWARGS_CHECK_IN_LIST(Params, (kw::groups::put, kw::name, kw::node, kw::lock_delay, kw::behavior, kw::ttl))
+
+        auto resp = m_consul.put(
+            "/v1/session/create",
+            impl::createBodyJson(
+                kwargs::get_opt(kw::name, std::string{}, params...),
+                kwargs::get_opt(kw::node, std::string{}, params...),
+                kwargs::get_opt(kw::lock_delay, std::chrono::seconds{-1}, params...),
+                kwargs::get_opt(kw::behavior, InvalidationBehavior::Release, params...),
+                kwargs::get_opt(kw::ttl, std::chrono::seconds{-1}, params...)
+            ),
+            kw::token = kwargs::get_opt(kw::token, m_defaultToken, params...),  // TODO: implement keywords filtering
+            kw::dc = kwargs::get_opt(kw::dc, m_defaultDc, params...)            //
+        );
+
+        return impl::parseCreateResponse(resp);
+    }
 }}

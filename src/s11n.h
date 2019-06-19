@@ -8,6 +8,7 @@
 #include "ppconsul/error.h"
 #include <json11/json11.hpp>
 #include <vector>
+#include <chrono>
 #include <set>
 #include <map>
 #include <string>
@@ -26,6 +27,16 @@ namespace ppconsul { namespace s11n {
                 throw FormatError(std::move(err));
             return obj;
         }
+    }
+
+    inline std::string to_json(std::chrono::milliseconds ms)
+    {
+        return std::to_string(ms.count()) + "ms";
+    }
+
+    inline std::string to_json(std::chrono::seconds s)
+    {
+        return std::to_string(s.count()) + "s";
     }
 
     inline void load(const Json& src, uint16_t& dst)

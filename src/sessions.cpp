@@ -34,19 +34,26 @@ namespace ppconsul { namespace sessions {
     }
 
     namespace impl {
-        std::string createBodyJson(const std::string &node, std::chrono::seconds lockDelay,
+        using s11n::to_json;
+
+        std::string createBodyJson(const std::string &name, const std::string &node, std::chrono::seconds lockDelay,
                                    InvalidationBehavior behavior, std::chrono::seconds ttl)
         {
             s11n::Json::object obj{
                 {"Behavior", encodeBehavior(behavior)},
-                {"LockDelay", std::to_string(lockDelay.count()) + "s"},
             };
+
+            if (lockDelay.count() >= 0)
+                obj["LockDelay"] = to_json(lockDelay);
+
+            if (!name.empty())
+                obj["Name"] = name;
 
             if (!node.empty())
                 obj["Node"] = node;
 
-            if (ttl.count())
-                obj["TTL"] = std::to_string(ttl.count()) + "s";
+            if (ttl.count() >= 0)
+                obj["TTL"] = to_json(ttl);
 
             return s11n::Json(std::move(obj)).dump();
         }
