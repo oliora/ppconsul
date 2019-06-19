@@ -169,9 +169,13 @@ namespace ppconsul { namespace curl {
 
         if (m_enableStop)
         {
+#if (LIBCURL_VERSION_NUM >= 0x073200)
             setopt(CURLOPT_NOPROGRESS, 0l);
             setopt(CURLOPT_XFERINFOFUNCTION, &progressCallback);
             setopt(CURLOPT_XFERINFODATA, this);
+#else
+            throw std::logic_error("Ppconsul is built without support for stopping the client (libcurl 7.32.0 or newer is required)");
+#endif
         }
         else
         {
