@@ -20,6 +20,7 @@ namespace json11 {
         load(src, dst.second.address, "ServiceAddress");
         load(src, dst.second.port, "ServicePort");
         load(src, dst.second.tags, "ServiceTags");
+        load(src, dst.second.meta, "ServiceMeta");
     }
 
     void load(const json11::Json& src, ppconsul::catalog::NodeServices& dst)
