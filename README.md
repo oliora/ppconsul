@@ -278,7 +278,7 @@ There are the following environment variable to configure tests:
 Sometimes catalog tests failed on assertion `REQUIRE(index1 == resp1.headers().index());`. In this case, just rerun the tests.
 The reason for the failure is Consul's internal idempotent write which cause a spurious wakeup of waiting blocking query. Check the critical note under the blocking queries documentation at https://www.consul.io/docs/agent/http.html.
 
-## Found a bag? Got a feature request? Need help with Ppconsul?
+## Found a bug? Got a feature request? Need help with Ppconsul?
 Use [issue tracker](https://github.com/oliora/ppconsul/issues) or/and drop an email to [oliora](https://github.com/oliora).
 
 ## Contribute
