@@ -40,6 +40,14 @@ TEST_CASE("helpers.base64encode", "[base64]")
     CHECK(encodeBase64("s") == "cw==");
     CHECK(encodeBase64("bla-bl") == "YmxhLWJs");
     CHECK(encodeBase64("bla-bla") == "YmxhLWJsYQ==");
+
+    {
+        const auto ntriples = 22000;
+        CHECK(
+            encodeBase64(
+                std::string(ntriples * 3, '\0')) ==
+            std::string(ntriples * 4, 'A'));
+    }
 }
 
 TEST_CASE("helpers.url encode", "[url]")
