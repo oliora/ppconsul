@@ -24,9 +24,7 @@ namespace {
     const auto Uniq_Name_1 = "B0D8A57F-0A73-4C6A-926A-262088B00B76";
     const auto Uniq_Name_2 = "749E5A49-4202-4995-AD5B-A3F28E19ADC1";
     const auto Uniq_Name_3 = "8d097c82-e9fb-471e-9479-c6b03313ab61";
-    const auto Uniq_Name_1_Spec = "\r\nB0D8A57F-0A73-4C6A-926A-262088B00B76{}";
-    const auto Uniq_Name_2_Spec = "{}749E5A49-4202-4995-AD5B-A3F28E19ADC1\r\n";
-    const auto Tag_Spec = "{}bla\r\n";
+    const auto Uniq_Name_4 = "76f164a6-43a6-4b0c-a1a0-dbeb423f1564";
     const auto Non_Existing_Service_Name = "D0087276-8F85-4612-AC88-8871DB15B2A7";
     const auto Non_Existing_Tag_Name = Non_Existing_Service_Name;
     const auto Non_Existing_Node_Name = Non_Existing_Service_Name;
@@ -158,6 +156,7 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
     agent.deregisterService("service1");
     agent.deregisterService("service2");
     agent.deregisterService("service3");
+    agent.deregisterService("service4");
     agent.registerService(
         agent::kw::name = Uniq_Name_1,
         agent::kw::port = 1234,
@@ -176,6 +175,14 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
         agent::kw::tags = { "print", "secret" },
         agent::kw::id = "service3",
         agent::kw::address = "hostxxx2"
+    );
+    agent.registerService(
+        agent::kw::name = Uniq_Name_4,
+        agent::kw::port = 9876,
+        agent::kw::tags = { "tag4" },
+        agent::kw::meta= { {"metakey", "metaval"}, {"metakey2", "metval2"} },
+        agent::kw::id = "service4",
+        agent::kw::address = "hostxxx4"
     );
 
     sleep(2.0); // Give some time to propogate registered services to the catalog
@@ -249,6 +256,7 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
         CHECK(services2[service1Index].second.port == 1234);
         CHECK(services2[service1Index].second.tags == ppconsul::Tags({ "print", "udp" }));
         CHECK(services2[service1Index].second.id == "service1");
+        CHECK(services2[service1Index].second.meta == ppconsul::Metadata({}));
         
         CHECK(services2[1 - service1Index].first == selfNode);
         CHECK(services2[1 - service1Index].second.name == Uniq_Name_1);
@@ -256,6 +264,21 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
         CHECK(services2[1 - service1Index].second.port == 3456);
         CHECK(services2[1 - service1Index].second.tags == ppconsul::Tags({ "print", "secret" }));
         CHECK(services2[1 - service1Index].second.id == "service3");
+        CHECK(services2[1 - service1Index].second.meta == ppconsul::Metadata({}));
+    }
+    SECTION("service with meta")
+    {
+        auto services1 = catalog.service(Uniq_Name_4, kw::tag = "tag4");
+
+        REQUIRE(services1.size() == 1);
+
+        CHECK(services1[0].first == selfNode);
+        CHECK(services1[0].second.name == Uniq_Name_4);
+        CHECK(services1[0].second.address == "hostxxx4");
+        CHECK(services1[0].second.port == 9876);
+        CHECK(services1[0].second.tags == ppconsul::Tags({ "tag4" }));
+        CHECK(services1[0].second.id == "service4");
+        CHECK(services1[0].second.meta == ppconsul::Metadata({ {"metakey", "metaval"}, {"metakey2", "metval2"} }));
     }
 
     SECTION("node")

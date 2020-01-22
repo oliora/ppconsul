@@ -9,6 +9,7 @@
 #include "ppconsul/consul.h"
 #include "ppconsul/helpers.h"
 #include "ppconsul/types.h"
+#include <boost/variant.hpp>
 #include <vector>
 #include <stdint.h>
 
@@ -29,6 +30,124 @@ namespace ppconsul { namespace kv {
         std::string session;
     };
 
+    namespace txn_ops {
+
+        struct Set
+        {
+            std::string key;
+            std::string value;
+            uint64_t flags;
+        };
+
+        struct CompareSet
+        {
+            std::string key;
+            uint64_t expectedIndex;
+            std::string value;
+            uint64_t flags;
+        };
+
+        struct Get
+        {
+            std::string key;
+        };
+
+        struct GetAll
+        {
+            std::string keyPrefix;
+        };
+
+        struct CheckIndex
+        {
+            std::string key;
+            uint64_t expectedIndex;
+        };
+
+        struct CheckNotExists
+        {
+            std::string key;
+        };
+
+        struct Erase
+        {
+            std::string key;
+        };
+
+        struct EraseAll
+        {
+            std::string keyPrefix;
+        };
+
+        struct CompareErase
+        {
+            std::string key;
+            uint64_t expectedIndex;
+        };
+
+        struct Lock
+        {
+            std::string key;
+            std::string value;
+            std::string session;
+            uint64_t flags;
+        };
+
+        struct Unlock
+        {
+            std::string key;
+            std::string value;
+            std::string session;
+            uint64_t flags;
+        };
+
+        struct CheckSession
+        {
+            std::string key;
+            std::string session;
+        };
+    }
+
+    using TxnOperation = boost::variant<
+        txn_ops::Set,
+        txn_ops::CompareSet,
+        txn_ops::Get,
+        txn_ops::GetAll,
+        txn_ops::CheckIndex,
+        txn_ops::CheckNotExists,
+        txn_ops::Erase,
+        txn_ops::EraseAll,
+        txn_ops::CompareErase,
+        txn_ops::Lock,
+        txn_ops::Unlock,
+        txn_ops::CheckSession
+    >;
+
+    struct TxnError
+    {
+        int opIndex;
+        std::string what;
+    };
+
+    class TxnAborted: public ppconsul::Error
+    {
+    public:
+        explicit TxnAborted(std::vector<TxnError> errors)
+            : m_errors(std::move(errors))
+        {}
+
+        virtual const char *what() const PPCONSUL_NOEXCEPT override
+        {
+            if (m_what.empty())
+                m_what = "Transaction aborted: " + (m_errors.empty() ? "no errors" : m_errors[0].what);
+            return m_what.c_str();
+        }
+
+        const std::vector<TxnError>& errors() const PPCONSUL_NOEXCEPT { return m_errors; }
+
+    private:
+        std::vector<TxnError> m_errors;
+        mutable std::string m_what;
+    };
 
     class UpdateError: public ppconsul::Error
     {
@@ -63,7 +182,17 @@ namespace ppconsul { namespace kv {
         namespace groups {
             KWARGS_KEYWORDS_GROUP(get, (consistency, dc, block_for, token))
             KWARGS_KEYWORDS_GROUP(put, (flags, token, dc))
+            KWARGS_KEYWORDS_GROUP(txn, (consistency, token, dc))
         }
+    }
+
+    namespace impl {
+        StringList parseKeys(const std::string& resp);
+        std::vector<KeyValue> parseValues(const std::string& resp);
+
+        std::vector<KeyValue> txnParseValues(const std::string& resp);
+        TxnAborted txnParseErrors(const std::string& resp);
+        std::string txnBodyJson(const std::vector<TxnOperation> &ops);
     }
 
     class Kv
@@ -194,7 +323,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> subKeys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
+        Response<StringList> subKeys(WithHeaders, const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::get))
             return get_keys_impl(keyPrefix, kv::kw::separator = separator, params...);
@@ -205,7 +334,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<std::string> subKeys(const std::string& keyPrefix, const std::string& separator, const Params&... params) const
+        StringList subKeys(const std::string& keyPrefix, const std::string& separator, const Params&... params) const
         {
             return std::move(subKeys(withHeaders, keyPrefix, separator, params...).data());
         }
@@ -215,7 +344,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> keys(WithHeaders, const std::string& keyPrefix, const Params&... params) const
+        Response<StringList> keys(WithHeaders, const std::string& keyPrefix, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::get))
             return get_keys_impl(keyPrefix, params...);
@@ -226,7 +355,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<std::string> keys(const std::string& prefix, const Params&... params) const
+        StringList keys(const std::string& prefix, const Params&... params) const
         {
             return std::move(keys(withHeaders, prefix, params...).data());
         }
@@ -236,7 +365,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> keys(WithHeaders, const Params&... params) const
+        Response<StringList> keys(WithHeaders, const Params&... params) const
         {
             return keys(withHeaders, std::string(), params...);
         }
@@ -246,7 +375,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<std::string> keys(const Params&... params) const
+        StringList keys(const Params&... params) const
         {
             return keys(std::string(), params...);
         }
@@ -313,9 +442,41 @@ namespace ppconsul { namespace kv {
                     kw::release = session, params...));
         }
 
+        // Perform a series of operations as a transaction.
+        // A KeyValue element is appended to the result for each operation except for:
+        // - txn_ops::Erase
+        // - txn_ops::EraseAll
+        // - txn_ops::CompareErase
+        // - txn_ops::CheckNotExists
+        // If the transaction was rolled back, TxnAborted is thrown.
+        //
+        // Allowed parameters:
+        // - groups::txn
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        std::vector<KeyValue> commit(const std::vector<TxnOperation> &ops, const Params&... params)
+        {
+            KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::txn))
+
+            http::Status status;
+            auto data = m_consul.put(
+                status,
+                "/v1/txn", impl::txnBodyJson(ops),
+                kw::token = m_defaultToken, kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
+                params...);
+
+            switch (status.code()) {
+            case 200:
+                return impl::txnParseValues(std::move(data));
+            case 409:
+                throw impl::txnParseErrors(std::move(data));
+            default:
+                throw BadStatus(std::move(status), std::move(data));
+            }
+        }
+
     private:
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::vector<std::string>> get_keys_impl(const std::string& keyPrefix, const Params&... params) const;
+        Response<StringList> get_keys_impl(const std::string& keyPrefix, const Params&... params) const;
 
         std::string keyPath(const std::string& key) const
         {
@@ -332,11 +493,6 @@ namespace ppconsul { namespace kv {
     // TODO: add ScopedLock
 
     // Implementation
-
-    namespace impl {
-        std::vector<std::string> parseKeys(const std::string& resp);
-        std::vector<KeyValue> parseValues(const std::string& resp);
-    }
 
     inline const char *UpdateError::what() const PPCONSUL_NOEXCEPT
     {
@@ -389,7 +545,7 @@ namespace ppconsul { namespace kv {
     }
 
     template<class... Params, class>
-    Response<std::vector<std::string>> Kv::get_keys_impl(const std::string& keyPrefix, const Params&... params) const
+    Response<StringList> Kv::get_keys_impl(const std::string& keyPrefix, const Params&... params) const
     {
         http::Status s;
         auto r = m_consul.get(s, keyPath(keyPrefix),

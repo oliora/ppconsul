@@ -10,6 +10,7 @@
 #include "http_helpers.h"
 #include <curl/curl.h>
 #include <memory>
+#include <atomic>
 
 
 namespace ppconsul { namespace curl {
@@ -30,8 +31,7 @@ namespace ppconsul { namespace curl {
     public:
         using GetResponse = std::tuple<http::Status, ResponseHeaders, std::string>;
 
-        HttpClient(const std::string& endpoint);
-        HttpClient(const std::string& endpoint, const ppconsul::http::impl::TlsConfig& tlsConfig);
+        HttpClient(const std::string& endpoint, const ppconsul::http::impl::TlsConfig& tlsConfig, bool enableStop);
 
         virtual ~HttpClient() override;
 
@@ -39,12 +39,17 @@ namespace ppconsul { namespace curl {
         std::pair<http::Status, std::string> put(const std::string& path, const std::string& query, const std::string& data) override;
         std::pair<http::Status, std::string> del(const std::string& path, const std::string& query) override;
 
+        void stop() override;
+        bool isStopped() const { return m_stopped.load(std::memory_order_relaxed); }
+
         HttpClient(const HttpClient&) = delete;
         HttpClient(HttpClient&&) = delete;
         HttpClient& operator= (const HttpClient&) = delete;
         HttpClient& operator= (HttpClient&&) = delete;
 
     private:
+        void setupTls(const ppconsul::http::impl::TlsConfig& tlsConfig);
+
         template<class Opt, class T>
         void setopt(Opt opt, const T& t);
 
@@ -57,6 +62,8 @@ namespace ppconsul { namespace curl {
         std::string m_endpoint;
         std::unique_ptr<CURL, detail::CurlEasyDeleter> m_handle;
         char m_errBuffer[CURL_ERROR_SIZE]; // Replace with unique_ptr<std::array<char, CURL_ERROR_SIZE>> if moving is needed
+        bool m_enableStop;
+        std::atomic_bool m_stopped;
     };
 
 }}

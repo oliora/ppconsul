@@ -13,9 +13,9 @@
 
 namespace ppconsul { namespace catalog {
 
-    typedef std::pair<Node, std::unordered_map<std::string, ServiceInfo>> NodeServices;
+    using NodeServices = std::pair<Node, std::map<std::string, ServiceInfo>>;
 
-    typedef std::pair<Node, ServiceInfo> NodeService;
+    using NodeService = std::pair<Node, ServiceInfo>;
 
     namespace kw {
         using ppconsul::kw::consistency;
@@ -29,10 +29,10 @@ namespace ppconsul { namespace catalog {
     }
 
     namespace impl {
-        std::vector<std::string> parseDatacenters(const std::string& json);
+        StringList parseDatacenters(const std::string& json);
         std::vector<Node> parseNodes(const std::string& json);
         NodeServices parseNode(const std::string& json);
-        std::unordered_map<std::string, Tags> parseServices(const std::string& json);
+        std::map<std::string, Tags> parseServices(const std::string& json);
         std::vector<NodeService> parseService(const std::string& json);
     }
 
@@ -51,7 +51,7 @@ namespace ppconsul { namespace catalog {
             KWARGS_CHECK_IN_LIST(Params, (kw::consistency, kw::dc))
         }
 
-        std::vector<std::string> datacenters() const
+        StringList datacenters() const
         {
             return impl::parseDatacenters(m_consul.get("/v1/catalog/datacenters"));
         }
@@ -92,13 +92,13 @@ namespace ppconsul { namespace catalog {
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::unordered_map<std::string, Tags>> services(WithHeaders, const Params&... params) const;
+        Response<std::map<std::string, Tags>> services(WithHeaders, const Params&... params) const;
 
         // Result contains data only.
         // Allowed parameters:
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::unordered_map<std::string, Tags> services(const Params&... params) const
+        std::map<std::string, Tags> services(const Params&... params) const
         {
             return std::move(services(withHeaders, params...).data());
         }
@@ -151,7 +151,7 @@ namespace ppconsul { namespace catalog {
     }
 
     template<class... Params, class>
-    Response<std::unordered_map<std::string, Tags>> Catalog::services(WithHeaders, const Params&... params) const
+    Response<std::map<std::string, Tags>> Catalog::services(WithHeaders, const Params&... params) const
     {
         KWARGS_CHECK_IN_LIST(Params, (kw::groups::get));
         auto r = m_consul.get(withHeaders, "/v1/catalog/services",

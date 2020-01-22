@@ -44,6 +44,8 @@ namespace ppconsul { namespace helpers {
     // incorrect padding.
     std::string decodeBase64(const std::string& s);
 
+    std::string encodeBase64(const std::string &s);
+
     // Encode string to be safely used as *part* of URL.
     std::string encodeUrl(const std::string&s);
 

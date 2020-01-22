@@ -15,7 +15,7 @@ namespace ppconsul {
 
     class Error: public std::exception {};
 
-    class FormatError: public ppconsul::Error
+    class FormatError: public Error
     {
     public:
         FormatError(std::string message)
@@ -26,6 +26,14 @@ namespace ppconsul {
 
     private:
         std::string m_message;
+    };
+
+    class OperationAborted: public Error
+    {
+    public:
+        OperationAborted() = default;
+
+        virtual const char *what() const PPCONSUL_NOEXCEPT override { return "Operation aborted"; }
     };
 
     class BadStatus: public Error

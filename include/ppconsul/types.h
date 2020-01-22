@@ -9,8 +9,8 @@
 #include "ppconsul/config.h"
 #include <string>
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
+#include <map>
+#include <set>
 #include <utility>
 #include <chrono>
 #include <stdint.h>
@@ -30,11 +30,13 @@ namespace ppconsul {
 
     using duration = std::chrono::milliseconds;
 
-    typedef std::pair<std::chrono::milliseconds, uint64_t> BlockForValue;
+    using BlockForValue = std::pair<std::chrono::milliseconds, uint64_t>;
 
-    typedef std::unordered_set<std::string> Tags;
+    using Tags = std::set<std::string>;
 
-    typedef std::unordered_map<std::string, std::string> Properties;
+    using Metadata = std::map<std::string, std::string>;
+
+    using StringList = std::vector<std::string>;
 
     struct Node
     {
@@ -71,6 +73,7 @@ namespace ppconsul {
         std::string address;
         uint16_t port;
         Tags tags;
+        Metadata meta;
     };
 
     struct WithHeaders {};

@@ -27,7 +27,7 @@ namespace ppconsul { namespace health {
         }
     }
 
-    typedef std::tuple<Node, ServiceInfo, std::vector<CheckInfo>> NodeServiceChecks;
+    using NodeServiceChecks = std::tuple<Node, ServiceInfo, std::vector<CheckInfo>>;
 
     namespace impl {
         std::vector<CheckInfo> parseCheckInfos(const std::string& json);

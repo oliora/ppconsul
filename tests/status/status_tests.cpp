@@ -37,5 +37,5 @@ TEST_CASE("status.peers", "[consul][status][peers]")
     Status status(consul);
 
     auto peers = status.peers();
-    CHECK(peers == std::vector<std::string>{get_test_leader()});
+    CHECK(peers == ppconsul::StringList({get_test_leader()}));
 }

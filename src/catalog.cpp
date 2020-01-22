@@ -20,6 +20,7 @@ namespace json11 {
         load(src, dst.second.address, "ServiceAddress");
         load(src, dst.second.port, "ServicePort");
         load(src, dst.second.tags, "ServiceTags");
+        load(src, dst.second.meta, "ServiceMeta");
     }
 
     void load(const json11::Json& src, ppconsul::catalog::NodeServices& dst)
@@ -35,9 +36,9 @@ namespace ppconsul { namespace catalog {
     
 namespace impl {
 
-    std::vector<std::string> parseDatacenters(const std::string& json)
+    StringList parseDatacenters(const std::string& json)
     {
-        return s11n::parseJson<std::vector<std::string>>(json);
+        return s11n::parseJson<StringList>(json);
     }
 
     std::vector<Node> parseNodes(const std::string& json)
@@ -50,9 +51,9 @@ namespace impl {
         return s11n::parseJson<NodeServices>(json);
     }
 
-    std::unordered_map<std::string, Tags> parseServices(const std::string& json)
+    std::map<std::string, Tags> parseServices(const std::string& json)
     {
-        return s11n::parseJson<std::unordered_map<std::string, Tags>>(json);
+        return s11n::parseJson<std::map<std::string, Tags>>(json);
     }
 
     std::vector<NodeService> parseService(const std::string& json)

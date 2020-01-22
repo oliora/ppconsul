@@ -7,12 +7,14 @@
 #include <catch/catch.hpp>
 
 #include "ppconsul/kv.h"
+#include "ppconsul/sessions.h"
 #include "test_consul.h"
-#include <json11/json11.hpp> // TODO: remove
 #include <chrono>
+#include <thread>
 
 
 using namespace ppconsul::kv;
+using ppconsul::StringList;
 
 
 namespace 
@@ -265,39 +267,39 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
 
     SECTION("get keys")
     {
-        CHECK(kv.keys(Non_Existing_Key) == std::vector<std::string>());
-        CHECK(kv.subKeys(Non_Existing_Key, "/") == std::vector<std::string>());
-        CHECK(kv.keys("key") == std::vector<std::string>({"key1", "key2", "key3"}));
-        CHECK(kv.keys("other/Key") == std::vector<std::string>({ "other/Key1", "other/Key2" }));
-        CHECK(kv.subKeys("", "/") == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
-        CHECK(kv.subKeys("", "e") == std::vector<std::string>({ "ke", "othe" }));
+        CHECK(kv.keys(Non_Existing_Key) == StringList());
+        CHECK(kv.subKeys(Non_Existing_Key, "/") == StringList());
+        CHECK(kv.keys("key") == StringList({"key1", "key2", "key3"}));
+        CHECK(kv.keys("other/Key") == StringList({ "other/Key1", "other/Key2" }));
+        CHECK(kv.subKeys("", "/") == StringList({ "key1", "key2", "key3", "other/" }));
+        CHECK(kv.subKeys("", "e") == StringList({ "ke", "othe" }));
     }
 
     SECTION("get keys with headers")
     {
-        ppconsul::Response<std::vector<std::string>> v0 = kv.keys(ppconsul::withHeaders, Non_Existing_Key);
-        CHECK(v0.data() == std::vector<std::string>());
+        ppconsul::Response<StringList> v0 = kv.keys(ppconsul::withHeaders, Non_Existing_Key);
+        CHECK(v0.data() == StringList());
         CHECK(v0.headers().valid());
         CHECK(v0.headers().index());
         CHECK(v0.headers().knownLeader());
         CHECK(v0.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v1 = kv.keys(ppconsul::withHeaders, "key");
-        CHECK(v1.data() == std::vector<std::string>({ "key1", "key2", "key3" }));
+        ppconsul::Response<StringList> v1 = kv.keys(ppconsul::withHeaders, "key");
+        CHECK(v1.data() == StringList({ "key1", "key2", "key3" }));
         CHECK(v1.headers().valid());
         CHECK(v1.headers().index());
         CHECK(v1.headers().knownLeader());
         CHECK(v1.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v2 = kv.subKeys(ppconsul::withHeaders, Non_Existing_Key, "/");
-        CHECK(v2.data() == std::vector<std::string>());
+        ppconsul::Response<StringList> v2 = kv.subKeys(ppconsul::withHeaders, Non_Existing_Key, "/");
+        CHECK(v2.data() == StringList());
         CHECK(v2.headers().valid());
         CHECK(v2.headers().index());
         CHECK(v2.headers().knownLeader());
         CHECK(v2.headers().lastContact() == std::chrono::milliseconds(0));
 
-        ppconsul::Response<std::vector<std::string>> v3 = kv.subKeys(ppconsul::withHeaders, "", "/");
-        CHECK(v3.data() == std::vector<std::string>({ "key1", "key2", "key3", "other/" }));
+        ppconsul::Response<StringList> v3 = kv.subKeys(ppconsul::withHeaders, "", "/");
+        CHECK(v3.data() == StringList({ "key1", "key2", "key3", "other/" }));
         CHECK(v3.headers().valid());
         CHECK(v3.headers().index());
         CHECK(v3.headers().knownLeader());
@@ -712,6 +714,35 @@ TEST_CASE("kv.blocking-query", "[consul][kv][blocking]")
     CHECK(resp2.data().value == "value2");
 }
 
+TEST_CASE("kv.abort-blocking-query", "[consul][kv][blocking]")
+{
+    auto consul = create_test_consul(ppconsul::kw::enable_stop = true);
+    Kv kv(consul);
+
+    kv.set("key1", "value1");
+    auto index1 = kv.item(ppconsul::withHeaders, "key1").headers().index();
+
+    const auto t1 = std::chrono::steady_clock::now();
+    std::exception_ptr exception;
+    auto monitorThread = std::thread(
+        [&]()
+        {
+            try
+            {
+                kv.item(ppconsul::withHeaders, "key1", kw::block_for = {std::chrono::seconds(5), index1});
+            }
+            catch (const std::exception&)
+            {
+                exception = std::current_exception();
+            }
+        });
+
+    consul.stop();
+    monitorThread.join();
+    CHECK((std::chrono::steady_clock::now() - t1) < std::chrono::seconds(1));
+    CHECK_THROWS_AS(std::rethrow_exception(exception), ppconsul::OperationAborted);
+}
+
 TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")
 {
     auto consul = create_test_consul();
@@ -734,18 +765,6 @@ TEST_CASE("kv.quick-block-query", "[consul][kv][blocking]")
     CHECK(resp2.data().value == "value2");
 }
 
-namespace {
-    // TODO: remove this hacky way to create session when session endpoint is oficially supported
-    std::string createSession(ppconsul::Consul& consul)
-    {
-        std::string err;
-        auto obj = json11::Json::parse(consul.put("/v1/session/create", ""), err);
-        if (!err.empty())
-            return {};
-        return obj["ID"].string_value();
-    }
-}
-
 TEST_CASE("kv.lock_unlock", "[consul][kv][session]")
 {
     auto consul = create_test_consul();
@@ -754,8 +773,10 @@ TEST_CASE("kv.lock_unlock", "[consul][kv][session]")
     kv.erase("key1");
     REQUIRE(!kv.count("key1"));
 
-    auto session1 = createSession(consul);
-    auto session2 = createSession(consul);
+    ppconsul::sessions::Sessions sessions(consul);
+
+    auto session1 = sessions.create();
+    auto session2 = sessions.create();
 
     SECTION("successful lock-unlock")
     {
@@ -803,4 +824,112 @@ TEST_CASE("kv.lock_unlock", "[consul][kv][session]")
     }
 
     // TODO: add more tests
+}
+
+TEST_CASE("kv.transactions", "[consul][kv][transactions]")
+{
+    auto consul = create_test_consul();
+    Kv kv(consul);
+
+    SECTION("empty transaction")
+    {
+        auto v = kv.commit({});
+        REQUIRE(v.empty());
+    }
+
+    SECTION("simple operations")
+    {
+        auto v = kv.commit({
+            txn_ops::Set{"key1", "one", 42},
+            txn_ops::Get{"key1"},
+            txn_ops::Erase{"key1"},
+            txn_ops::CheckNotExists{"key1"},
+        });
+
+        REQUIRE(v.size() == 2);
+
+        CHECK(v[0].key == "key1");
+        CHECK(v[0].flags == 42);
+        CHECK(v[0].value == "");
+
+        CHECK(v[1].key == "key1");
+        CHECK(v[1].flags == 42);
+        CHECK(v[1].value == "one");
+    }
+
+    SECTION("index-checking operations")
+    {
+        auto v1 = kv.commit({
+            txn_ops::Set{"key1", "ichi", 111},
+            txn_ops::Set{"key2", "ni",   222},
+            txn_ops::Set{"key3", "san",  333},
+        });
+        REQUIRE(v1.size() == 3);
+
+        CHECK(v1[0].key == "key1");
+        CHECK(v1[0].flags == 111);
+        CHECK(v1[0].value == "");
+
+        CHECK(v1[1].key == "key2");
+        CHECK(v1[1].flags == 222);
+        CHECK(v1[1].value == "");
+
+        CHECK(v1[2].key == "key3");
+        CHECK(v1[2].flags == 333);
+        CHECK(v1[2].value == "");
+
+        auto v2 = kv.commit({
+            txn_ops::CompareSet{"key1", v1[0].modifyIndex, "x", 27},
+            txn_ops::CompareErase{"key2", v1[1].modifyIndex},
+            txn_ops::CheckIndex{"key3", v1[2].modifyIndex},
+        });
+        REQUIRE(v2.size() == 2);
+
+        CHECK(v2[0].key == "key1");
+        CHECK(v2[0].flags == 27);
+        CHECK(v2[0].value == "");
+
+        CHECK(v2[1].key == "key3");
+        CHECK(v2[1].flags == 333);
+        CHECK(v2[1].value == "");
+
+        kv.erase("key1");
+        kv.erase("key3");
+    }
+
+    SECTION("tree operations")
+    {
+        auto v1 = kv.commit({
+            txn_ops::Set{"key1", "ichi", 123},
+            txn_ops::Set{"key2", "ni",   456},
+            txn_ops::Set{"key3", "san",  789},
+        });
+        REQUIRE(v1.size() == 3);
+
+        auto v2 = kv.commit({
+            txn_ops::GetAll{"key"},
+            txn_ops::EraseAll{"key"},
+        });
+        REQUIRE(v2.size() == 3);
+
+        CHECK(v2[0].key == "key1");
+        CHECK(v2[0].flags == 123);
+        CHECK(v2[0].value == "ichi");
+
+        CHECK(v2[1].key == "key2");
+        CHECK(v2[1].flags == 456);
+        CHECK(v2[1].value == "ni");
+
+        CHECK(v2[2].key == "key3");
+        CHECK(v2[2].flags == 789);
+        CHECK(v2[2].value == "san");
+    }
+
+    SECTION("transaction errors")
+    {
+        REQUIRE_THROWS_AS(
+            kv.commit({txn_ops::Get{"key1"}}),
+            TxnAborted
+        );
+    }
 }

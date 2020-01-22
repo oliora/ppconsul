@@ -12,7 +12,7 @@ The goal of Ppconsul is to:
 
 Note that this project is under development and doesn't promise a stable interface.
 
-Library tests are currently running against **Consul v1.0.6**. Library is known to work with Consul starting from version **0.4** (earlier versions might work as well but has never been tested) although some tests fail for older versions because of backward incompatible changes in Consul.
+Library tests are currently running against **Consul v1.4.2**. Library is known to work with Consul starting from version **0.4** (earlier versions might work as well but has never been tested) although some tests fail for older versions because of backward incompatible changes in Consul.
 
 The library is written in C++11 and requires a quite modern compiler. Currently it's compiled with:
 * macOS: Clang 9 (Xcode 9.2)
@@ -31,7 +31,7 @@ The library includes code of the following 3rd party libraries (check `ext` dire
 * [json11](https://github.com/dropbox/json11) library to deal with JSON.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
 
-For unit tests, the library uses [Catch](https://github.com/philsquared/Catch) framework. Many thanks to Phil Nash for this great product.
+For unit tests, the library uses [Catch2](https://github.com/catchorg/Catch2) framework. Many thanks to Phil Nash for this great product.
 
 ## Warm Up Examples
 
@@ -142,6 +142,18 @@ item = kv.item("status.last-event-id", kw::block_for = {std::chrono::minutes(1),
 // If key exists, print it:
 if (item)
     std::cout << item.key << "=" << item.value << "\n";
+```
+
+Abort blocking queries:
+
+```cpp
+Consul consul(kw::enable_stop = true); // Must be enabled at construction time
+Kv kv(consul);
+
+// Issue blocking queries, similarly to example above, on background threads etc.
+
+// Stop all pending requests, e.g. at shutdown. Also prevents any future ones being initiated.
+consul.stop();
 ```
 
 Connect to Consul via HTTPS (TLS/SSL, whatever you call it):
@@ -266,7 +278,7 @@ There are the following environment variable to configure tests:
 Sometimes catalog tests failed on assertion `REQUIRE(index1 == resp1.headers().index());`. In this case, just rerun the tests.
 The reason for the failure is Consul's internal idempotent write which cause a spurious wakeup of waiting blocking query. Check the critical note under the blocking queries documentation at https://www.consul.io/docs/agent/http.html.
 
-## Found a bag? Got a feature request? Need help with Ppconsul?
+## Found a bug? Got a feature request? Need help with Ppconsul?
 Use [issue tracker](https://github.com/oliora/ppconsul/issues) or/and drop an email to [oliora](https://github.com/oliora).
 
 ## Contribute

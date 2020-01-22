@@ -9,6 +9,7 @@
 
 extern "C" {
     #include <b64/cdecode.h>
+    #include <b64/cencode.h>
 }
 
 
@@ -51,6 +52,22 @@ namespace ppconsul { namespace helpers {
         base64_decodestate state;
         base64_init_decodestate(&state);
         auto len = base64_decode_block(s.data(), s.size(), &r.front(), &state);
+        r.resize(static_cast<size_t>(len));
+        return r;
+    }
+
+    std::string encodeBase64(const std::string &s)
+    {
+        std::string r;
+        if (s.empty())
+            return r;
+        r.resize(s.size() * 4 / 3 + 10);
+        base64_encodestate state;
+        base64_init_encodestate(&state);
+        auto len = base64_encode_block(s.data(), s.size(), &r.front(), &state);
+        len += base64_encode_blockend(&r.front() + len, &state);
+        if (len && r[len - 1] == '\n')
+            --len;
         r.resize(static_cast<size_t>(len));
         return r;
     }

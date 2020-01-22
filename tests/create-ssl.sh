@@ -5,8 +5,8 @@
 set -ex
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-NEWCERTTOP="$(pwd)/tls/certs"
-CATOP="$(pwd)/tls/ca"
+NEWCERTTOP="$DIR/tls/certs"
+CATOP="$DIR/tls/ca"
 
 function create_ca {
     [ ! -d $CATOP ] || (echo "CA directory already exists" && exit 1)

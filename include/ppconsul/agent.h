@@ -24,7 +24,7 @@ namespace ppconsul { namespace agent {
         std::string name;
         std::string address;
         uint16_t port = 0;
-        Properties tags;
+        Metadata tags;
         int status = 0;
         int protocolMin = 0;
         int protocolMax = 0;
@@ -48,6 +48,9 @@ namespace ppconsul { namespace agent {
         duration deregisterCriticalServiceAfter;
     };
 
+    // This check type is deprecated in Consul 1.0 and removed somewhen later.
+    // Use `CommandCheck` check type instead.
+    // See https://www.consul.io/api/agent/check.html#args
     struct ScriptCheck
     {
         ScriptCheck() = default;
@@ -57,6 +60,43 @@ namespace ppconsul { namespace agent {
 
         std::string script;
         duration interval;
+        duration timeout;
+    };
+
+    // Not supported before Consul 1.0
+    struct CommandCheck
+    {
+        CommandCheck() = default;
+
+        CommandCheck(StringList args, duration interval)
+        : args(std::move(args)), interval(interval) {}
+
+        StringList args;
+        duration interval;
+    };
+
+    struct GrpcCheck
+    {
+        GrpcCheck() = default;
+
+        GrpcCheck(std::string a_strUrl,
+                std::string a_strServiceID,
+                const duration& interval,
+                const duration& deregisterCriticalServiceAfter,
+                const duration& timeout = duration::zero()):
+            url(std::move(a_strUrl)),
+            serviceID(std::move(a_strServiceID)),
+            interval(interval),
+            deregisterCriticalServiceAfter(deregisterCriticalServiceAfter),
+            timeout(timeout),
+            tls(false){}
+
+        std::string url;
+        std::string serviceID;
+        duration interval;
+        duration deregisterCriticalServiceAfter;
+        duration timeout;
+        bool tls;
     };
 
     struct HttpCheck
@@ -70,30 +110,6 @@ namespace ppconsul { namespace agent {
         duration interval;
         duration timeout;
     };
-
-	struct GrpcCheck
-	{
-		GrpcCheck() = default;
-
-		GrpcCheck(std::string a_strUrl,
-				std::string a_strServiceID,
-				const duration& interval,
-				const duration& deregisterCriticalServiceAfter,
-				const duration& timeout = duration::zero()):
-		    url(std::move(a_strUrl)),
-		    serviceID(std::move(a_strServiceID)),
-			interval(interval),
-			deregisterCriticalServiceAfter(deregisterCriticalServiceAfter),
-			timeout(timeout),
-			tls(false){}
-
-		std::string url;
-		std::string serviceID;
-		duration interval;
-		duration deregisterCriticalServiceAfter;
-		duration timeout;
-        bool tls;
-	};
 
     namespace impl {
         inline std::string makeTcpAddress(const char *host, uint16_t port)
@@ -117,11 +133,14 @@ namespace ppconsul { namespace agent {
         duration timeout;
     };
 
-    struct DockerCheck
+    // This check type is deprecated in Consul 1.0 and removed somewhen later.
+    // Use `CommandCheck` check type instead.
+    // See https://www.consul.io/api/agent/check.html#args
+    struct DockerScriptCheck
     {
-        DockerCheck() = default;
+        DockerScriptCheck() = default;
 
-        DockerCheck(std::string containerId, std::string script, const duration& interval, std::string shell = "")
+        DockerScriptCheck(std::string containerId, std::string script, const duration& interval, std::string shell = "")
         : containerId(std::move(containerId)), script(std::move(script)), interval(interval), shell(std::move(shell)) {}
 
         std::string containerId;
@@ -130,7 +149,21 @@ namespace ppconsul { namespace agent {
         std::string shell;
     };
 
-    using CheckParams = boost::variant<TtlCheck, ScriptCheck, GrpcCheck, HttpCheck, TcpCheck, DockerCheck>;
+    // Not supported before Consul 1.0
+    struct DockerCommandCheck
+    {
+        DockerCommandCheck() = default;
+
+        DockerCommandCheck(std::string containerId, StringList args, const duration& interval, std::string shell = "")
+        : containerId(std::move(containerId)), args(std::move(args)), interval(interval), shell(std::move(shell)) {}
+
+        std::string containerId;
+        StringList args;
+        duration interval;
+        std::string shell;
+    };
+
+    using CheckParams = boost::variant<TtlCheck, ScriptCheck, CommandCheck, GrpcCheck, HttpCheck, TcpCheck, DockerScriptCheck, DockerCommandCheck>;
 
     namespace kw {
         KWARGS_KEYWORD(name, std::string)
@@ -140,6 +173,7 @@ namespace ppconsul { namespace agent {
         KWARGS_KEYWORD(port, uint16_t)
         KWARGS_KEYWORD(address, std::string)
         KWARGS_KEYWORD(tags, Tags)
+        KWARGS_KEYWORD(meta, Metadata)
 
         PPCONSUL_KEYWORD(pool, Pool)
         PPCONSUL_KEYWORD(note, std::string)
@@ -158,8 +192,8 @@ namespace ppconsul { namespace agent {
 
         std::vector<Member> parseMembers(const std::string& json);
         std::pair<Config, Member> parseSelf(const std::string& json);
-        std::unordered_map<std::string, CheckInfo> parseChecks(const std::string& json);
-        std::unordered_map<std::string, ServiceInfo> parseServices(const std::string& json);
+        std::map<std::string, CheckInfo> parseChecks(const std::string& json);
+        std::map<std::string, ServiceInfo> parseServices(const std::string& json);
 
         std::string checkRegistrationJson(const CheckRegistrationData& check);
         std::string serviceRegistrationJson(const ServiceRegistrationData& service);
@@ -201,12 +235,10 @@ namespace ppconsul { namespace agent {
             m_consul.put("/v1/agent/force-leave/" + helpers::encodeUrl(node), "");
         }
 
-        std::unordered_map<std::string, CheckInfo> checks() const
+        std::map<std::string, CheckInfo> checks() const
         {
             return impl::parseChecks(m_consul.get("/v1/agent/checks"));
         }
-
-
 
         // Allowed parameters:
         // - name - the check's name (required)
@@ -267,7 +299,7 @@ namespace ppconsul { namespace agent {
             updateServiceCheck(serviceId, CheckStatus::Critical, note);
         }
 
-        std::unordered_map<std::string, ServiceInfo> services() const
+        std::map<std::string, ServiceInfo> services() const
         {
             return impl::parseServices(m_consul.get("/v1/agent/services"));
         }
@@ -373,13 +405,14 @@ namespace ppconsul { namespace agent {
             , address(kwargs::get_opt(kw::address, std::string(), std::forward<Keywords>(params)...))
             , port(kwargs::get_opt(kw::port, 0, std::forward<Keywords>(params)...))
             , tags(kwargs::get_opt(kw::tags, Tags(), std::forward<Keywords>(params)...))
+            , meta(kwargs::get_opt(kw::meta, Metadata{}, std::forward<Keywords>(params)...))
             , check({
                 kwargs::get(kw::check, std::forward<Keywords>(params)...),
                 kwargs::get_opt(kw::notes, std::string(), std::forward<Keywords>(params)...)})
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
-                    kw::id, kw::name, kw::address, kw::port, kw::tags,
-                        kw::check, kw::notes))
+                    kw::id, kw::name, kw::address, kw::port, kw::tags, kw::meta,
+                    kw::check, kw::notes))
             }
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
@@ -389,9 +422,10 @@ namespace ppconsul { namespace agent {
             , address(kwargs::get_opt(kw::address, std::string(), std::forward<Keywords>(params)...))
             , port(kwargs::get_opt(kw::port, 0, std::forward<Keywords>(params)...))
             , tags(kwargs::get_opt(kw::tags, Tags(), std::forward<Keywords>(params)...))
+            , meta(kwargs::get_opt(kw::meta, Metadata{}, std::forward<Keywords>(params)...))
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
-                    kw::id, kw::name, kw::address, kw::port, kw::tags))
+                    kw::id, kw::name, kw::address, kw::port, kw::tags, kw::meta))
             }
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
@@ -406,6 +440,7 @@ namespace ppconsul { namespace agent {
             std::string address;
             uint16_t port = 0;
             Tags tags;
+            Metadata meta;
 
             boost::optional<Check> check;
         };

@@ -46,6 +46,8 @@ namespace ppconsul { namespace http { namespace impl {
         // Returns {status, body}
         virtual std::pair<Status, std::string> del(const std::string& path, const std::string& query) = 0;
 
+        virtual void stop() = 0;
+
         virtual ~Client() {};
     };
 

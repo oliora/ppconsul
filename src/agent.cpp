@@ -47,16 +47,21 @@ namespace ppconsul { namespace agent {
 namespace impl {
 
     namespace {
-        std::string to_json(const std::chrono::milliseconds& ms)
+        using s11n::to_json;
+
+        s11n::Json::array to_json(const StringList& strings)
         {
-            std::ostringstream os;
-            os << ms.count() << "ms";
-            return os.str();
+            return s11n::Json::array(strings.begin(), strings.end());
         }
 
         s11n::Json::array to_json(const Tags& tags)
         {
             return s11n::Json::array(tags.begin(), tags.end());
+        }
+
+        s11n::Json::object to_json(const Metadata& meta)
+        {
+            return s11n::Json::object(meta.begin(), meta.end());
         }
 
         struct CheckConfigSaver: boost::static_visitor<>
@@ -66,13 +71,29 @@ namespace impl {
             void operator() (const TtlCheck& c) const
             {
                 dst()["ttl"] = to_json(c.ttl);
-                dst()["DeregisterCriticalServiceAfter"] = to_json(c.deregisterCriticalServiceAfter);
             }
 
             void operator() (const ScriptCheck& c) const
             {
                 dst()["script"] = c.script;
                 dst()["interval"] = to_json(c.interval);
+            }
+
+            void operator() (const CommandCheck& c) const
+            {
+                dst()["args"] = to_json(c.args);
+                dst()["interval"] = to_json(c.interval);
+            }
+
+            void operator() (const GrpcCheck& c) const
+            {
+                dst()["grpc_use_tls"] = c.tls;
+                dst()["grpc"] = c.url;
+                dst()["interval"] = to_json(c.interval);
+                if (c.timeout != decltype(c.timeout)::zero())
+                    dst()["timeout"] = to_json(c.timeout);
+                dst ()["DeregisterCriticalServiceAfter"] = to_json(c.deregisterCriticalServiceAfter);
+                dst()["ServiceID"] = c.serviceID;
             }
 
             void operator() (const HttpCheck& c) const
@@ -83,17 +104,6 @@ namespace impl {
                     dst()["timeout"] = to_json(c.timeout);
             }
 
-			void operator() (const GrpcCheck& c) const
-			{
-				dst()["grpc_use_tls"] = c.tls;
-				dst()["grpc"] = c.url;
-				dst()["interval"] = to_json(c.interval);
-				if (c.timeout != decltype(c.timeout)::zero())
-					dst()["timeout"] = to_json(c.timeout);
-                dst()["DeregisterCriticalServiceAfter"] = to_json(c.deregisterCriticalServiceAfter);
-                dst()["ServiceID"] = c.serviceID;
-			}
-
             void operator() (const TcpCheck& c) const
             {
                 dst()["tcp"] = c.address;
@@ -102,11 +112,19 @@ namespace impl {
                     dst()["timeout"] = to_json(c.timeout);
             }
 
-            void operator() (const DockerCheck& c) const
+            void operator() (const DockerScriptCheck& c) const
             {
                 dst()["docker_container_id"] = c.containerId;
                 dst()["shell"] = c.shell;
                 dst()["script"] = c.script;
+                dst()["interval"] = to_json(c.interval);
+            }
+
+            void operator() (const DockerCommandCheck& c) const
+            {
+                dst()["docker_container_id"] = c.containerId;
+                dst()["shell"] = c.shell;
+                dst()["args"] = to_json(c.args);
                 dst()["interval"] = to_json(c.interval);
             }
 
@@ -133,14 +151,14 @@ namespace impl {
         return s11n::parseJson<std::pair<Config, Member>>(json);
     }
 
-    std::unordered_map<std::string, CheckInfo> parseChecks(const std::string& json)
+    std::map<std::string, CheckInfo> parseChecks(const std::string& json)
     {
-        return s11n::parseJson<std::unordered_map<std::string, CheckInfo>>(json);
+        return s11n::parseJson<std::map<std::string, CheckInfo>>(json);
     }
 
-    std::unordered_map<std::string, ServiceInfo> parseServices(const std::string& json)
+    std::map<std::string, ServiceInfo> parseServices(const std::string& json)
     {
-        return s11n::parseJson<std::unordered_map<std::string, ServiceInfo>>(json);
+        return s11n::parseJson<std::map<std::string, ServiceInfo>>(json);
     }
 
     std::string checkRegistrationJson(const CheckRegistrationData& check)
@@ -150,7 +168,7 @@ namespace impl {
         Json::object o {
             { "ID", check.id },
             { "Name", check.name },
-            { "Notes", check.notes },
+            { "Notes", check.notes }
         };
 
         save(o, check.params);
@@ -166,6 +184,7 @@ namespace impl {
             { "ID", service.id },
             { "Name", service.name },
             { "Tags", to_json(service.tags) },
+            { "Meta", to_json(service.meta) },
             { "Address", service.address },
             { "Port", service.port }
         };

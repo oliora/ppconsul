@@ -1,1 +1,1 @@
-This directory contains files from [Catch](https://github.com/philsquared/Catch) unit test framework.
+This directory contains [Catch2](https://github.com/catchorg/Catch2) unit test framework.

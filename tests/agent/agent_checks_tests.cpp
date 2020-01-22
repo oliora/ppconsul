@@ -42,7 +42,7 @@ TEST_CASE("agent.check_deregistration", "[consul][agent][checks]")
     CHECK_NOTHROW(agent.deregisterCheck(Non_Existing_Check_Name));
 }
 
-TEST_CASE("agent.check_registration", "[consul][agent][checks]")
+TEST_CASE("agent.ttl_check_registration", "[consul][agent][checks]")
 {
     auto consul = create_test_consul();
     Agent agent(consul);
@@ -103,6 +103,16 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
     }
+}
+
+// Script check is only useful in Consul 0.x
+TEST_CASE("agent.script_check_registration_0_x", "[!hide][consul][agent][checks][consul_0_x]")
+{
+    auto consul = create_test_consul();
+    Agent agent(consul);
+
+    agent.deregisterCheck("check1");
+    agent.deregisterCheck(Unique_Id);
 
     SECTION("script")
     {
@@ -126,10 +136,10 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
     SECTION("script with notes")
     {
         agent.registerCheck(
-            kw::name = "check1",
-            kw::notes = "the notes",
-            kw::check = ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)}
-        );
+                            kw::name = "check1",
+                            kw::notes = "the notes",
+                            kw::check = ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)}
+                            );
         sleep(0.5); // To get updated state and output
 
         const auto checks = agent.checks();
@@ -149,6 +159,76 @@ TEST_CASE("agent.check_registration", "[consul][agent][checks]")
     SECTION("script with id")
     {
         agent.registerCheck("check1", ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(1)}, kw::notes = "the notes", kw::id = Unique_Id);
+        sleep(0.5); // To get updated state and output
+
+        const auto checks = agent.checks();
+        REQUIRE(checks.count(Unique_Id));
+        const auto & c = checks.at(Unique_Id);
+
+        CHECK(c.id == Unique_Id);
+        CHECK(c.node == agent.self().second.name);
+        CHECK(c.name == "check1");
+        CHECK(c.notes == "the notes");
+        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
+        // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
+        CHECK(c.serviceId.empty());
+        CHECK(c.serviceName.empty());
+    }
+}
+
+TEST_CASE("agent.command_check_registration", "[consul][agent][checks]")
+{
+    auto consul = create_test_consul();
+    Agent agent(consul);
+
+    agent.deregisterCheck("check1");
+    agent.deregisterCheck(Unique_Id);
+
+    SECTION("script")
+    {
+        agent.registerCheck("check1", CommandCheck{{Non_Existing_Script_Name, "--param"}, std::chrono::seconds(100)});
+        sleep(0.5); // To get updated state and output
+
+        const auto checks = agent.checks();
+        REQUIRE(checks.count("check1"));
+        const auto & c = checks.at("check1");
+
+        CHECK(c.id == "check1");
+        CHECK(c.node == agent.self().second.name);
+        CHECK(c.name == "check1");
+        CHECK(c.notes.empty());
+        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
+        // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
+        CHECK(c.serviceId.empty());
+        CHECK(c.serviceName.empty());
+    }
+
+    SECTION("script with notes")
+    {
+        agent.registerCheck(
+                            kw::name = "check1",
+                            kw::notes = "the notes",
+                            kw::check = CommandCheck{{Non_Existing_Script_Name}, std::chrono::seconds(100)}
+                            );
+        sleep(0.5); // To get updated state and output
+
+        const auto checks = agent.checks();
+        REQUIRE(checks.count("check1"));
+        const auto & c = checks.at("check1");
+
+        CHECK(c.id == "check1");
+        CHECK(c.node == agent.self().second.name);
+        CHECK(c.name == "check1");
+        CHECK(c.notes == "the notes");
+        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
+        // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
+        CHECK(c.serviceId.empty());
+        CHECK(c.serviceName.empty());
+    }
+
+    SECTION("script with id")
+    {
+        agent.registerCheck("check1", CommandCheck{{Non_Existing_Script_Name, "-0"}, std::chrono::seconds(1)}, kw::notes = "the notes", kw::id = Unique_Id);
         sleep(0.5); // To get updated state and output
 
         const auto checks = agent.checks();
@@ -219,6 +299,26 @@ TEST_CASE("agent.tcp_check_registration", "[consul][agent][checks][tcp_check]")
     }
 }
 
+// Script check is only useful in Consul 0.x
+TEST_CASE("agent.docker_check_registration_0_x", "[!hide][consul][agent][checks][docker_check][consul_0_x]")
+{
+    auto consul = create_test_consul();
+    Agent agent(consul);
+
+    agent.deregisterCheck("check1");
+    agent.deregisterCheck(Unique_Id);
+
+    SECTION("default shell")
+    {
+        REQUIRE_NOTHROW(agent.registerCheck("check1", DockerScriptCheck{ "example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5) }));
+    }
+
+    SECTION("custom shell")
+    {
+        REQUIRE_NOTHROW(agent.registerCheck("check1", DockerScriptCheck{ "example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5), "/usr/bin/cpp_shell_of_the_future_3016" }));
+    }
+}
+
 TEST_CASE("agent.docker_check_registration", "[consul][agent][checks][docker_check]")
 {
     auto consul = create_test_consul();
@@ -229,12 +329,12 @@ TEST_CASE("agent.docker_check_registration", "[consul][agent][checks][docker_che
 
     SECTION("default shell")
     {
-        REQUIRE_NOTHROW(agent.registerCheck("check1", DockerCheck{ "example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5) }));
+        REQUIRE_NOTHROW(agent.registerCheck("check1", DockerCommandCheck{ "example.com-docker-unexisting", {Non_Existing_Script_Name}, std::chrono::minutes(5) }));
     }
 
     SECTION("custom shell")
     {
-        REQUIRE_NOTHROW(agent.registerCheck("check1", DockerCheck{ "example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5), "/usr/bin/cpp_shell_of_the_future_3016" }));
+        REQUIRE_NOTHROW(agent.registerCheck("check1", DockerCommandCheck{ "example.com-docker-unexisting", {Non_Existing_Script_Name}, std::chrono::minutes(5), "/usr/bin/cpp_shell_of_the_future_3016" }));
     }
 }
 
@@ -276,8 +376,6 @@ TEST_CASE("agent.check_update", "[consul][agent][checks][health]")
     REQUIRE(c.status != CheckStatus::Passing);
     REQUIRE(c.notes == "the check");
     REQUIRE(c.output == "");
-
-    //CHECK_THROWS_AS(agent.updateCheck("check1", CheckStatus::Unknown), std::logic_error);
 }
 
 TEST_CASE("agent.check_update_incorrect", "[consul][agent][checks][health]")
@@ -292,7 +390,7 @@ TEST_CASE("agent.check_update_incorrect", "[consul][agent][checks][health]")
 
     SECTION("script")
     {
-        agent.registerCheck("check1" , ScriptCheck{Non_Existing_Script_Name, std::chrono::minutes(5)});
+        agent.registerCheck("check1" , CommandCheck{{Non_Existing_Script_Name}, std::chrono::minutes(5)});
 
         CHECK_THROWS_AS(agent.pass("check1"), ppconsul::Error);
     }
@@ -310,7 +408,31 @@ TEST_CASE("agent.check_update_incorrect", "[consul][agent][checks][health]")
     }
     SECTION("docker")
     {
-        agent.registerCheck("check1", DockerCheck{"example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5)});
+        agent.registerCheck("check1", DockerCommandCheck{"example.com-docker-unexisting", {Non_Existing_Script_Name}, std::chrono::minutes(5)});
+
+        CHECK_THROWS_AS(agent.pass("check1"), ppconsul::Error);
+    }
+}
+
+TEST_CASE("agent.check_update_incorrect_0_x", "[!hide][consul][agent][checks][health][consul_0_x]")
+{
+    auto consul = create_test_consul();
+    Agent agent(consul);
+
+    agent.deregisterCheck("check1");
+    REQUIRE(!agent.checks().count("check1"));
+
+    CHECK_THROWS_AS(agent.pass(Non_Existing_Check_Name), ppconsul::Error);
+
+    SECTION("script")
+    {
+        agent.registerCheck("check1" , ScriptCheck{Non_Existing_Script_Name, std::chrono::minutes(5)});
+
+        CHECK_THROWS_AS(agent.pass("check1"), ppconsul::Error);
+    }
+    SECTION("docker")
+    {
+        agent.registerCheck("check1", DockerScriptCheck{"example.com-docker-unexisting", Non_Existing_Script_Name, std::chrono::minutes(5)});
 
         CHECK_THROWS_AS(agent.pass("check1"), ppconsul::Error);
     }
@@ -324,7 +446,7 @@ TEST_CASE("agent.check_expired", "[consul][agent][checks][health]")
     agent.deregisterCheck("check1");
     REQUIRE(!agent.checks().count("check1"));
 
-    agent.registerCheck("check1", TtlCheck{std::chrono::seconds(1), std::chrono::seconds(10)});
+    agent.registerCheck("check1", TtlCheck{std::chrono::seconds(1), std::chrono::seconds(20)});
     REQUIRE(agent.checks().count("check1"));
 
     sleep(1.5);

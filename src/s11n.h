@@ -8,8 +8,9 @@
 #include "ppconsul/error.h"
 #include <json11/json11.hpp>
 #include <vector>
-#include <unordered_set>
-#include <unordered_map>
+#include <chrono>
+#include <set>
+#include <map>
 #include <string>
 
 
@@ -26,6 +27,16 @@ namespace ppconsul { namespace s11n {
                 throw FormatError(std::move(err));
             return obj;
         }
+    }
+
+    inline std::string to_json(std::chrono::milliseconds ms)
+    {
+        return std::to_string(ms.count()) + "ms";
+    }
+
+    inline std::string to_json(std::chrono::seconds s)
+    {
+        return std::to_string(s.count()) + "s";
     }
 
     inline void load(const Json& src, uint16_t& dst)
@@ -71,12 +82,11 @@ namespace ppconsul { namespace s11n {
     }
 
     template<class T>
-    void load(const Json& src, std::unordered_set<T>& dst)
+    void load(const Json& src, std::set<T>& dst)
     {
         const auto& arr = src.array_items();
 
         dst.clear();
-        dst.reserve(arr.size());
 
         for (const auto& i : arr)
         {
@@ -87,7 +97,7 @@ namespace ppconsul { namespace s11n {
     }
 
     template<class T>
-    void load(const Json& src, std::unordered_map<std::string, T>& dst)
+    void load(const Json& src, std::map<std::string, T>& dst)
     {
         const auto& obj = src.object_items();
 
