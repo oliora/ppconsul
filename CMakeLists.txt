@@ -115,7 +115,3 @@ if (NOT WIN32 OR CYGWIN)
     )
 endif()
 
-# generate test consul application ppconsul/cmake-build-debug/output
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(ppconsul REQUIRED ppconsul)
-
