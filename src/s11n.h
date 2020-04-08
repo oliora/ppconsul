@@ -39,6 +39,11 @@ namespace ppconsul { namespace s11n {
         return std::to_string(s.count()) + "s";
     }
 
+    inline std::string to_json(std::chrono::minutes m)
+    {
+        return std::to_string(m.count()) + "m";
+    }
+
     inline void load(const Json& src, uint16_t& dst)
     {
         dst = static_cast<int>(src.int_value());
@@ -58,6 +63,11 @@ namespace ppconsul { namespace s11n {
     {
         // TODO: support full precision of uint64_t in json11
         dst = static_cast<uint64_t>(src.number_value());
+    }
+
+    inline void load(const Json& src, std::chrono::minutes& dst)
+    {
+        dst = std::chrono::minutes(static_cast<int>(src.number_value()));
     }
 
     inline void load(const Json& src, std::string& dst)

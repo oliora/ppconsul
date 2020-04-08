@@ -148,7 +148,7 @@ namespace ppconsul { namespace agent {
         KWARGS_KEYWORD(address, std::string)
         KWARGS_KEYWORD(tags, Tags)
         KWARGS_KEYWORD(meta, Metadata)
-        KWARGS_KEYWORD(deregisterCriticalServiceAfter, std::string)
+        KWARGS_KEYWORD(deregisterCriticalServiceAfter, std::chrono::minutes)
 
         PPCONSUL_KEYWORD(pool, Pool)
         PPCONSUL_KEYWORD(note, std::string)
@@ -287,6 +287,7 @@ namespace ppconsul { namespace agent {
         // - port - the service's port, set to 0 by default
         // - check - parameters for a check associated with the service, no check is associated if omitted
         // - notes - notes for a check associated with the service, empty by default
+        // - deregisterCriticalServiceAfter - deregister the service after the associated check has been failing for this duration
         template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
         void registerService(Keywords&&... params);
 
@@ -297,6 +298,7 @@ namespace ppconsul { namespace agent {
         // - port - the service's port, set to 0 by default
         // - check - parameters for a check associated with the service, no check is associated if omitted
         // - notes - notes for a check associated with the service, empty by default
+        // - deregisterCriticalServiceAfter - deregister the service after the associated check has been failing for this duration
         template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
         void registerService(std::string name, Keywords&&... params)
         {
@@ -312,6 +314,7 @@ namespace ppconsul { namespace agent {
         // - address - the service's address, empty by default (Note that Consul docs say one is set to the agent's address but this is not true)
         // - port - the service's port, set to 0 by default
         // - notes - notes for a check associated with the service, empty by default
+        // - deregisterCriticalServiceAfter - deregister the service after the associated check has been failing for this duration
         template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
         void registerService(std::string name, CheckParams check, Keywords&&... params)
         {
@@ -354,7 +357,7 @@ namespace ppconsul { namespace agent {
             , name(kwargs::get(kw::name, std::forward<Keywords>(params)...))
             , params(kwargs::get(kw::check, std::forward<Keywords>(params)...))
             , notes(kwargs::get_opt(kw::notes, std::string(), std::forward<Keywords>(params)...))
-            , deregisterCriticalServiceAfter(kwargs::get_opt(kw::deregisterCriticalServiceAfter, std::string(), std::forward<Keywords>(params)...))
+            , deregisterCriticalServiceAfter(kwargs::get_opt(kw::deregisterCriticalServiceAfter, std::chrono::minutes(), std::forward<Keywords>(params)...))
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
                     kw::id, kw::name, kw::check, kw::notes, kw::deregisterCriticalServiceAfter))
@@ -364,7 +367,7 @@ namespace ppconsul { namespace agent {
             std::string name;
             CheckParams params;
             std::string notes;
-            std::string deregisterCriticalServiceAfter;
+            std::chrono::minutes deregisterCriticalServiceAfter;
         };
 
         struct ServiceRegistrationData
@@ -373,7 +376,7 @@ namespace ppconsul { namespace agent {
             {
                 CheckParams params;
                 std::string notes;
-                std::string deregisterCriticalServiceAfter;
+                std::chrono::minutes deregisterCriticalServiceAfter;
             };
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
@@ -387,7 +390,7 @@ namespace ppconsul { namespace agent {
             , check({
                 kwargs::get(kw::check, std::forward<Keywords>(params)...),
                 kwargs::get_opt(kw::notes, std::string(), std::forward<Keywords>(params)...),
-                kwargs::get_opt(kw::deregisterCriticalServiceAfter, std::string(), std::forward<Keywords>(params)...)})
+                kwargs::get_opt(kw::deregisterCriticalServiceAfter, std::chrono::minutes(), std::forward<Keywords>(params)...)})
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
                     kw::id, kw::name, kw::address, kw::port, kw::tags, kw::meta,

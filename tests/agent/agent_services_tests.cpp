@@ -136,7 +136,6 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(c.output.empty());
         CHECK(c.serviceId == "service1");
         CHECK(c.serviceName == "service1");
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("ttl")
@@ -174,12 +173,11 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(c.output.empty());
         CHECK(c.serviceId == Unique_Id);
         CHECK(c.serviceName == "service1");
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
     
     SECTION("ttl with DeregisterCriticalServiceAfter")
     {
-        agent.registerService("service1", TtlCheck{std::chrono::minutes(5)}, kw::deregisterCriticalServiceAfter = "9m");
+        agent.registerService("service1", TtlCheck{std::chrono::minutes(5)}, kw::deregisterCriticalServiceAfter = std::chrono::minutes(9));
 
         const auto services = agent.services();
         REQUIRE(services.count("service1"));
@@ -203,7 +201,6 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(c.output.empty());
         CHECK(c.serviceId == "service1");
         CHECK(c.serviceName == "service1");
-        CHECK(c.deregisterCriticalServiceAfter == "9m");
     }
 }
 
@@ -244,7 +241,6 @@ TEST_CASE("agent.service_registration_script_check_0_x", "[!hide][consul][agent]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == "service1");
         CHECK(c.serviceName == "service1");
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("script")
@@ -282,7 +278,6 @@ TEST_CASE("agent.service_registration_script_check_0_x", "[!hide][consul][agent]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == Unique_Id);
         CHECK(c.serviceName == "service1");
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 }
 
@@ -322,7 +317,6 @@ TEST_CASE("agent.service_registration_command_check", "[consul][agent][services]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == "service1");
         CHECK(c.serviceName == "service1");
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("script")
@@ -360,7 +354,6 @@ TEST_CASE("agent.service_registration_command_check", "[consul][agent][services]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == Unique_Id);
         CHECK(c.serviceName == "service1");
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 }
 
@@ -376,6 +369,25 @@ TEST_CASE("agent.service_deregistration_with_check", "[consul][agent][services]"
 
     agent.deregisterService("service1");
     
+    REQUIRE(!agent.services().count("service1"));
+    REQUIRE(!agent.checks().count(serviceCheckId("service1")));
+}
+
+TEST_CASE("agent.service_deregister_critical_service", "[consul][agent][services]")
+{
+    auto consul = create_test_consul();
+    Agent agent(consul);
+
+    agent.registerService("service1",
+        // RFC 5737 203.0.113.x is reserved
+        TcpCheck{"203.0.113.1", 1234, std::chrono::seconds(10), std::chrono::milliseconds(1)},
+        kw::deregisterCriticalServiceAfter = std::chrono::minutes(1));
+
+    REQUIRE(agent.services().count("service1"));
+    REQUIRE(agent.checks().count(serviceCheckId("service1")));
+    
+    std::this_thread::sleep_for(std::chrono::minutes(2));
+
     REQUIRE(!agent.services().count("service1"));
     REQUIRE(!agent.checks().count(serviceCheckId("service1")));
 }

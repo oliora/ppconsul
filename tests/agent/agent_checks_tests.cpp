@@ -66,7 +66,6 @@ TEST_CASE("agent.ttl_check_registration", "[consul][agent][checks]")
         CHECK(c.output.empty());
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("ttl with notes")
@@ -85,7 +84,6 @@ TEST_CASE("agent.ttl_check_registration", "[consul][agent][checks]")
         CHECK(c.output.empty());
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("ttl with id")
@@ -104,12 +102,11 @@ TEST_CASE("agent.ttl_check_registration", "[consul][agent][checks]")
         CHECK(c.output.empty());
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("ttl with DeregisterCriticalServiceAfter")
     {
-        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180)}, kw::deregisterCriticalServiceAfter = "42m");
+        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180)}, kw::deregisterCriticalServiceAfter = std::chrono::minutes(42));
 
         const auto checks = agent.checks();
         REQUIRE(checks.count("check1"));
@@ -123,7 +120,6 @@ TEST_CASE("agent.ttl_check_registration", "[consul][agent][checks]")
         CHECK(c.output.empty());
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter == "42m");
     }
 }
 
@@ -153,7 +149,6 @@ TEST_CASE("agent.script_check_registration_0_x", "[!hide][consul][agent][checks]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("script with notes")
@@ -177,7 +172,6 @@ TEST_CASE("agent.script_check_registration_0_x", "[!hide][consul][agent][checks]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("script with id")
@@ -197,11 +191,10 @@ TEST_CASE("agent.script_check_registration_0_x", "[!hide][consul][agent][checks]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
     SECTION("script with deregisterCriticalServiceAfter")
     {
-        agent.registerCheck("check1", ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)}, kw::deregisterCriticalServiceAfter = "99m");
+        agent.registerCheck("check1", ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)}, kw::deregisterCriticalServiceAfter = std::chrono::minutes(99));
         sleep(0.5); // To get updated state and output
 
         const auto checks = agent.checks();
@@ -216,7 +209,6 @@ TEST_CASE("agent.script_check_registration_0_x", "[!hide][consul][agent][checks]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter == "99m");
     }
 }
 
@@ -245,7 +237,6 @@ TEST_CASE("agent.command_check_registration", "[consul][agent][checks]")
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("script with notes")
@@ -269,7 +260,6 @@ TEST_CASE("agent.command_check_registration", "[consul][agent][checks]")
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("script with id")
@@ -289,7 +279,6 @@ TEST_CASE("agent.command_check_registration", "[consul][agent][checks]")
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
-        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 }
 
