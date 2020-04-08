@@ -50,7 +50,6 @@ elseif (MSVC)
     #set(Boost_USE_STATIC_RUNTIME OFF)
 endif()
 
-enable_testing()
 
 if (${USE_CPPNETLIB})
     find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS thread filesystem system date_time chrono regex)
@@ -89,7 +88,12 @@ endif()
 
 add_subdirectory(ext/json11)
 add_subdirectory(src)
-add_subdirectory(tests)
+
+option(BUILD_TESTS "Flag to use to build test or not" ON)
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
 install(
     DIRECTORY "${HEADERS_DIR}"
