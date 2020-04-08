@@ -64,6 +64,7 @@ namespace ppconsul {
         std::string node;
         CheckStatus status;
         std::string output;
+        std::string deregisterCriticalServiceAfter;
     };
 
     struct ServiceInfo

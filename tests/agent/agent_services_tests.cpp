@@ -136,6 +136,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(c.output.empty());
         CHECK(c.serviceId == "service1");
         CHECK(c.serviceName == "service1");
+        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("ttl")
@@ -173,6 +174,36 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         CHECK(c.output.empty());
         CHECK(c.serviceId == Unique_Id);
         CHECK(c.serviceName == "service1");
+        CHECK(c.deregisterCriticalServiceAfter.empty());
+    }
+    
+    SECTION("ttl with DeregisterCriticalServiceAfter")
+    {
+        agent.registerService("service1", TtlCheck{std::chrono::minutes(5)}, kw::deregisterCriticalServiceAfter = "9m");
+
+        const auto services = agent.services();
+        REQUIRE(services.count("service1"));
+        const auto & s = services.at("service1");
+
+        CHECK(s.id == "service1");
+        CHECK(s.name == "service1");
+        CHECK(s.address == "");
+        CHECK(s.port == 0);
+        CHECK(s.tags == ppconsul::Tags());
+
+        const auto checks = agent.checks();
+        REQUIRE(checks.count(serviceCheckId("service1")));
+        const auto & c = checks.at(serviceCheckId("service1"));
+
+        CHECK(c.id == serviceCheckId("service1"));
+        CHECK(c.node == agent.self().second.name);
+        CHECK(!c.name.empty());
+        CHECK(c.status != CheckStatus::Passing);
+        CHECK(c.notes.empty());
+        CHECK(c.output.empty());
+        CHECK(c.serviceId == "service1");
+        CHECK(c.serviceName == "service1");
+        CHECK(c.deregisterCriticalServiceAfter == "9m");
     }
 }
 
@@ -213,6 +244,7 @@ TEST_CASE("agent.service_registration_script_check_0_x", "[!hide][consul][agent]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == "service1");
         CHECK(c.serviceName == "service1");
+        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("script")
@@ -250,6 +282,7 @@ TEST_CASE("agent.service_registration_script_check_0_x", "[!hide][consul][agent]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == Unique_Id);
         CHECK(c.serviceName == "service1");
+        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 }
 
@@ -289,6 +322,7 @@ TEST_CASE("agent.service_registration_command_check", "[consul][agent][services]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == "service1");
         CHECK(c.serviceName == "service1");
+        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 
     SECTION("script")
@@ -326,6 +360,7 @@ TEST_CASE("agent.service_registration_command_check", "[consul][agent][services]
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId == Unique_Id);
         CHECK(c.serviceName == "service1");
+        CHECK(c.deregisterCriticalServiceAfter.empty());
     }
 }
 

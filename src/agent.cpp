@@ -157,7 +157,8 @@ namespace impl {
         Json::object o {
             { "ID", check.id },
             { "Name", check.name },
-            { "Notes", check.notes }
+            { "Notes", check.notes },
+            { "DeregisterCriticalServiceAfter", check.deregisterCriticalServiceAfter }
         };
 
         save(o, check.params);
@@ -181,7 +182,8 @@ namespace impl {
         if (service.check)
         {
             Json::object check_o {
-                { "Notes", service.check->notes }
+                { "Notes", service.check->notes },
+                { "DeregisterCriticalServiceAfter", service.check->deregisterCriticalServiceAfter }
             };
 
             save(check_o, service.check->params);

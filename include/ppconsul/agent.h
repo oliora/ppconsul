@@ -148,6 +148,7 @@ namespace ppconsul { namespace agent {
         KWARGS_KEYWORD(address, std::string)
         KWARGS_KEYWORD(tags, Tags)
         KWARGS_KEYWORD(meta, Metadata)
+        KWARGS_KEYWORD(deregisterCriticalServiceAfter, std::string)
 
         PPCONSUL_KEYWORD(pool, Pool)
         PPCONSUL_KEYWORD(note, std::string)
@@ -353,15 +354,17 @@ namespace ppconsul { namespace agent {
             , name(kwargs::get(kw::name, std::forward<Keywords>(params)...))
             , params(kwargs::get(kw::check, std::forward<Keywords>(params)...))
             , notes(kwargs::get_opt(kw::notes, std::string(), std::forward<Keywords>(params)...))
+            , deregisterCriticalServiceAfter(kwargs::get_opt(kw::deregisterCriticalServiceAfter, std::string(), std::forward<Keywords>(params)...))
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
-                    kw::id, kw::name, kw::check, kw::notes))
+                    kw::id, kw::name, kw::check, kw::notes, kw::deregisterCriticalServiceAfter))
             }
 
             std::string id;
             std::string name;
             CheckParams params;
             std::string notes;
+            std::string deregisterCriticalServiceAfter;
         };
 
         struct ServiceRegistrationData
@@ -370,6 +373,7 @@ namespace ppconsul { namespace agent {
             {
                 CheckParams params;
                 std::string notes;
+                std::string deregisterCriticalServiceAfter;
             };
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
@@ -382,11 +386,12 @@ namespace ppconsul { namespace agent {
             , meta(kwargs::get_opt(kw::meta, Metadata{}, std::forward<Keywords>(params)...))
             , check({
                 kwargs::get(kw::check, std::forward<Keywords>(params)...),
-                kwargs::get_opt(kw::notes, std::string(), std::forward<Keywords>(params)...)})
+                kwargs::get_opt(kw::notes, std::string(), std::forward<Keywords>(params)...),
+                kwargs::get_opt(kw::deregisterCriticalServiceAfter, std::string(), std::forward<Keywords>(params)...)})
             {
                 KWARGS_CHECK_IN_LIST(Keywords, (
                     kw::id, kw::name, kw::address, kw::port, kw::tags, kw::meta,
-                    kw::check, kw::notes))
+                    kw::check, kw::notes, kw::deregisterCriticalServiceAfter))
             }
 
             template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>

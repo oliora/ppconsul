@@ -58,6 +58,7 @@ namespace ppconsul {
         load(src, dst.output, "Output");
         load(src, dst.serviceId, "ServiceID");
         load(src, dst.serviceName, "ServiceName");
+        load(src, dst.deregisterCriticalServiceAfter, "DeregisterCriticalServiceAfter");
     }
 
 }
