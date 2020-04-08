@@ -26,7 +26,6 @@ Endpoint is supported except the following:
 - Endpoint [`/v1/agent/maintenance`](https://www.consul.io/docs/agent/http/agent.html#agent_maintenance)
 - Endpoint [`/v1/agent/service/maintenance`](https://www.consul.io/docs/agent/http/agent.html#agent_service_maintenance)
 - Specify an initial status for checks (`"Status"` field)
-- Automatic unregistration of services associated with checks (`"DeregisterCriticalServiceAfter"` field)
 - Multiple checks associated with a single service.
 - Accessing to `"Config"` and `"Stats"` objects received from `/v1/agent/self` endpoint. There is no plan to support it any time soon unless requested by users.
 

@@ -159,6 +159,9 @@ namespace impl {
             { "Name", check.name },
             { "Notes", check.notes }
         };
+        if (check.deregisterCriticalServiceAfter != decltype(check.deregisterCriticalServiceAfter)::zero()) {
+            o["DeregisterCriticalServiceAfter"] =  to_json(check.deregisterCriticalServiceAfter);
+        }
 
         save(o, check.params);
 
@@ -181,9 +184,12 @@ namespace impl {
         if (service.check)
         {
             Json::object check_o {
-                { "Notes", service.check->notes }
+                { "Notes", service.check->notes },
             };
 
+            if (service.check->deregisterCriticalServiceAfter != decltype(service.check->deregisterCriticalServiceAfter)::zero()) {
+            check_o["DeregisterCriticalServiceAfter"] =  to_json(service.check->deregisterCriticalServiceAfter);
+        }
             save(check_o, service.check->params);
 
             o["Check"] = check_o;

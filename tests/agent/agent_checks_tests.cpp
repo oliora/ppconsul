@@ -103,6 +103,24 @@ TEST_CASE("agent.ttl_check_registration", "[consul][agent][checks]")
         CHECK(c.serviceId.empty());
         CHECK(c.serviceName.empty());
     }
+
+    SECTION("ttl with DeregisterCriticalServiceAfter")
+    {
+        agent.registerCheck("check1", TtlCheck{std::chrono::seconds(180)}, kw::deregisterCriticalServiceAfter = std::chrono::minutes(42));
+
+        const auto checks = agent.checks();
+        REQUIRE(checks.count("check1"));
+        const auto & c = checks.at("check1");
+
+        CHECK(c.id == "check1");
+        CHECK(c.node == agent.self().second.name);
+        CHECK(c.name == "check1");
+        CHECK(c.status != CheckStatus::Passing);
+        CHECK(c.notes.empty());
+        CHECK(c.output.empty());
+        CHECK(c.serviceId.empty());
+        CHECK(c.serviceName.empty());
+    }
 }
 
 // Script check is only useful in Consul 0.x
@@ -169,6 +187,24 @@ TEST_CASE("agent.script_check_registration_0_x", "[!hide][consul][agent][checks]
         CHECK(c.node == agent.self().second.name);
         CHECK(c.name == "check1");
         CHECK(c.notes == "the notes");
+        CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
+        // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
+        CHECK(c.serviceId.empty());
+        CHECK(c.serviceName.empty());
+    }
+    SECTION("script with deregisterCriticalServiceAfter")
+    {
+        agent.registerCheck("check1", ScriptCheck{Non_Existing_Script_Name, std::chrono::seconds(100)}, kw::deregisterCriticalServiceAfter = std::chrono::minutes(99));
+        sleep(0.5); // To get updated state and output
+
+        const auto checks = agent.checks();
+        REQUIRE(checks.count("check1"));
+        const auto & c = checks.at("check1");
+
+        CHECK(c.id == "check1");
+        CHECK(c.node == agent.self().second.name);
+        CHECK(c.name == "check1");
+        CHECK(c.notes.empty());
         CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
         // CHECK(!c.output.empty());                // different results on different Consul versions on different platforms
         CHECK(c.serviceId.empty());
