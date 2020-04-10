@@ -170,6 +170,8 @@ Consul consul("https://localhost:8080",
 
 // Use consul ...
 ```
+## Some Notes on Multi-Threaded Usage of Ppconsul
+Multi-threaded access to Consul objects must be synchronized appropriately. If you need to do multiple parallel requests (such as blocking kv queries), each thread needs to use a dedicated <code>Consul</code> object.
 
 ## Documentation
 TBD
