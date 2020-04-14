@@ -148,6 +148,12 @@ namespace ppconsul { namespace curl {
             const auto* client = static_cast<const HttpClient*>(clientPtr);
             return client->isStopped();
         }
+        // old-style progress callback for curl <= 7.31.0
+        int progressCallback_compat(void *clientPtr, double, double, double, double)
+        {
+            const auto* client = static_cast<const HttpClient*>(clientPtr);
+            return client->isStopped();
+        }
     }
 
     HttpClient::HttpClient(const std::string& endpoint, const TlsConfig& tlsConfig, bool enableStop)
@@ -169,12 +175,13 @@ namespace ppconsul { namespace curl {
 
         if (m_enableStop)
         {
-#if (LIBCURL_VERSION_NUM >= 0x073200)
             setopt(CURLOPT_NOPROGRESS, 0l);
+#if (LIBCURL_VERSION_NUM >= 0x073200)
             setopt(CURLOPT_XFERINFOFUNCTION, &progressCallback);
             setopt(CURLOPT_XFERINFODATA, this);
 #else
-            throw std::logic_error("Ppconsul is built without support for stopping the client (libcurl 7.32.0 or newer is required)");
+            setopt(CURLOPT_PROGRESSFUNCTION, &progressCallback_compat);
+            setopt(CURLOPT_PROGRESSDATA, this);
 #endif
         }
         else
