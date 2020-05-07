@@ -240,20 +240,20 @@ namespace ppconsul { namespace kv {
             return 0 == countAll(std::string(), params...);
         }
 
-        void erase(const std::string& key)
+        void erase(const std::string& key) const
         {
             m_consul.del(keyPath(key),
                 kw::token = m_defaultToken, kw::dc = m_defaultDc);
         }
 
-        void eraseAll(const std::string& keyPrefix)
+        void eraseAll(const std::string& keyPrefix) const
         {
             m_consul.del(keyPath(keyPrefix),
                          kw::token = m_defaultToken, kw::dc = m_defaultDc,
                          kw::recurse = true);
         }
 
-        void clear()
+        void clear() const
         {
             eraseAll(std::string());
         }
@@ -384,7 +384,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        void set(const std::string& key, const std::string& value, const Params&... params)
+        void set(const std::string& key, const std::string& value, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::put))
             auto r = helpers::parseJsonBool(
@@ -399,7 +399,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        bool compareSet(const std::string& key, uint64_t expectedIndex, const std::string& value, const Params&... params)
+        bool compareSet(const std::string& key, uint64_t expectedIndex, const std::string& value, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::put))
             return helpers::parseJsonBool(
@@ -409,7 +409,7 @@ namespace ppconsul { namespace kv {
         }
 
         // Compare and erase (CAS operation).
-        bool compareErase(const std::string& key, uint64_t expectedIndex)
+        bool compareErase(const std::string& key, uint64_t expectedIndex) const
         {
             return helpers::parseJsonBool(
                 m_consul.del(keyPath(key),
@@ -420,7 +420,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        bool lock(const std::string& key, const std::string& session, const std::string& value, const Params&... params)
+        bool lock(const std::string& key, const std::string& session, const std::string& value, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::put))
             return helpers::parseJsonBool(
@@ -433,7 +433,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        bool unlock(const std::string& key, const std::string& session, const std::string& value, const Params&... params)
+        bool unlock(const std::string& key, const std::string& session, const std::string& value, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::put))
             return helpers::parseJsonBool(
@@ -453,7 +453,7 @@ namespace ppconsul { namespace kv {
         // Allowed parameters:
         // - groups::txn
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::vector<KeyValue> commit(const std::vector<TxnOperation> &ops, const Params&... params)
+        std::vector<KeyValue> commit(const std::vector<TxnOperation> &ops, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kv::kw::groups::txn))
 

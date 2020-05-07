@@ -100,7 +100,7 @@ namespace ppconsul { namespace curl {
         size_t headerCallback(char *ptr, size_t size_, size_t nitems, void *outputResponse_)
         {
             const auto size = size_ * nitems;
-            auto outputResponse = reinterpret_cast<HttpClient::GetResponse *>(outputResponse_);
+            auto outputResponse = reinterpret_cast<CurlHttpClient::GetResponse *>(outputResponse_);
 
             if (parseStatus(std::get<0>(*outputResponse), ptr, size))
                 return size;
@@ -143,29 +143,41 @@ namespace ppconsul { namespace curl {
             return size;
         }
 
+#if (LIBCURL_VERSION_NUM >= 0x073200)
         int progressCallback(void *clientPtr, curl_off_t, curl_off_t, curl_off_t, curl_off_t)
-        {
-            const auto* client = static_cast<const HttpClient*>(clientPtr);
-            return client->isStopped();
-        }
+#else
         // old-style progress callback for curl <= 7.31.0
-        int progressCallback_compat(void *clientPtr, double, double, double, double)
+        int progressCallback(void *clientPtr, double, double, double, double)
+#endif
         {
-            const auto* client = static_cast<const HttpClient*>(clientPtr);
-            return client->isStopped();
+            const auto* client = static_cast<const CurlHttpClient*>(clientPtr);
+            return client->stopped();
         }
+
     }
 
-    HttpClient::HttpClient(const std::string& endpoint, const TlsConfig& tlsConfig, bool enableStop)
-    : m_endpoint(endpoint)
-    , m_enableStop(enableStop)
-    , m_stopped(false)
+    CurlHttpClientFactory::CurlHttpClientFactory()
     {
         static const CurlInitializer g_initialized;
 
         if (!g_initialized)
             throw std::runtime_error("CURL was not successfully initialized");
+    }
 
+    std::unique_ptr<CurlHttpClient> CurlHttpClientFactory::operator() (const std::string& endpoint,
+                                                                       const ppconsul::http::TlsConfig& tlsConfig,
+                                                                       std::function<bool()> cancellationCallback) const
+    {
+        return std::unique_ptr<CurlHttpClient>(new CurlHttpClient(endpoint, tlsConfig, cancellationCallback));
+    }
+
+
+    CurlHttpClient::CurlHttpClient(const std::string& endpoint,
+                                   const ppconsul::http::TlsConfig& tlsConfig,
+                                   const std::function<bool()>& cancellationCallback)
+    : m_cancellationCallback(cancellationCallback)
+    , m_endpoint(endpoint)
+    {
         m_handle.reset(curl_easy_init());
         if (!m_handle)
             throw std::runtime_error("CURL handle creation failed");
@@ -173,14 +185,14 @@ namespace ppconsul { namespace curl {
         if (auto err = curl_easy_setopt(handle(), CURLOPT_ERRORBUFFER, m_errBuffer))
             throwCurlError(err, "");
 
-        if (m_enableStop)
+        if (m_cancellationCallback)
         {
             setopt(CURLOPT_NOPROGRESS, 0l);
 #if (LIBCURL_VERSION_NUM >= 0x073200)
             setopt(CURLOPT_XFERINFOFUNCTION, &progressCallback);
             setopt(CURLOPT_XFERINFODATA, this);
 #else
-            setopt(CURLOPT_PROGRESSFUNCTION, &progressCallback_compat);
+            setopt(CURLOPT_PROGRESSFUNCTION, &progressCallback);
             setopt(CURLOPT_PROGRESSDATA, this);
 #endif
         }
@@ -196,7 +208,7 @@ namespace ppconsul { namespace curl {
         setupTls(tlsConfig);
     }
 
-    void HttpClient::setupTls(const TlsConfig& tlsConfig)
+    void CurlHttpClient::setupTls(const ppconsul::http::TlsConfig& tlsConfig)
     {
         if (!tlsConfig.cert.empty())
             setopt(CURLOPT_SSLCERT, tlsConfig.cert.c_str());
@@ -227,9 +239,9 @@ namespace ppconsul { namespace curl {
         }
     }
 
-    HttpClient::~HttpClient() = default;
+    CurlHttpClient::~CurlHttpClient() = default;
 
-    HttpClient::GetResponse HttpClient::get(const std::string& path, const std::string& query)
+    CurlHttpClient::GetResponse CurlHttpClient::get(const std::string& path, const std::string& query)
     {
         GetResponse r;
         std::get<2>(r).reserve(Buffer_Size);
@@ -245,7 +257,7 @@ namespace ppconsul { namespace curl {
         return r;
     }
 
-    std::pair<http::Status, std::string> HttpClient::put(const std::string& path, const std::string& query, const std::string& data)
+    std::pair<http::Status, std::string> CurlHttpClient::put(const std::string& path, const std::string& query, const std::string& data)
     {
         ReadContext ctx(&data, 0u);
         
@@ -266,7 +278,7 @@ namespace ppconsul { namespace curl {
         return r;
     }
 
-    std::pair<http::Status, std::string> HttpClient::del(const std::string& path, const std::string& query)
+    std::pair<http::Status, std::string> CurlHttpClient::del(const std::string& path, const std::string& query)
     {
         std::pair<http::Status, std::string> r;
         r.second.reserve(Buffer_Size);
@@ -282,22 +294,15 @@ namespace ppconsul { namespace curl {
         return r;
     }
 
-    void HttpClient::stop()
-    {
-        if (!m_enableStop)
-            throw std::logic_error("Must enable stop at construction time");
-        m_stopped.store(true, std::memory_order_relaxed);
-    }
-
     template<class Opt, class T>
-    inline void HttpClient::setopt(Opt opt, const T& t)
+    inline void CurlHttpClient::setopt(Opt opt, const T& t)
     {
         const auto err = curl_easy_setopt(handle(), opt, t);
         if (err)
             throwCurlError(err, m_errBuffer);
     }
 
-    inline void HttpClient::perform()
+    inline void CurlHttpClient::perform()
     {
         const auto err = curl_easy_perform(handle());
         if (err)

@@ -3,25 +3,6 @@ Notes about the project rationals
 
 Just some notes for future me about the project decisions was made.
 
-HTTP Clients
-------------
-
-http::Client - interface for http/https client
-^      ^
-|      |
-|      curl::HttpClient
-|                     ^
-|                     |
-|                     curl::HttpsClient
-netlib::HttpClient
-^
-|
-netlib::HttpsClient (?)
-
-
-
-
-
 Keywords naming and namespace rationale
 ---------------------------------------
 

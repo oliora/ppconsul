@@ -13,17 +13,12 @@ if (WIN32)
 else()
     option(BUILD_STATIC_LIB "Build Ppconsul as static library" OFF)
 endif()
-option(USE_CPPNETLIB "Use cpp-netlib as HTTP backend (CURL is used by default)" OFF)
 
 include(GNUInstallDirs)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
-
-if (${USE_CPPNETLIB})
-    add_definitions(-DPPCONSUL_USE_CPPNETLIB)
-endif ()
 
 set(BOOST_MIN_VERSION 1.55) # Because of https://svn.boost.org/trac/boost/ticket/8759
 set(USE_BOOST_REGEX OFF)
@@ -51,30 +46,24 @@ elseif (MSVC)
 endif()
 
 
-if (${USE_CPPNETLIB})
-    find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS thread filesystem system date_time chrono regex)
-
-    find_package(cppnetlib 0.11.0 REQUIRED)
+if (NOT ${USE_BOOST_REGEX})
+    find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
 else ()
-    if (NOT ${USE_BOOST_REGEX})
-        find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
-    else ()
-        find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS regex)
-        add_definitions(-DPPCONSUL_USE_BOOST_REGEX)
-    endif ()
-
-    # Add user specified path to CURL headers/libraries into CMAKE_INCLUDE_PATH/CMAKE_LIBRARY_PATH variables.
-    # Otherwise CURL could not be found on Windows
-    if ("${CURL_ROOT}" STREQUAL "")
-        set (CURL_ROOT "$ENV{CURL_ROOT}")
-    endif ()
-
-    if (NOT ${CURL_ROOT} STREQUAL "")
-    	set (CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CURL_ROOT}/include")
-	   set (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CURL_ROOT}/lib")
-    endif ()
-    find_package(CURL REQUIRED)
+    find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS regex)
+    add_definitions(-DPPCONSUL_USE_BOOST_REGEX)
 endif ()
+
+# Add user specified path to CURL headers/libraries into CMAKE_INCLUDE_PATH/CMAKE_LIBRARY_PATH variables.
+# Otherwise CURL could not be found on Windows
+if ("${CURL_ROOT}" STREQUAL "")
+    set (CURL_ROOT "$ENV{CURL_ROOT}")
+endif ()
+
+if (NOT ${CURL_ROOT} STREQUAL "")
+    set (CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CURL_ROOT}/include")
+   set (CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CURL_ROOT}/lib")
+endif ()
+find_package(CURL REQUIRED)
 
 set(LIBB64_DIR "${PROJECT_SOURCE_DIR}/ext/b64")
 set(LIBB64_SOURCES "${LIBB64_DIR}/cdecode.h" "${LIBB64_DIR}/cdecode.c" "${LIBB64_DIR}/cencode.h" "${LIBB64_DIR}/cencode.c")

@@ -200,12 +200,12 @@ namespace ppconsul { namespace agent {
             return impl::parseSelf(m_consul.get("/v1/agent/self"));
         }
 
-        void join(const std::string& addr, Pool pool = Pool::Lan)
+        void join(const std::string& addr, Pool pool = Pool::Lan) const
         {
             m_consul.put("/v1/agent/join/" + helpers::encodeUrl(addr), "", kw::pool = pool);
         }
 
-        void forceLeave(const std::string& node)
+        void forceLeave(const std::string& node) const
         {
             m_consul.put("/v1/agent/force-leave/" + helpers::encodeUrl(node), "");
         }
@@ -221,13 +221,13 @@ namespace ppconsul { namespace agent {
         // - id - the check's id, set to the check's name by default
         // - notes - the check's notes, empty by default
         template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
-        void registerCheck(Keywords&&... params);
+        void registerCheck(Keywords&&... params) const;
 
         // Allowed parameters:
         // - id - the check's id, set to the check's name by default
         // - notes - the check's notes, empty by default
         template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
-        void registerCheck(std::string name, CheckParams check, Keywords&&... params)
+        void registerCheck(std::string name, CheckParams check, Keywords&&... params) const
         {
             registerCheck(
                 kw::name = std::move(name),
@@ -236,40 +236,40 @@ namespace ppconsul { namespace agent {
             );
         }
 
-        void deregisterCheck(const std::string& id)
+        void deregisterCheck(const std::string& id) const
         {
             m_consul.put("/v1/agent/check/deregister/" + helpers::encodeUrl(id), "");
         }
 
-        void pass(const std::string& checkId, const std::string& note = "")
+        void pass(const std::string& checkId, const std::string& note = "") const
         {
             updateCheck(checkId, CheckStatus::Passing, note);
         }
 
-        void warn(const std::string& checkId, const std::string& note = "")
+        void warn(const std::string& checkId, const std::string& note = "") const
         {
             updateCheck(checkId, CheckStatus::Warning, note);
         }
 
-        void fail(const std::string& checkId, const std::string& note = "")
+        void fail(const std::string& checkId, const std::string& note = "") const
         {
             updateCheck(checkId, CheckStatus::Critical, note);
         }
 
         // Same as pass(serviceCheckId(serviceId), note))
-        void servicePass(const std::string& serviceId, const std::string& note = "")
+        void servicePass(const std::string& serviceId, const std::string& note = "") const
         {
             updateServiceCheck(serviceId, CheckStatus::Passing, note);
         }
 
         // Same as warn(serviceCheckId(serviceId), note))
-        void serviceWarn(const std::string& serviceId, const std::string& note = "")
+        void serviceWarn(const std::string& serviceId, const std::string& note = "") const
         {
             updateServiceCheck(serviceId, CheckStatus::Warning, note);
         }
 
         // Same as fail(serviceCheckId(serviceId), note))
-        void serviceFail(const std::string& serviceId, const std::string& note = "")
+        void serviceFail(const std::string& serviceId, const std::string& note = "") const
         {
             updateServiceCheck(serviceId, CheckStatus::Critical, note);
         }
@@ -289,7 +289,7 @@ namespace ppconsul { namespace agent {
         // - notes - notes for a check associated with the service, empty by default
         // - deregisterCriticalServiceAfter - deregister the service after the associated check has been failing for this duration
         template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
-        void registerService(Keywords&&... params);
+        void registerService(Keywords&&... params) const;
 
         // Allowed parameters:
         // - id - the service's id, set to the service's name by default
@@ -300,7 +300,7 @@ namespace ppconsul { namespace agent {
         // - notes - notes for a check associated with the service, empty by default
         // - deregisterCriticalServiceAfter - deregister the service after the associated check has been failing for this duration
         template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
-        void registerService(std::string name, Keywords&&... params)
+        void registerService(std::string name, Keywords&&... params) const
         {
             registerService(
                 kw::name = std::move(name),
@@ -316,7 +316,7 @@ namespace ppconsul { namespace agent {
         // - notes - notes for a check associated with the service, empty by default
         // - deregisterCriticalServiceAfter - deregister the service after the associated check has been failing for this duration
         template<class... Keywords, class = kwargs::enable_if_kwargs_t<Keywords...>>
-        void registerService(std::string name, CheckParams check, Keywords&&... params)
+        void registerService(std::string name, CheckParams check, Keywords&&... params) const
         {
             registerService(
                 kw::name = std::move(name),
@@ -325,19 +325,19 @@ namespace ppconsul { namespace agent {
             );
         }
 
-        void deregisterService(const std::string& id)
+        void deregisterService(const std::string& id) const
         {
             m_consul.put("/v1/agent/service/deregister/" + helpers::encodeUrl(id), "");
         }
 
     private:
-        void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "")
+        void updateCheck(const std::string& checkId, CheckStatus newStatus, const std::string& note = "") const
         {
             m_consul.put(impl::updateCheckUrl(newStatus) + helpers::encodeUrl(checkId), "", kw::note = note);
         }
 
         // Same as `updateCheck(serviceCheckId(serviceId), newStatus, note)`
-        void updateServiceCheck(const std::string& serviceId, CheckStatus newStatus, const std::string& note = "")
+        void updateServiceCheck(const std::string& serviceId, CheckStatus newStatus, const std::string& note = "") const
         {
             updateCheck(serviceCheckId(serviceId), newStatus, note);
         }
@@ -444,14 +444,14 @@ namespace ppconsul { namespace agent {
     }
 
     template<class... Keywords, class>
-    inline void Agent::registerCheck(Keywords&&... params)
+    inline void Agent::registerCheck(Keywords&&... params) const
     {
         m_consul.put("/v1/agent/check/register",
                      impl::checkRegistrationJson({std::forward<Keywords>(params)...}));
     }
 
     template<class... Keywords, class>
-    inline void Agent::registerService(Keywords&&... params)
+    inline void Agent::registerService(Keywords&&... params) const
     {
         m_consul.put("/v1/agent/service/register",
                      impl::serviceRegistrationJson({std::forward<Keywords>(params)...}));

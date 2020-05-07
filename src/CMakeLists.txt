@@ -13,8 +13,7 @@ set(HEADERS
     error.h
     health.h
     helpers.h
-    http_client.h
-    http_status.h
+    client_pool.h
     kv.h
     kwargs.h
     parameters.h
@@ -22,30 +21,27 @@ set(HEADERS
     response.h
     sessions.h
     types.h
+    http/http_client.h
+    http/status.h
 )
 
 set(SOURCES
     http_helpers.h
     s11n.h
     s11n_types.h
-    all_clients.h
     agent.cpp
     catalog.cpp
     consul.cpp
     helpers.cpp
     health.cpp
+    client_pool.cpp
     kv.cpp
     sessions.cpp
     status.cpp
 )
 
-if (${USE_CPPNETLIB})
-    list(APPEND SOURCES "netlib/http_client.h")
-    list(APPEND SOURCES "netlib/http_client.cpp")
-else ()
-    list(APPEND SOURCES "curl/http_client.h")
-    list(APPEND SOURCES "curl/http_client.cpp")
-endif ()
+list(APPEND SOURCES "curl/http_client.h")
+list(APPEND SOURCES "curl/http_client.cpp")
 
 foreach(SRC ${HEADERS})
     list(APPEND SOURCES "${HEADERS_DIR}/${SRC}")
@@ -82,13 +78,8 @@ target_link_libraries(${PROJECT_NAME}
         ${Boost_LIBRARIES}
 )
 
-if (${USE_CPPNETLIB})
-    target_include_directories(${PROJECT_NAME} PRIVATE ${CPPNETLIB_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${CPPNETLIB_LIBRARIES})
-else ()
-    target_include_directories(${PROJECT_NAME} PRIVATE ${CURL_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${CURL_LIBRARIES})
-endif ()
+target_include_directories(${PROJECT_NAME} PRIVATE ${CURL_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CURL_LIBRARIES})
 
 source_group(${PROJECT_NAME} FILES ${SOURCES})
 source_group(libb64 FILES ${LIBB64_SOURCES})

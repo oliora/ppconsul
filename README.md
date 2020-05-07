@@ -25,7 +25,7 @@ Versions of GCC prior to 4.8 and Visual Studio prior to 2013 are known to fail.
 
 The library depends on:
 * [Boost](http://www.boost.org/) 1.55 or later. Ppconsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regular expressions are broken in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
-* [libCURL](http://curl.haxx.se/libcurl/) ~~or [C++ Network Library](http://cpp-netlib.org/) (aka cpp-netlib)~~ to do HTTP/HTTPS. **Note that C++ Network Library support is removed. If you care, please share your thoughts in [Keep support for C++ Network Library](https://github.com/oliora/ppconsul/issues/11).**
+* [libCURL](http://curl.haxx.se/libcurl/) to do HTTP/HTTPS.
 
 The library includes code of the following 3rd party libraries (check `ext` directory):
 * [json11](https://github.com/dropbox/json11) library to deal with JSON.
@@ -35,7 +35,7 @@ For unit tests, the library uses [Catch2](https://github.com/catchorg/Catch2) fr
 
 ## Warm Up Examples
 
-Register, deregister and report the state of your service in Consul:
+### Register, deregister and report the state of your service in Consul:
 
 
 ```cpp
@@ -79,7 +79,7 @@ agent.servicePass("my-service-1");
 agent.serviceFail("my-service-1", "Disk is full");
 ```
 
-Determine raft leader (or lack thereof) and raft peers:
+### Determine raft leader (or lack thereof) and raft peers:
 
 ```cpp
 #include "ppconsul/status.h"
@@ -103,7 +103,7 @@ auto leader = status.leader();
 auto peers = status.peers();
 ```
 
-Use Key-Value storage:
+### Use Key-Value storage:
 
 ```cpp
 #include "ppconsul/kv.h"
@@ -130,7 +130,7 @@ kv.erase("settings.something-else");
 kv.set("settings.something", "new-value");
 ```
 
-Blocking query to Key-Value storage:
+### Blocking query to Key-Value storage:
 
 ```cpp
 // Get key+value+metadata item
@@ -144,7 +144,7 @@ if (item)
     std::cout << item.key << "=" << item.value << "\n";
 ```
 
-Abort blocking queries:
+### Abort all [blocking] queries:
 
 ```cpp
 Consul consul(kw::enable_stop = true); // Must be enabled at construction time
@@ -152,11 +152,13 @@ Kv kv(consul);
 
 // Issue blocking queries, similarly to example above, on background threads etc.
 
-// Stop all pending requests, e.g. at shutdown. Also prevents any future ones being initiated.
+// Stop all pending requests, e.g. at shutdown. No further requests can be done after this call.
 consul.stop();
 ```
 
-Connect to Consul via HTTPS (TLS/SSL, whatever you call it):
+Call to `Consul::stop()` is irreversible: once it's done the `Consul` object is switched to the stopped state forever. This whole feature was made solery for the purpose of timely application shutdown in case when blocking queries are used and should be used accordingly.
+
+### Connect to Consul via HTTPS (TLS/SSL, whatever you call it):
 
 ```cpp
 #include "ppconsul/consul.h"
@@ -170,8 +172,14 @@ Consul consul("https://localhost:8080",
 
 // Use consul ...
 ```
-## Some Notes on Multi-Threaded Usage of Ppconsul
-Multi-threaded access to Consul objects must be synchronized appropriately. If you need to do multiple parallel requests (such as blocking kv queries), each thread needs to use a dedicated <code>Consul</code> object.
+
+## Multi-Threaded Usage of Ppconsul
+Each <code>Consul</code> object has a pool of HTTP(S) clients to perform network requests. It is safe to call any endpoint (e.g. `Kv`, `Agent` etc) object or <code>Consul</code> object from multiple threads in the same time.
+
+Call to `Consul::stop()` method stops all ongoing requests on that particular `Consul` object.
+
+## Custom `http::HttpClient`
+If needed, user can implement `http::HttpClient` interface and pass custom `HttpClientFactory` to `Consul`'s constructor.
 
 ## Documentation
 TBD
@@ -181,7 +189,7 @@ TBD
 ### Get Dependencies
 * Get C++11 compatible compiler. See above for the list of supported compilers.
 * Install [CMake](http://www.cmake.org/) 3.1 or above.
-* Install [Boost](http://www.boost.org/) 1.55 or later. You need compiled Boost libraries if you going to use cpp-netlib or GCC 4.8, otherwise you need Boost headers only.
+* Install [Boost](http://www.boost.org/) 1.55 or later. You need compiled Boost.Regex library if you use GCC 4.8, otherwise you need headers only.
 * Install [libCURL](http://curl.haxx.se/libcurl/) (any version should be fine).
 * If you want to run Ppconsul tests then install [Consul](http://consul.io) 0.4 or newer. *I recommend 0.7 or newer since it's easier to run them in development mode.*
 

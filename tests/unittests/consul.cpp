@@ -10,14 +10,13 @@
 
 TEST_CASE( "consul.BadStatus", "[http][consul][status][error]" )
 {
-    using ppconsul::BadStatus;
-    using ppconsul::http::Status;
+    using namespace ppconsul;
 
-    CHECK(BadStatus(Status(500, "Internal Server Error"), "No path to datacenter").what() == std::string("No path to datacenter [500 Internal Server Error]"));
-    CHECK(BadStatus(Status(404, "Not Found")).what() == std::string("404 Not Found"));
-    CHECK(BadStatus(Status(0, "Nothing")).what() == std::string("000 Nothing"));
-    CHECK(BadStatus(Status(9999, "Wrong Long Code")).what() == std::string("9999 Wrong Long Code"));
-    CHECK(std::string(BadStatus(Status(1)).what()).find("001") == 0);
+    CHECK(BadStatus(http::Status(500, "Internal Server Error"), "No path to datacenter").what() == std::string("No path to datacenter [500 Internal Server Error]"));
+    CHECK(BadStatus(http::Status(404, "Not Found")).what() == std::string("404 Not Found"));
+    CHECK(BadStatus(http::Status(0, "Nothing")).what() == std::string("000 Nothing"));
+    CHECK(BadStatus(http::Status(9999, "Wrong Long Code")).what() == std::string("9999 Wrong Long Code"));
+    CHECK(std::string(BadStatus(http::Status(1)).what()).find("001") == 0);
 }
 
 TEST_CASE( "consul.throwStatusError", "[http][consul][status][error]" )

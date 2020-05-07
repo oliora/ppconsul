@@ -6,13 +6,14 @@
 
 #pragma once
 
-#include "ppconsul/config.h"
-#include "ppconsul/error.h"
-#include "ppconsul/types.h"
-#include "ppconsul/parameters.h"
-#include "ppconsul/http_status.h"
-#include "ppconsul/response.h"
-#include "ppconsul/http_client.h"
+#include <ppconsul/config.h>
+#include <ppconsul/error.h>
+#include <ppconsul/types.h>
+#include <ppconsul/parameters.h>
+#include <ppconsul/response.h>
+#include <ppconsul/http/status.h>
+#include <ppconsul/http/http_client.h>
+#include <ppconsul/client_pool.h>
 #include <chrono>
 #include <string>
 #include <vector>
@@ -90,10 +91,18 @@ namespace ppconsul {
 
     namespace impl {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        http::impl::TlsConfig makeTlsConfig(const Params&... params);
+        http::TlsConfig makeTlsConfig(const Params&... params);
     }
 
     const char Default_Server_Endpoint[] = "http://127.0.0.1:8500";
+
+    using CancellationCallback = std::function<bool()>;
+
+    using HttpClientFactory = std::function<std::unique_ptr<http::HttpClient>(const std::string& endpoint,
+                                                                              const ppconsul::http::TlsConfig& tlsConfig,
+                                                                              CancellationCallback)>;
+    HttpClientFactory makeDefaultHttpClientFactory();
+
 
     class Consul
     {
@@ -104,10 +113,45 @@ namespace ppconsul {
         // - groups::tls (tls::*) - TLS options
         // - enable_stop - configures client such that stop() may be used
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        explicit Consul(const std::string& endpoint, const Params&... params)
-        : Consul(kwargs::get_opt(kw::token, std::string(), params...),
+        explicit Consul(std::string endpoint, const Params&... params)
+        : Consul(makeDefaultHttpClientFactory(),
+                 kwargs::get_opt(kw::token, std::string(), params...),
                  kwargs::get_opt(kw::dc, std::string(), params...),
-                 endpoint,
+                 std::move(endpoint),
+                 impl::makeTlsConfig(params...),
+                 kwargs::get_opt(kw::enable_stop, false, params...))
+        {
+            KWARGS_CHECK_IN_LIST(Params, (kw::dc, kw::token, kw::groups::tls, kw::enable_stop))
+        }
+
+        // Allowed parameters:
+        // - dc - data center to use
+        // - token - default token for all client requests (can be overloaded in every specific request)
+        // - groups::tls (tls::*) - TLS options
+        // - enable_stop - configures client such that stop() may be used
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        explicit Consul(HttpClientFactory clientFactory, std::string endpoint, const Params&... params)
+        : Consul(std::move(clientFactory),
+                 kwargs::get_opt(kw::token, std::string(), params...),
+                 kwargs::get_opt(kw::dc, std::string(), params...),
+                 std::move(endpoint),
+                 impl::makeTlsConfig(params...),
+                 kwargs::get_opt(kw::enable_stop, false, params...))
+        {
+            KWARGS_CHECK_IN_LIST(Params, (kw::dc, kw::token, kw::groups::tls, kw::enable_stop))
+        }
+
+        // Allowed parameters:
+        // - dc - data center to use
+        // - token - default token for all client requests (can be overloaded in every specific request)
+        // - groups::tls (tls::*) - TLS options
+        // - enable_stop - configures client such that stop() may be used
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        explicit Consul(HttpClientFactory clientFactory, const Params&... params)
+        : Consul(std::move(clientFactory),
+                 kwargs::get_opt(kw::token, std::string(), params...),
+                 kwargs::get_opt(kw::dc, std::string(), params...),
+                 Default_Server_Endpoint,
                  impl::makeTlsConfig(params...),
                  kwargs::get_opt(kw::enable_stop, false, params...))
         {
@@ -123,66 +167,59 @@ namespace ppconsul {
             : Consul(Default_Server_Endpoint, params...)
         {}
 
-        Consul(Consul &&op) PPCONSUL_NOEXCEPT
-        : m_client(std::move(op.m_client))
-        , m_dataCenter(std::move(op.m_dataCenter))
-        , m_defaultToken(std::move(op.m_defaultToken))
-        {}
+        ~Consul();
 
-        Consul& operator= (Consul &&op) PPCONSUL_NOEXCEPT
-        {
-            m_client = std::move(op.m_client);
-            m_dataCenter = std::move(op.m_dataCenter);
-            m_defaultToken = std::move(op.m_defaultToken);
-
-            return *this;
-        }
+        Consul(Consul &&op) PPCONSUL_NOEXCEPT;
+        Consul& operator= (Consul &&op) PPCONSUL_NOEXCEPT;
 
         Consul(const Consul &op) = delete;
         Consul& operator= (const Consul &op) = delete;
 
         // Throws BadStatus if !response_status.success()
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::string> get(WithHeaders, const std::string& path, const Params&... params);
+        Response<std::string> get(WithHeaders, const std::string& path, const Params&... params) const;
 
         // Throws BadStatus if !response_status.success()
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string get(const std::string& path, const Params&... params)
+        std::string get(const std::string& path, const Params&... params) const
         {
             return std::move(get(withHeaders, path, params...).data());
         }
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        Response<std::string> get(http::Status& status, const std::string& path, const Params&... params)
+        Response<std::string> get(http::Status& status, const std::string& path, const Params&... params) const
         {
             return get_impl(status, path, makeQuery(params...));
         }
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string put(http::Status& status, const std::string& path, const std::string& data, const Params&... params)
+        std::string put(http::Status& status, const std::string& path, const std::string& data, const Params&... params) const
         {
             return put_impl(status, path, makeQuery(params...), data);
         }
 
         // Throws BadStatus if !response_status.success()
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string put(const std::string& path, const std::string& data, const Params&... params);
+        std::string put(const std::string& path, const std::string& data, const Params&... params) const;
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string del(http::Status& status, const std::string& path, const Params&... params)
+        std::string del(http::Status& status, const std::string& path, const Params&... params) const
         {
             return del_impl(status, path, makeQuery(params...));
         }
 
         // Throws BadStatus if !response_status.success()
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string del(const std::string& path, const Params&... params);
+        std::string del(const std::string& path, const Params&... params) const;
 
         void stop();
+        bool stopped() const noexcept;
 
     private:
-        Consul(const std::string& defaultToken, const std::string& dataCenter, const std::string& endpoint,
-               const http::impl::TlsConfig& tlsConfig, bool enableStop);
+        struct Impl;
+
+        Consul(HttpClientFactory clientFactory, std::string defaultToken, std::string dataCenter, std::string endpoint,
+               http::TlsConfig tlsConfig, bool enableStop);
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string makeQuery(const Params&... params) const
@@ -190,13 +227,14 @@ namespace ppconsul {
             return parameters::makeQuery(kw::dc = m_dataCenter, kw::token = m_defaultToken, params...);
         }
 
-        Response<std::string> get_impl(http::Status& status, const std::string& paty, const std::string& query);
-        std::string put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data);
-        std::string del_impl(http::Status& status, const std::string& path, const std::string& query);
+        Response<std::string> get_impl(http::Status& status, const std::string& paty, const std::string& query) const;
+        std::string put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data) const;
+        std::string del_impl(http::Status& status, const std::string& path, const std::string& query) const;
 
-        std::unique_ptr<http::impl::Client> m_client;
+        ClientPool::ClientPtr getClient() const;
+
+        std::unique_ptr<Impl> m_impl;
         std::string m_dataCenter;
-
         std::string m_defaultToken;
     };
 
@@ -216,7 +254,7 @@ namespace ppconsul {
     }
 
     template<class... Params, class>
-    inline Response<std::string> Consul::get(WithHeaders, const std::string& path, const Params&... params)
+    inline Response<std::string> Consul::get(WithHeaders, const std::string& path, const Params&... params) const
     {
         http::Status s;
         auto r = get(s, path, params...);
@@ -226,7 +264,7 @@ namespace ppconsul {
     }
 
     template<class... Params, class>
-    inline std::string Consul::put(const std::string& path, const std::string& data, const Params&... params)
+    inline std::string Consul::put(const std::string& path, const std::string& data, const Params&... params) const
     {
         http::Status s;
         auto r = put(s, path, data, params...);
@@ -236,7 +274,7 @@ namespace ppconsul {
     }
 
     template<class... Params, class>
-    inline std::string Consul::del(const std::string& path, const Params&... params)
+    inline std::string Consul::del(const std::string& path, const Params&... params) const
     {
         http::Status s;
         auto r = del(s, path, params...);
@@ -245,42 +283,37 @@ namespace ppconsul {
         return r;
     }
 
-    inline Response<std::string> Consul::get_impl(http::Status& status, const std::string& path, const std::string& query)
+    inline Response<std::string> Consul::get_impl(http::Status& status, const std::string& path, const std::string& query) const
     {
         Response<std::string> r;
-        std::tie(status, r.headers(), r.data()) = m_client->get(path, query);
+        std::tie(status, r.headers(), r.data()) = getClient()->get(path, query);
         return r;
     }
 
-    inline std::string Consul::put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data)
+    inline std::string Consul::put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data) const
     {
         std::string r;
-        std::tie(status, r) = m_client->put(path, query, data);
+        std::tie(status, r) = getClient()->put(path, query, data);
         return r;
     }
 
-    inline std::string Consul::del_impl(http::Status& status, const std::string& path, const std::string& query)
+    inline std::string Consul::del_impl(http::Status& status, const std::string& path, const std::string& query) const
     {
         std::string r;
-        std::tie(status, r) = m_client->del(path, query);
+        std::tie(status, r) = getClient()->del(path, query);
         return r;
-    }
-
-    inline void Consul::stop()
-    {
-        m_client->stop();
     }
 
     // Implementation
     namespace impl {
         template<class... Params, class>
-        inline http::impl::TlsConfig makeTlsConfig(const Params&... params)
+        inline http::TlsConfig makeTlsConfig(const Params&... params)
         {
-            http::impl::TlsConfig res;
+            http::TlsConfig res;
             res.cert = kwargs::get_opt(kw::tls::cert, std::string(), params...);
-        res.certType = kwargs::get_opt(kw::tls::cert_type, std::string(), params...);
+            res.certType = kwargs::get_opt(kw::tls::cert_type, std::string(), params...);
             res.key = kwargs::get_opt(kw::tls::key, std::string(), params...);
-        res.keyType = kwargs::get_opt(kw::tls::key_type, std::string(), params...);
+            res.keyType = kwargs::get_opt(kw::tls::key_type, std::string(), params...);
             res.caPath = kwargs::get_opt(kw::tls::ca_path, std::string(), params...);
             res.caInfo = kwargs::get_opt(kw::tls::ca_info, std::string(), params...);
             res.verifyPeer = kwargs::get_opt(kw::tls::verify_peer, true, params...);

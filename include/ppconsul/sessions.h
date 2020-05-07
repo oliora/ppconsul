@@ -68,13 +68,13 @@ namespace ppconsul { namespace sessions {
         // - ttl - session TTL
         // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        std::string create(const Params&... params);
+        std::string create(const Params&... params) const;
 
         // Renew an existing session by its ID. Note that this operation only makes sense if the session has a TTL.
         // Allowed parameters:
         // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        void renew(const std::string &session, const Params&... params)
+        void renew(const std::string &session, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kw::groups::put))
 
@@ -87,7 +87,7 @@ namespace ppconsul { namespace sessions {
         // Allowed parameters:
         // - groups::put
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
-        bool destroy(const std::string &session, const Params&... params)
+        bool destroy(const std::string &session, const Params&... params) const
         {
             KWARGS_CHECK_IN_LIST(Params, (kw::groups::put))
 
@@ -107,7 +107,7 @@ namespace ppconsul { namespace sessions {
     // Implementation
 
     template<class... Params, class>
-    std::string Sessions::create(const Params&... params)
+    std::string Sessions::create(const Params&... params) const
     {
         KWARGS_CHECK_IN_LIST(Params, (kw::groups::put, kw::name, kw::node, kw::lock_delay, kw::behavior, kw::ttl))
 

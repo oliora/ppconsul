@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "ppconsul/config.h"
-#include "ppconsul/http_status.h"
+#include <ppconsul/config.h>
+#include <ppconsul/http/status.h>
 #include <stdexcept>
 
 
@@ -62,7 +62,7 @@ namespace ppconsul {
     public:
         enum { Code = 404 };
 
-        /*explicit NotFoundError(http::Status status, std::string message = "")
+        /*explicit NotFoundError(http::HttpStatus status, std::string message = "")
         : BadStatus(std::move(status), std::move(message))
         {}*/
 
