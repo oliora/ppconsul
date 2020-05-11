@@ -1,0 +1,9 @@
+[requires]
+boost/[>1.55]
+libcurl/[>7.00]
+
+[generators]
+cmake_paths
+
+[options]
+libcurl:shared=True

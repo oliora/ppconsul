@@ -24,10 +24,12 @@ Older versions of Clang should work fine (at least Clang 5 and newer).
 Versions of GCC prior to 4.8 and Visual Studio prior to 2013 are known to fail.
 
 The library depends on:
+
 * [Boost](http://www.boost.org/) 1.55 or later. Ppconsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regular expressions are broken in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
 * [libCURL](http://curl.haxx.se/libcurl/) to do HTTP/HTTPS.
 
 The library includes code of the following 3rd party libraries (check `ext` directory):
+
 * [json11](https://github.com/dropbox/json11) library to deal with JSON.
 * [libb64](http://libb64.sourceforge.net/) library for base64 decoding.
 
@@ -36,7 +38,6 @@ For unit tests, the library uses [Catch2](https://github.com/catchorg/Catch2) fr
 ## Warm Up Examples
 
 ### Register, deregister and report the state of your service in Consul:
-
 
 ```cpp
 #include "ppconsul/agent.h"
@@ -186,38 +187,70 @@ TBD
 
 ## How To Build
 
-### Get Dependencies
-* Get C++11 compatible compiler. See above for the list of supported compilers.
-* Install [CMake](http://www.cmake.org/) 3.1 or above.
+You need C++11 compatible compiler (see above for the list of supported compilers) and [CMake](http://www.cmake.org/) 3.1 or above.
+
+### TLDR
+
+```bash
+# Install dependencies
+conan install .
+
+# Make workspace directory
+mkdir workspace
+cd workspace
+
+# Configure:
+cmake ..
+
+#Build
+cmake --build . --config Release
+
+# Install
+cmake --build . --config Release --target install
+```
+
+### Get dependencies
+
+If you use [Conan](https://conan.io/) then simply run `conan install .` to install dependencies.
+
+Otherwise:
+
 * Install [Boost](http://www.boost.org/) 1.55 or later. You need compiled Boost.Regex library if you use GCC 4.8, otherwise you need headers only.
 * Install [libCURL](http://curl.haxx.se/libcurl/) (any version should be fine).
-* If you want to run Ppconsul tests then install [Consul](http://consul.io) 0.4 or newer. *I recommend 0.7 or newer since it's easier to run them in development mode.*
 
 ### Build
 
-Prepare project:
+Configure project:
+
 ```bash
 mkdir workspace
 cd workspace
 cmake ..
 ```
 
-* To change where the build looks for Boost, pass `-DBOOST_ROOT=<path_to_boost>` parameter to CMake or set `BOOST_ROOT` environment variable.
-* To change where the build looks for libCURL, pass `-DCURL_ROOT=<path_to_curl>` parameter to CMake or set `CURL_ROOT` environment variable.
-* To change the default install location, pass `-DCMAKE_INSTALL_PREFIX=<prefix>` parameter.
-* To build Ppconsul as static library, pass `-DBUILD_STATIC_LIB=ON` parameter.
-  Note that in this case you have to link with json11 static library as well (json11 library is build as part of Ppconsul build.)
+You may want to set the following CMake variables on the command line:
 
-**Note that on Windows Ppconsul can be built as static library only (and that's the default build mode on Windows), see issue [Allow to build Ppconsul as dynamic library on Windows](https://github.com/oliora/ppconsul/issues/25)**.
+To change where CMake looks for Boost, pass `-DBOOST_ROOT=<path_to_boost>` parameter to CMake or set `BOOST_ROOT` environment variable.
+
+To change where CMake looks for libCURL, pass `-DCURL_ROOT=<path_to_curl>` parameter to CMake or set `CURL_ROOT` environment variable.
+
+To change default install location, pass `-DCMAKE_INSTALL_PREFIX=<prefix>` parameter.
+
+To build Ppconsul as static library, pass `-DBUILD_STATIC_LIB=ON` parameter.
+Note that in this case you have to link with json11 static library as well (json11 library is build as part of Ppconsul build.)
+
+**Note that on Windows Ppconsul can only be built as static library (that's default mode on Windows), see issue [Allow to build Ppconsul as dynamic library on Windows](https://github.com/oliora/ppconsul/issues/25)**.
 
 *Note about -G option of CMake to choose you favourite IDE to generate project files for.*
 
 Build:
+
 ```bash
 cmake --build . --config Release
 ```
 
 If Makefile generator was used then you can also do:
+
 ```bash
 make
 ```
@@ -225,36 +258,30 @@ make
 ## How to Install
 
 Build it first as described above then run
+
 ```bash
 cmake --build . --config Release --target install
 ```
 
 If Makefile generator was used then you can also do:
+
 ```bash
 make install
 ```
-## How to Use
-
-Build and install it first as described above.
-
-When installed, the library can be simply used in any CMake-based project as following:
-
-```
-find_package(ppconsul)
-add_executable(<your_app> ...)
-target_link_libraries(<your_app> ppconsul)
-```
 
 ## How To Run Tests
+Install [Consul](http://consul.io) 0.4 or newer. *I recommend 0.7 or newer since it's easier to run it in development mode.*
 
 ### Run Consul
 
 For Consul 0.9 and above:
+
 ```bash
 consul agent -dev -datacenter=ppconsul_test -enable-script-checks=true
 ```
 
 For Consul 0.7 and 0.8:
+
 ```bash
 consul agent -dev -datacenter=ppconsul_test
 ```
@@ -263,12 +290,12 @@ For earlier version of Consul follow its documentation on how to run it with `pp
 
 ### Run Tests
 
-Build it first as described above then run
 ```bash
 ctest -C Release
 ```
 
 If Makefile generator was used then you can also do:
+
 ```bash
 make test
 ```
@@ -287,6 +314,18 @@ There are the following environment variable to configure tests:
 
 Sometimes catalog tests failed on assertion `REQUIRE(index1 == resp1.headers().index());`. In this case, just rerun the tests.
 The reason for the failure is Consul's internal idempotent write which cause a spurious wakeup of waiting blocking query. Check the critical note under the blocking queries documentation at https://www.consul.io/docs/agent/http.html.
+
+## How to Use Ppconsul in Your Project
+
+Build and install it first as described above.
+
+When installed, the library can be simply used in any CMake-based project as following:
+
+```
+find_package(ppconsul)
+add_executable(<your_app> ...)
+target_link_libraries(<your_app> ppconsul)
+```
 
 ## Found a bug? Got a feature request? Need help with Ppconsul?
 Use [issue tracker](https://github.com/oliora/ppconsul/issues) or/and drop an email to [oliora](https://github.com/oliora).
