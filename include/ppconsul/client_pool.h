@@ -6,7 +6,7 @@
 #include <functional>
 #include <utility>
 #include <memory>
-
+#include <cassert>
 
 namespace ppconsul {
 
