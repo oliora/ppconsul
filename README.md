@@ -1,6 +1,6 @@
 # Ppconsul
 
-*Version 0.1*
+*Version 0.2*
 
 A C++ client library for [Consul](http://consul.io). Consul is a distributed tool for discovering and configuring services in your infrastructure.
 
@@ -15,13 +15,16 @@ Note that this project is under development and doesn't promise a stable interfa
 Library tests are currently running against **Consul v1.4.2**. Library is known to work with Consul starting from version **0.4** (earlier versions might work as well but has never been tested) although some tests fail for older versions because of backward incompatible changes in Consul.
 
 The library is written in C++11 and requires a quite modern compiler. Currently it's compiled with:
-* macOS: Clang 9 (Xcode 9.2)
-* Ubuntu Linux: GCC 5.3, GCC 4.9, GCC 4.8.2 all with stdlibc++
-* Windows: Visual Studio 2013 Update 3
+* macOS: Clang 11 (Xcode 11.3.1)
+* Ubuntu Linux: GCC 7.4 with stdlibc++
+* Windows: n/a
 
-Newer versions of specified compilers should work fine.
-Older versions of Clang should work fine (at least Clang 5 and newer).
-Versions of GCC prior to 4.8 and Visual Studio prior to 2013 are known to fail.
+Oldest versions of compilers that should work (all with using C++11 standard)
+- Clang 5
+- GCC 4.8
+- Visual Studio 2013
+
+I try to support all modern compilers and platforms but I don't have resources to do extensive testing so from time to time something got broken on some platforms (mostly old GCC or Windows issues). Please create an issue if you discover a compilation error on your platform.
 
 The library depends on:
 
