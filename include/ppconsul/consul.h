@@ -14,6 +14,7 @@
 #include <ppconsul/http/status.h>
 #include <ppconsul/http/http_client.h>
 #include <ppconsul/client_pool.h>
+#include <functional>
 #include <chrono>
 #include <string>
 #include <vector>

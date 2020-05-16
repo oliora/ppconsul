@@ -9,6 +9,7 @@
 #include <ppconsul/http/http_client.h>
 #include "http_helpers.h"
 #include <curl/curl.h>
+#include <functional>
 #include <memory>
 #include <atomic>
 
