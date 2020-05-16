@@ -20,7 +20,7 @@ namespace ppconsul { namespace curl {
     {
         struct CurlEasyDeleter
         {
-            void operator() (CURL *handle) const PPCONSUL_NOEXCEPT
+            void operator() (CURL *handle) const noexcept
             {
                 curl_easy_cleanup(handle);
             }
@@ -57,7 +57,7 @@ namespace ppconsul { namespace curl {
 
         std::string makeUrl(const std::string& path, const std::string& query) const { return ppconsul::http::impl::makeUrl(m_endpoint, path, query); }
 
-        CURL *handle() const PPCONSUL_NOEXCEPT { return m_handle.get(); }
+        CURL *handle() const noexcept { return m_handle.get(); }
 
         void perform();
 

@@ -11,7 +11,7 @@
 
 namespace ppconsul {
 
-    const char *BadStatus::what() const PPCONSUL_NOEXCEPT
+    const char *BadStatus::what() const noexcept
     {
         if (m_what.empty())
         {
@@ -90,20 +90,20 @@ namespace ppconsul {
 
     Consul::~Consul() = default;
 
-    Consul::Consul(Consul &&op) PPCONSUL_NOEXCEPT = default;
-    Consul& Consul::operator= (Consul &&op) PPCONSUL_NOEXCEPT = default;
+    Consul::Consul(Consul &&op) noexcept = default;
+    Consul& Consul::operator= (Consul &&op) noexcept = default;
 
     ClientPool::ClientPtr Consul::getClient() const
     {
         return m_impl->m_clientPool();
     }
 
-    const std::string& Consul::dataCenter() const PPCONSUL_NOEXCEPT
+    const std::string& Consul::dataCenter() const noexcept
     {
         return m_impl->m_dataCenter;
     }
 
-    const std::string& Consul::defaultToken() const PPCONSUL_NOEXCEPT
+    const std::string& Consul::defaultToken() const noexcept
     {
         return m_impl->m_defaultToken;
     }

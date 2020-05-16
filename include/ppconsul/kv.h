@@ -135,14 +135,14 @@ namespace ppconsul { namespace kv {
             : m_errors(std::move(errors))
         {}
 
-        virtual const char *what() const PPCONSUL_NOEXCEPT override
+        virtual const char *what() const noexcept override
         {
             if (m_what.empty())
                 m_what = "Transaction aborted: " + (m_errors.empty() ? "no errors" : m_errors[0].what);
             return m_what.c_str();
         }
 
-        const std::vector<TxnError>& errors() const PPCONSUL_NOEXCEPT { return m_errors; }
+        const std::vector<TxnError>& errors() const noexcept { return m_errors; }
 
     private:
         std::vector<TxnError> m_errors;
@@ -156,9 +156,9 @@ namespace ppconsul { namespace kv {
         : m_key(key)
         {}
 
-        const std::string& key() const PPCONSUL_NOEXCEPT { return m_key; }
+        const std::string& key() const noexcept { return m_key; }
 
-        virtual const char *what() const PPCONSUL_NOEXCEPT override;
+        virtual const char *what() const noexcept override;
 
     private:
         std::string m_key;
@@ -494,7 +494,7 @@ namespace ppconsul { namespace kv {
 
     // Implementation
 
-    inline const char *UpdateError::what() const PPCONSUL_NOEXCEPT
+    inline const char *UpdateError::what() const noexcept
     {
         if (m_what.empty())
             m_what = helpers::format("Update of key '%s' failed", m_key.c_str());

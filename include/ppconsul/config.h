@@ -15,8 +15,6 @@
     #endif
 #endif
 
-#if ! defined PPCONSUL_NO_CXX11_NOEXCEPT
-    #define PPCONSUL_NOEXCEPT noexcept
-#else
-    #define PPCONSUL_NOEXCEPT
+#if defined PPCONSUL_NO_CXX11_NOEXCEPT
+    #define noexcept
 #endif

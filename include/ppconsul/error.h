@@ -22,7 +22,7 @@ namespace ppconsul {
         : m_message(std::move(message))
         {}
 
-        virtual const char *what() const PPCONSUL_NOEXCEPT override { return m_message.c_str(); }
+        virtual const char *what() const noexcept override { return m_message.c_str(); }
 
     private:
         std::string m_message;
@@ -33,7 +33,7 @@ namespace ppconsul {
     public:
         OperationAborted() = default;
 
-        virtual const char *what() const PPCONSUL_NOEXCEPT override { return "Operation aborted"; }
+        virtual const char *what() const noexcept override { return "Operation aborted"; }
     };
 
     class BadStatus: public Error
@@ -44,12 +44,12 @@ namespace ppconsul {
         , m_message(std::move(message))
         {}
 
-        int code() const PPCONSUL_NOEXCEPT{ return m_status.code(); }
+        int code() const noexcept{ return m_status.code(); }
 
-        const http::Status& status() const PPCONSUL_NOEXCEPT{ return m_status; }
-        const std::string& message() const PPCONSUL_NOEXCEPT{ return m_message; }
+        const http::Status& status() const noexcept{ return m_status; }
+        const std::string& message() const noexcept{ return m_message; }
 
-        virtual const char *what() const PPCONSUL_NOEXCEPT override;
+        virtual const char *what() const noexcept override;
 
     private:
         http::Status m_status;

@@ -15,7 +15,7 @@ namespace ppconsul { namespace http {
     class Status
     {
     public:
-        explicit Status(int code = 0) PPCONSUL_NOEXCEPT
+        explicit Status(int code = 0) noexcept
         : m_code(code)
         {}
 
@@ -25,10 +25,10 @@ namespace ppconsul { namespace http {
         {}
 
         // Returns true if code() is 2xx (i.e. success) and false otherwise
-        bool success() const PPCONSUL_NOEXCEPT{ return 2 == m_code / 100; }
+        bool success() const noexcept{ return 2 == m_code / 100; }
 
-        int code() const PPCONSUL_NOEXCEPT{ return m_code; }
-        const std::string& message() const PPCONSUL_NOEXCEPT{ return m_message; }
+        int code() const noexcept{ return m_code; }
+        const std::string& message() const noexcept{ return m_message; }
 
     private:
         int m_code;

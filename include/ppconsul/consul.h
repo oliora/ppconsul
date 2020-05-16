@@ -170,8 +170,8 @@ namespace ppconsul {
 
         ~Consul();
 
-        Consul(Consul &&op) PPCONSUL_NOEXCEPT;
-        Consul& operator= (Consul &&op) PPCONSUL_NOEXCEPT;
+        Consul(Consul &&op) noexcept;
+        Consul& operator= (Consul &&op) noexcept;
 
         Consul(const Consul &op) = delete;
         Consul& operator= (const Consul &op) = delete;
@@ -232,8 +232,8 @@ namespace ppconsul {
         std::string put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data) const;
         std::string del_impl(http::Status& status, const std::string& path, const std::string& query) const;
 
-        const std::string& dataCenter() const PPCONSUL_NOEXCEPT;
-        const std::string& defaultToken() const PPCONSUL_NOEXCEPT;
+        const std::string& dataCenter() const noexcept;
+        const std::string& defaultToken() const noexcept;
 
         ClientPool::ClientPtr getClient() const;
 
