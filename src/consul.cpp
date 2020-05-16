@@ -40,8 +40,10 @@ namespace ppconsul {
 
     struct Consul::Impl
     {
-        Impl(HttpClientFactory clientFactory, std::string endpoint, ppconsul::http::TlsConfig tlsConfig, bool enableStop)
+        Impl(HttpClientFactory clientFactory, std::string dataCenter, std::string defaultToken, std::string endpoint, ppconsul::http::TlsConfig tlsConfig, bool enableStop)
         : m_clientFactory(std::move(clientFactory))
+	, m_dataCenter(std::move(dataCenter))
+	, m_defaultToken(std::move(defaultToken))
         , m_endpoint(std::move(endpoint))
         , m_tlsConfig(std::move(tlsConfig))
         , m_enableStop(enableStop)
@@ -71,6 +73,8 @@ namespace ppconsul {
         }
 
         HttpClientFactory m_clientFactory;
+        std::string m_dataCenter;
+        std::string m_defaultToken;
         std::string m_endpoint;
         ppconsul::http::TlsConfig m_tlsConfig;
         bool m_enableStop;
@@ -80,9 +84,8 @@ namespace ppconsul {
 
     Consul::Consul(HttpClientFactory clientFactory, std::string defaultToken, std::string dataCenter, std::string endpoint,
                    http::TlsConfig tlsConfig, bool enableStop)
-    : m_impl(new Impl{std::move(clientFactory), helpers::ensureScheme(endpoint), std::move(tlsConfig), enableStop})
-    , m_dataCenter(std::move(dataCenter))
-    , m_defaultToken(std::move(defaultToken))
+    : m_impl(new Impl{std::move(clientFactory), std::move(dataCenter), std::move(defaultToken),
+                      helpers::ensureScheme(endpoint), std::move(tlsConfig), enableStop})
     {}
 
     Consul::~Consul() = default;
@@ -93,6 +96,16 @@ namespace ppconsul {
     ClientPool::ClientPtr Consul::getClient() const
     {
         return m_impl->m_clientPool();
+    }
+
+    const std::string& Consul::dataCenter() const PPCONSUL_NOEXCEPT
+    {
+        return m_impl->m_dataCenter;
+    }
+
+    const std::string& Consul::defaultToken() const PPCONSUL_NOEXCEPT
+    {
+        return m_impl->m_defaultToken;
     }
 
     bool Consul::stopped() const noexcept

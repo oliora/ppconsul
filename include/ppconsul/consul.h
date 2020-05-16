@@ -225,18 +225,19 @@ namespace ppconsul {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string makeQuery(const Params&... params) const
         {
-            return parameters::makeQuery(kw::dc = m_dataCenter, kw::token = m_defaultToken, params...);
+            return parameters::makeQuery(kw::dc = dataCenter(), kw::token = defaultToken(), params...);
         }
 
         Response<std::string> get_impl(http::Status& status, const std::string& paty, const std::string& query) const;
         std::string put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data) const;
         std::string del_impl(http::Status& status, const std::string& path, const std::string& query) const;
 
+        const std::string& dataCenter() const PPCONSUL_NOEXCEPT;
+        const std::string& defaultToken() const PPCONSUL_NOEXCEPT;
+
         ClientPool::ClientPtr getClient() const;
 
         std::unique_ptr<Impl> m_impl;
-        std::string m_dataCenter;
-        std::string m_defaultToken;
     };
 
     // Implementation
