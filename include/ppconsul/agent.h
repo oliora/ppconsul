@@ -88,15 +88,15 @@ namespace ppconsul { namespace agent {
             serviceID(std::move(a_strServiceID)),
             interval(interval),
             deregisterCriticalServiceAfter(deregisterCriticalServiceAfter),
-            timeout(timeout),
-            tls(false){}
+            timeout(timeout) 
+        {
+        }
 
         std::string url;
         std::string serviceID;
         duration interval;
         duration deregisterCriticalServiceAfter;
         duration timeout;
-        bool tls;
     };
 
     struct HttpCheck

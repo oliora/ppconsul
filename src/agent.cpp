@@ -87,7 +87,6 @@ namespace impl {
 
             void operator() (const GrpcCheck& c) const
             {
-                dst()["grpc_use_tls"] = c.tls;
                 dst()["grpc"] = c.url;
                 dst()["interval"] = to_json(c.interval);
                 if (c.timeout != decltype(c.timeout)::zero())
