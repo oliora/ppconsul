@@ -34,7 +34,15 @@ namespace ppconsul { namespace agent {
         int delegateCur = 0;
     };
 
-    struct Config {}; // TODO: use boost::ptree
+    struct Config
+    {
+        std::string datacenter;
+        std::string nodeName;
+        std::string nodeId;
+        bool server;
+        std::string revision;
+        std::string version;
+    };
 
     struct TtlCheck
     {
