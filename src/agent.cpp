@@ -8,7 +8,6 @@
 #include "ppconsul/agent.h"
 #include "s11n_types.h"
 
-
 namespace json11 {
     inline void load(const json11::Json& src, std::pair<ppconsul::agent::Config, ppconsul::agent::Member>& dst)
     {
@@ -25,7 +24,12 @@ namespace ppconsul { namespace agent {
 
     void load(const s11n::Json& src, Config& dst)
     {
-        // TODO
+        load(src, dst.datacenter, "Datacenter");
+        load(src, dst.nodeName, "NodeName");
+        load(src, dst.nodeId, "NodeID");
+        load(src, dst.server, "Server");
+        load(src, dst.revision, "Revision");
+        load(src, dst.version, "Version");
     }
 
     void load(const s11n::Json& src, Member& dst)

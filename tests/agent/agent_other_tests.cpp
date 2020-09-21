@@ -27,7 +27,15 @@ TEST_CASE("agent.self", "[consul][agent][config][self]")
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    auto selfMember = agent.self().second;
+    auto self = agent.self();
+    auto & selfConfig = self.first;
+    CHECK(!selfConfig.datacenter.empty());
+    CHECK(!selfConfig.nodeName.empty());
+    CHECK(!selfConfig.nodeId.empty());
+    CHECK(!selfConfig.version.empty());
+    // seems like selfConfig.revision can be empty
+
+    auto & selfMember = self.second;
     CHECK(!selfMember.name.empty());
     CHECK(!selfMember.address.empty());
     CHECK(selfMember.port);
@@ -40,6 +48,8 @@ TEST_CASE("agent.self", "[consul][agent][config][self]")
     CHECK(selfMember.delegateMin);
     CHECK(selfMember.delegateMax);
     CHECK(selfMember.delegateCur);
+
+    CHECK(selfConfig.nodeName == selfMember.name);
 }
 
 TEST_CASE("agent.members", "[consul][agent][config][members]")
