@@ -63,13 +63,13 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_auto_type cxx_decltype cxx_st
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
         $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${Boost_INCLUDE_DIRS}
-        ${CMAKE_SOURCE_DIR}/ext
+        ${CMAKE_CURRENT_SOURCE_DIR}/../ext
 )
 
 target_link_libraries(${PROJECT_NAME}

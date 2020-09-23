@@ -330,6 +330,23 @@ add_executable(<your_app> ...)
 target_link_libraries(<your_app> ppconsul)
 ```
 
+As an alternative you can clone ppconsul into your project as submodule:
+
+```
+git submodule add https://github.com/oliora/ppconsul.git
+```
+
+And then include it into your CMake-based project as subdirectory:
+
+```
+set(BUILD_TESTS OFF)
+set(BUILD_STATIC_LIB ON)
+add_subdirectory(ppconsul)
+...
+target_link_libraries(<your_app> ppconsul)
+```
+
+
 ## Found a bug? Got a feature request? Need help with Ppconsul?
 Use [issue tracker](https://github.com/oliora/ppconsul/issues) or/and drop an email to [oliora](https://github.com/oliora).
 
