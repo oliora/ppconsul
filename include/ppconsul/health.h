@@ -124,7 +124,7 @@ namespace ppconsul { namespace health {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<CheckInfo> state(CheckStatus state, const Params&... params) const
         {
-            return std::move(state(withHeaders, state, params...).data());
+            return std::move(this->state(withHeaders, state, params...).data());
         }
 
         // Returns all the checks
