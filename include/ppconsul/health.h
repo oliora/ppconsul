@@ -21,6 +21,7 @@ namespace ppconsul { namespace health {
         using ppconsul::kw::tag;
 
         PPCONSUL_KEYWORD(passing, bool);
+        PPCONSUL_KEYWORD(near, std::string);
 
         namespace groups {
             KWARGS_KEYWORDS_GROUP(get, (consistency, dc, block_for));
@@ -69,12 +70,14 @@ namespace ppconsul { namespace health {
         // Result contains both headers and data.
         // Allowed parameters:
         // - groups::get
+        // - kw::near
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<CheckInfo>> checks(WithHeaders, const std::string& serviceName, const Params&... params) const;
 
         // Result contains data only.
         // Allowed parameters:
         // - groups::get
+        // - kw::near
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<CheckInfo> checks(const std::string& serviceName, const Params&... params) const
         {
@@ -86,6 +89,7 @@ namespace ppconsul { namespace health {
         // - groups::get
         // - kw::tag
         // - kw::passing
+        // - kw::near
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<NodeServiceChecks>> service(WithHeaders, const std::string& serviceName, const Params&... params) const;
 
@@ -94,6 +98,7 @@ namespace ppconsul { namespace health {
         // - groups::get
         // - kw::tag
         // - kw::passing
+        // - kw::near
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<NodeServiceChecks> service(const std::string& serviceName, const Params&... params) const
         {
@@ -104,6 +109,7 @@ namespace ppconsul { namespace health {
         // Result contains both headers and data.
         // Allowed parameters:
         // - groups::get
+        // - kw::near
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<CheckInfo>> state(WithHeaders, CheckStatus state, const Params&... params) const
         {
@@ -114,6 +120,7 @@ namespace ppconsul { namespace health {
         // Result contains data only.
         // Allowed parameters:
         // - groups::get
+        // - kw::near
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<CheckInfo> state(CheckStatus state, const Params&... params) const
         {
@@ -183,7 +190,7 @@ namespace ppconsul { namespace health {
     template<class... Params, class>
     Response<std::vector<CheckInfo>> Health::checks(WithHeaders, const std::string& serviceName, const Params&... params) const
     {
-        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get));
+        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get, kw::near));
         auto r = m_consul.get(withHeaders, "/v1/health/checks/" + helpers::encodeUrl(serviceName),
                               kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
                               params...);
@@ -193,7 +200,7 @@ namespace ppconsul { namespace health {
     template<class... Params, class>
     Response<std::vector<NodeServiceChecks>> Health::service(WithHeaders, const std::string& serviceName, const Params&... params) const
     {
-        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get, kw::tag, kw::passing));
+        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get, kw::tag, kw::passing, kw::near));
         auto r = m_consul.get(withHeaders, "/v1/health/service/" + helpers::encodeUrl(serviceName),
                               kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
                               params...);
@@ -203,7 +210,7 @@ namespace ppconsul { namespace health {
     template<class... Params, class>
     Response<std::vector<CheckInfo>> Health::state_impl(const std::string& state, const Params&... params) const
     {
-        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get));
+        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get, kw::near));
         auto r = m_consul.get(withHeaders, "/v1/health/state/" + state,
                               kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
                               params...);

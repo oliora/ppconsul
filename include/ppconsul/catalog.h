@@ -23,6 +23,8 @@ namespace ppconsul { namespace catalog {
         using ppconsul::kw::dc;
         using ppconsul::kw::tag;
 
+        PPCONSUL_KEYWORD(near, std::string);
+
         namespace groups {
             KWARGS_KEYWORDS_GROUP(get, (consistency, dc, block_for))
         }
@@ -58,12 +60,14 @@ namespace ppconsul { namespace catalog {
 
         // Result contains both headers and data.
         // Allowed parameters:
+        // - near
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<Node>> nodes(WithHeaders, const Params&... params) const;
 
         // Result contains data only.
         // Allowed parameters:
+        // - near
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<Node> nodes(const Params&... params) const
@@ -106,6 +110,7 @@ namespace ppconsul { namespace catalog {
         // Result contains both headers and data.
         // Allowed parameters:
         // - tag
+        // - near
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<NodeService>> service(WithHeaders, const std::string& name, const Params&... params) const;
@@ -113,6 +118,7 @@ namespace ppconsul { namespace catalog {
         // Result contains data only.
         // Allowed parameters:
         // - tag
+        // - near
         // - groups::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::vector<NodeService> service(const std::string& name, const Params&... params) const
@@ -133,7 +139,7 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<std::vector<Node>> Catalog::nodes(WithHeaders, const Params&... params) const
     {
-        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get));
+        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get, kw::near));
         auto r = m_consul.get(withHeaders, "/v1/catalog/nodes",
             kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
             params...);
@@ -163,7 +169,7 @@ namespace ppconsul { namespace catalog {
     template<class... Params, class>
     Response<std::vector<NodeService>> Catalog::service(WithHeaders, const std::string& name, const Params&... params) const
     {
-        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get, kw::tag));
+        KWARGS_CHECK_IN_LIST(Params, (kw::groups::get, kw::tag, kw::near));
         auto r = m_consul.get(withHeaders, "/v1/catalog/service/" + helpers::encodeUrl(name),
             kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
             params...);
