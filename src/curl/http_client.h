@@ -25,22 +25,31 @@ namespace ppconsul { namespace curl {
                 curl_easy_cleanup(handle);
             }
         };
+
+        struct CurlSListDeleter
+        {
+            void operator() (curl_slist * slist) const noexcept
+            {
+                curl_slist_free_all(slist);
+            }
+        };
     }
 
     class CurlHttpClient: public ppconsul::http::HttpClient
     {
     public:
-        using GetResponse = std::tuple<http::Status, ResponseHeaders, std::string>;
-
         CurlHttpClient(const std::string& endpoint,
                        const ppconsul::http::TlsConfig& tlsConfig,
                        const std::function<bool()>& cancellationCallback);
 
         virtual ~CurlHttpClient() override;
 
-        GetResponse get(const std::string& path, const std::string& query) override;
-        std::pair<http::Status, std::string> put(const std::string& path, const std::string& query, const std::string& data) override;
-        std::pair<http::Status, std::string> del(const std::string& path, const std::string& query) override;
+        GetResponse get(const std::string& path, const std::string& query,
+                        const http::RequestHeaders & headers = http::RequestHeaders{}) override;
+        PutResponse put(const std::string& path, const std::string& query, const std::string& data,
+                        const http::RequestHeaders & headers = http::RequestHeaders{}) override;
+        DelResponse del(const std::string& path, const std::string& query,
+                        const http::RequestHeaders & headers = http::RequestHeaders{}) override;
 
         bool stopped() const noexcept { return m_cancellationCallback(); }
 
@@ -61,10 +70,13 @@ namespace ppconsul { namespace curl {
 
         void perform();
 
+        void setHeaders(const http::RequestHeaders & headers);
+
         std::function<bool()> m_cancellationCallback;
 
         std::string m_endpoint;
         std::unique_ptr<CURL, detail::CurlEasyDeleter> m_handle;
+        std::unique_ptr<curl_slist, detail::CurlSListDeleter> m_headers;
         char m_errBuffer[CURL_ERROR_SIZE]; // Replace with unique_ptr<std::array<char, CURL_ERROR_SIZE>> if moving is needed
     };
 

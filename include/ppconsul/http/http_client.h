@@ -10,9 +10,11 @@
 #include <ppconsul/response.h>
 #include <tuple>
 #include <string>
+#include <map>
 
 
 namespace ppconsul { namespace http {
+    const std::string Token_Header_Name("X-Consul-Token");
 
     struct TlsConfig
     {
@@ -34,17 +36,26 @@ namespace ppconsul { namespace http {
         const char *keyPass;
     };
 
+    using RequestHeaders = std::map<std::string, std::string>;
+
     class HttpClient
     {
     public:
+        using GetResponse = std::tuple<Status, ResponseHeaders, std::string>;
+        using PutResponse = std::pair<Status, std::string>;
+        using DelResponse = std::pair<Status, std::string>;
+
         // Returns {HttpStatus, headers, body}
-        virtual std::tuple<Status, ResponseHeaders, std::string> get(const std::string& path, const std::string& query) = 0;
+        virtual GetResponse get(const std::string& path, const std::string& query,
+                                const RequestHeaders & headers = RequestHeaders{}) = 0;
 
         // Returns {HttpStatus, body}
-        virtual std::pair<Status, std::string> put(const std::string& path, const std::string& query, const std::string& data) = 0;
+        virtual PutResponse put(const std::string& path, const std::string& query, const std::string& data,
+                                const RequestHeaders & headers = RequestHeaders{}) = 0;
 
         // Returns {HttpStatus, body}
-        virtual std::pair<Status, std::string> del(const std::string& path, const std::string& query) = 0;
+        virtual DelResponse del(const std::string& path, const std::string& query,
+                                const RequestHeaders & headers = RequestHeaders{}) = 0;
 
         virtual ~HttpClient() {};
     };
