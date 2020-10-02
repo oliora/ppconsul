@@ -190,13 +190,13 @@ namespace ppconsul {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::string> get(http::Status& status, const std::string& path, const Params&... params) const
         {
-            return get_impl(status, path, makeQuery(params...));
+            return get_impl(status, path, makeQuery(params...), makeHeaders(params...));
         }
 
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string put(http::Status& status, const std::string& path, const std::string& data, const Params&... params) const
         {
-            return put_impl(status, path, makeQuery(params...), data);
+            return put_impl(status, path, makeQuery(params...), data, makeHeaders(params...));
         }
 
         // Throws BadStatus if !response_status.success()
@@ -206,7 +206,7 @@ namespace ppconsul {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string del(http::Status& status, const std::string& path, const Params&... params) const
         {
-            return del_impl(status, path, makeQuery(params...));
+            return del_impl(status, path, makeQuery(params...), makeHeaders(params...));
         }
 
         // Throws BadStatus if !response_status.success()
@@ -225,12 +225,22 @@ namespace ppconsul {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string makeQuery(const Params&... params) const
         {
-            return parameters::makeQuery(kw::dc = dataCenter(), kw::token = defaultToken(), params...);
+            // Exclude kw::token from query (should be submitted as a header)
+            return parameters::makeQuery(kw::dc = dataCenter(), params..., kw::token = "");
         }
 
-        Response<std::string> get_impl(http::Status& status, const std::string& paty, const std::string& query) const;
-        std::string put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data) const;
-        std::string del_impl(http::Status& status, const std::string& path, const std::string& query) const;
+        template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        http::RequestHeaders makeHeaders(const Params&... params) const
+        {
+            return { { http::Token_Header_Name, kwargs::get_opt(kw::token, defaultToken(), params...) } };
+        }
+
+        Response<std::string> get_impl(http::Status& status, const std::string& path,
+                                       const std::string& query, const http::RequestHeaders & headers) const;
+        std::string put_impl(http::Status& status, const std::string& path, const std::string& query,
+                             const std::string& data, const http::RequestHeaders & headers) const;
+        std::string del_impl(http::Status& status, const std::string& path,
+                             const std::string& query, const http::RequestHeaders & headers) const;
 
         const std::string& dataCenter() const noexcept;
         const std::string& defaultToken() const noexcept;
@@ -285,24 +295,27 @@ namespace ppconsul {
         return r;
     }
 
-    inline Response<std::string> Consul::get_impl(http::Status& status, const std::string& path, const std::string& query) const
+    inline Response<std::string> Consul::get_impl(http::Status& status, const std::string& path,
+                                                  const std::string& query, const http::RequestHeaders & headers) const
     {
         Response<std::string> r;
-        std::tie(status, r.headers(), r.data()) = getClient()->get(path, query);
+        std::tie(status, r.headers(), r.data()) = getClient()->get(path, query, headers);
         return r;
     }
 
-    inline std::string Consul::put_impl(http::Status& status, const std::string& path, const std::string& query, const std::string& data) const
+    inline std::string Consul::put_impl(http::Status& status, const std::string& path, const std::string& query,
+                                        const std::string& data, const http::RequestHeaders & headers) const
     {
         std::string r;
-        std::tie(status, r) = getClient()->put(path, query, data);
+        std::tie(status, r) = getClient()->put(path, query, data, headers);
         return r;
     }
 
-    inline std::string Consul::del_impl(http::Status& status, const std::string& path, const std::string& query) const
+    inline std::string Consul::del_impl(http::Status& status, const std::string& path,
+                                        const std::string& query, const http::RequestHeaders & headers) const
     {
         std::string r;
-        std::tie(status, r) = getClient()->del(path, query);
+        std::tie(status, r) = getClient()->del(path, query, headers);
         return r;
     }
 

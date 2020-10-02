@@ -241,7 +241,8 @@ namespace ppconsul { namespace curl {
 
     CurlHttpClient::~CurlHttpClient() = default;
 
-    CurlHttpClient::GetResponse CurlHttpClient::get(const std::string& path, const std::string& query)
+    CurlHttpClient::GetResponse CurlHttpClient::get(const std::string& path, const std::string& query,
+                                                    const http::RequestHeaders & headers)
     {
         GetResponse r;
         std::get<2>(r).reserve(Buffer_Size);
@@ -252,12 +253,14 @@ namespace ppconsul { namespace curl {
         setopt(CURLOPT_WRITEDATA, &std::get<2>(r));
         setopt(CURLOPT_HEADERDATA, &r);
         setopt(CURLOPT_HTTPGET, 1l);
+        setHeaders(headers);
         perform();
 
         return r;
     }
 
-    std::pair<http::Status, std::string> CurlHttpClient::put(const std::string& path, const std::string& query, const std::string& data)
+    CurlHttpClient::PutResponse CurlHttpClient::put(const std::string& path, const std::string& query,
+                                                    const std::string& data, const http::RequestHeaders & headers)
     {
         ReadContext ctx(&data, 0u);
         
@@ -273,12 +276,14 @@ namespace ppconsul { namespace curl {
         setopt(CURLOPT_PUT, 1l);
         setopt(CURLOPT_INFILESIZE_LARGE, static_cast<curl_off_t>(data.size()));
         setopt(CURLOPT_READDATA, &ctx);
+        setHeaders(headers);
         perform();
 
         return r;
     }
 
-    std::pair<http::Status, std::string> CurlHttpClient::del(const std::string& path, const std::string& query)
+    CurlHttpClient::DelResponse CurlHttpClient::del(const std::string& path, const std::string& query,
+                                                    const http::RequestHeaders & headers)
     {
         std::pair<http::Status, std::string> r;
         r.second.reserve(Buffer_Size);
@@ -289,6 +294,7 @@ namespace ppconsul { namespace curl {
         setopt(CURLOPT_HEADERDATA, &r.first);
         setopt(CURLOPT_HTTPGET, 1l);
         setopt(CURLOPT_CUSTOMREQUEST, "DELETE");
+        setHeaders(headers);
         perform();
 
         return r;
@@ -309,4 +315,19 @@ namespace ppconsul { namespace curl {
             throwCurlError(err, m_errBuffer);
     }
 
+    void CurlHttpClient::setHeaders(const http::RequestHeaders & headers)
+    {
+        curl_slist * slist = nullptr;
+        for (const auto & header : headers)
+        {
+            auto record = header.first + ": " + header.second;
+            slist = curl_slist_append(slist, record.c_str());
+        }
+        m_headers.reset(slist);
+
+        if (m_headers)
+        {
+            setopt(CURLOPT_HTTPHEADER, m_headers.get());
+        }
+    }
 }}
