@@ -317,17 +317,23 @@ namespace ppconsul { namespace curl {
 
     void CurlHttpClient::setHeaders(const http::RequestHeaders & headers)
     {
-        curl_slist * slist = nullptr;
+        m_headers.reset(nullptr);
         for (const auto & header : headers)
         {
-            auto record = header.first + ": " + header.second;
-            slist = curl_slist_append(slist, record.c_str());
-        }
-        m_headers.reset(slist);
+            auto record = std::string{};
+            record.reserve(header.first.size() + 2 + header.second.size()); // +2 for ": "
+            record += header.first;
+            record += ": ";
+            record += header.second;
 
-        if (m_headers)
-        {
-            setopt(CURLOPT_HTTPHEADER, m_headers.get());
+            auto ptr = curl_slist_append(m_headers.get(), record.c_str());
+            if (!ptr)
+                throw std::runtime_error("CURL headers append failed");
+
+            m_headers.release();
+            m_headers.reset(ptr);
         }
+
+        setopt(CURLOPT_HTTPHEADER, m_headers.get());
     }
 }}
