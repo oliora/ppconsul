@@ -232,7 +232,7 @@ namespace ppconsul {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         http::RequestHeaders makeHeaders(const Params&... params) const
         {
-            auto headers = http::RequestHeaders{};
+            http::RequestHeaders headers;
             headers.emplace(http::Token_Header_Name, kwargs::get_opt(kw::token, defaultToken(), params...));
             return headers;
         }
