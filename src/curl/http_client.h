@@ -35,6 +35,8 @@ namespace ppconsul { namespace curl {
         };
     }
 
+    using CurlHeaderList = std::unique_ptr<curl_slist, detail::CurlSListDeleter>;
+
     class CurlHttpClient: public ppconsul::http::HttpClient
     {
     public:
@@ -76,7 +78,7 @@ namespace ppconsul { namespace curl {
 
         std::string m_endpoint;
         std::unique_ptr<CURL, detail::CurlEasyDeleter> m_handle;
-        std::unique_ptr<curl_slist, detail::CurlSListDeleter> m_headers;
+        CurlHeaderList m_headers;
         char m_errBuffer[CURL_ERROR_SIZE]; // Replace with unique_ptr<std::array<char, CURL_ERROR_SIZE>> if moving is needed
     };
 

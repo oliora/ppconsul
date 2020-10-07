@@ -156,6 +156,29 @@ namespace ppconsul { namespace curl {
 
     }
 
+    CurlHeaderList makeCurlHeaderList(const http::RequestHeaders & headers)
+    {
+        CurlHeaderList header_list = nullptr;
+
+        for (const auto & header : headers)
+        {
+            std::string record;
+            record.reserve(header.first.size() + 2 + header.second.size()); // +2 for ": "
+            record += header.first;
+            record += ": ";
+            record += header.second;
+
+            auto ptr = curl_slist_append(header_list.get(), record.c_str());
+            if (!ptr)
+                throw std::runtime_error("CURL headers append failed");
+
+            header_list.release();
+            header_list.reset(ptr);
+        }
+
+        return header_list;
+    }
+
     CurlHttpClientFactory::CurlHttpClientFactory()
     {
         static const CurlInitializer g_initialized;
@@ -317,22 +340,7 @@ namespace ppconsul { namespace curl {
 
     void CurlHttpClient::setHeaders(const http::RequestHeaders & headers)
     {
-        m_headers.reset(nullptr);
-        for (const auto & header : headers)
-        {
-            auto record = std::string{};
-            record.reserve(header.first.size() + 2 + header.second.size()); // +2 for ": "
-            record += header.first;
-            record += ": ";
-            record += header.second;
-
-            auto ptr = curl_slist_append(m_headers.get(), record.c_str());
-            if (!ptr)
-                throw std::runtime_error("CURL headers append failed");
-
-            m_headers.release();
-            m_headers.reset(ptr);
-        }
+        m_headers = makeCurlHeaderList(headers);
 
         setopt(CURLOPT_HTTPHEADER, m_headers.get());
     }
