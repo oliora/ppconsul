@@ -11,15 +11,38 @@
 #include "test_consul.h"
 #include <chrono>
 #include <thread>
+#include <iostream>
 
 
 using namespace ppconsul::kv;
 using ppconsul::StringList;
 
-
 namespace 
 {
     auto const Non_Existing_Key = "6DD1E923-71E6-4448-A0B7-57B5F32690E7";
+
+    struct LexicalCastable
+    {
+        int number = 0;
+        std::string word;
+    };
+
+    std::ostream & operator<<(std::ostream & out, const LexicalCastable& value)
+    {
+        return out << value.number << " " << value.word;
+    }
+
+    std::istream & operator>>(std::istream & in, LexicalCastable& value)
+    {
+        in >> value.number;
+        if((in.flags() & std::ios_base::skipws) == 0)
+        {
+            char whitespace;
+            in >> whitespace;
+        }
+        return in >> value.word;
+    }
+
 }
 
 TEST_CASE("kv.invalid KeyValue", "[consul][kv]")
@@ -59,6 +82,29 @@ TEST_CASE("kv.valid KeyValue", "[consul][kv]")
     CHECK(v.key == "some key");
     CHECK(v.value == "some value");
     CHECK(v.session == "some session");
+}
+
+TEST_CASE("kv.get KeyValue", "[consul][kv]")
+{
+    KeyValue v;
+    v.modifyIndex = 42;
+    REQUIRE(v.valid());
+    
+    v.value = "-11";
+    CHECK(v.get<int>() == -11);
+
+    v.value = "4.20";
+    CHECK(v.get<float>() == 4.20f);
+
+    v.value = "1";
+    CHECK(v.get<bool>());
+
+    v.value = "0";
+    CHECK(!v.get<bool>());
+
+    v.value = "123 lexical_castable";
+    CHECK(v.get<LexicalCastable>().number == 123);
+    CHECK(v.get<LexicalCastable>().word == "lexical_castable");
 }
     
 TEST_CASE("kv.erase and count", "[consul][kv]")
@@ -131,8 +177,10 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
     kv.set("key3", "value3");
     kv.set("other/Key1", "other/Value1");
     kv.set("other/Key2", "other/Value2");
+    kv.set("nonstring/Key1", 111111);
+    kv.set("nonstring/Key2", LexicalCastable{123, "lexical_castable"});
 
-    REQUIRE(kv.size() == 5);
+    REQUIRE(kv.size() == 7);
 
     SECTION("valid")
     {
@@ -141,6 +189,8 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(kv.item("key3").valid());
         CHECK(kv.item("other/Key1").valid());
         CHECK(kv.item("other/Key2").valid());
+        CHECK(kv.item("nonstring/Key1").valid());
+        CHECK(kv.item("nonstring/Key2").valid());
     }
 
     SECTION("get nonexisting item")
@@ -176,6 +226,33 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(kv.get("key1", "some default value") == "value1");
     }
 
+    SECTION("get (nonstring)")
+    {
+        KeyValue v = kv.item("nonstring/Key2");
+
+        REQUIRE(v.valid());
+
+        CHECK(v.createIndex);
+        CHECK(v.modifyIndex);
+        CHECK(!v.lockIndex);
+        CHECK(!v.flags);
+        CHECK(v.key == "nonstring/Key2");
+        CHECK(v.value == "123 lexical_castable");
+        CHECK(v.session == "");
+        CHECK(v.get<LexicalCastable>().number == 123);
+        CHECK(v.get<LexicalCastable>().word == "lexical_castable");
+
+        CHECK(kv.get("nonstring/Key1", 0) == 111111);
+        CHECK(kv.get(Non_Existing_Key, 100) == 100);
+
+        CHECK(kv.get(Non_Existing_Key, true));
+
+        CHECK(kv.get("nonstring/Key2", LexicalCastable{100, "default"}).number == 123);
+        CHECK(kv.get("nonstring/Key2", LexicalCastable{100, "default"}).word == "lexical_castable");
+        CHECK(kv.get(Non_Existing_Key, LexicalCastable{100, "default"}).number == 100);
+        CHECK(kv.get(Non_Existing_Key, LexicalCastable{100, "default"}).word == "default");
+    }
+
     SECTION("get item with headers")
     {
         ppconsul::Response<KeyValue> v0 = kv.item(ppconsul::withHeaders, Non_Existing_Key);
@@ -208,8 +285,9 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
     SECTION("get items")
     {
         CHECK(kv.items(Non_Existing_Key).size() == 0);
-        CHECK(kv.items().size() == 5);
+        CHECK(kv.items().size() == 7);
         CHECK(kv.items("other/Key").size() == 2);
+        CHECK(kv.items("nonstring/Key").size() == 2);
 
         std::vector<KeyValue> v = kv.items("key");
 
@@ -271,8 +349,9 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(kv.subKeys(Non_Existing_Key, "/") == StringList());
         CHECK(kv.keys("key") == StringList({"key1", "key2", "key3"}));
         CHECK(kv.keys("other/Key") == StringList({ "other/Key1", "other/Key2" }));
-        CHECK(kv.subKeys("", "/") == StringList({ "key1", "key2", "key3", "other/" }));
-        CHECK(kv.subKeys("", "e") == StringList({ "ke", "othe" }));
+        CHECK(kv.keys("nonstring/Key") == StringList({ "nonstring/Key1", "nonstring/Key2" }));
+        CHECK(kv.subKeys("", "/") == StringList({ "key1", "key2", "key3", "nonstring/", "other/" }));
+        CHECK(kv.subKeys("", "e") == StringList({ "ke", "nonstring/Ke", "othe" }));
     }
 
     SECTION("get keys with headers")
@@ -299,7 +378,7 @@ TEST_CASE("kv.get", "[consul][kv][headers]")
         CHECK(v2.headers().lastContact() == std::chrono::milliseconds(0));
 
         ppconsul::Response<StringList> v3 = kv.subKeys(ppconsul::withHeaders, "", "/");
-        CHECK(v3.data() == StringList({ "key1", "key2", "key3", "other/" }));
+        CHECK(v3.data() == StringList({ "key1", "key2", "key3", "nonstring/", "other/" }));
         CHECK(v3.headers().valid());
         CHECK(v3.headers().index());
         CHECK(v3.headers().knownLeader());
@@ -374,6 +453,7 @@ TEST_CASE("kv.compareSet", "[consul][kv]")
         SECTION("init without cas")
         {
             kv.set("key1", "value1");
+            kv.set("nonstring/Key1", 111111);
             
             {
                 KeyValue v = kv.item("key1");
@@ -391,12 +471,24 @@ TEST_CASE("kv.compareSet", "[consul][kv]")
             REQUIRE(kv.item("key1").value == "value1");
             REQUIRE(kv.item("key1").flags == 0);
 
+            REQUIRE(kv.item("nonstring/Key1").valid());
+            REQUIRE(kv.item("nonstring/Key1").get<int>() == 111111);
+            REQUIRE(kv.item("nonstring/Key1").flags == 0);
+
             SECTION("change with cas wrong")
             {
                 REQUIRE(!kv.compareSet("key1", 0, "value2"));
                 CHECK(kv.item("key1").valid());
                 CHECK(kv.item("key1").value == "value1");
                 CHECK(kv.item("key1").flags == 0);
+            }
+
+            SECTION("change with cas wrong (nonstring)")
+            {
+                REQUIRE(!kv.compareSet("nonstring/Key1", 0, 222222));
+                CHECK(kv.item("nonstring/Key1").valid());
+                CHECK(kv.item("nonstring/Key1").get<int>() == 111111);
+                CHECK(kv.item("nonstring/Key1").flags == 0);
             }
 
             SECTION("change with cas right")
@@ -413,6 +505,23 @@ TEST_CASE("kv.compareSet", "[consul][kv]")
                 CHECK(!v.lockIndex);
                 CHECK(v.flags == 0);
                 CHECK(v.key == "key1");
+                CHECK(v.session == "");
+            }
+
+            SECTION("change with cas right (nonstring)")
+            {
+                auto cas = kv.item("nonstring/Key1").modifyIndex;
+
+                REQUIRE(kv.compareSet("nonstring/Key1", cas, 222222));
+
+                KeyValue v = kv.item("nonstring/Key1");
+                REQUIRE(v.valid());
+                CHECK(v.get<int>() == 222222);
+                CHECK(v.createIndex);
+                CHECK(v.modifyIndex);
+                CHECK(!v.lockIndex);
+                CHECK(v.flags == 0);
+                CHECK(v.key == "nonstring/Key1");
                 CHECK(v.session == "");
             }
         }
@@ -803,6 +912,20 @@ TEST_CASE("kv.lock_unlock", "[consul][kv][session]")
         REQUIRE(v);
         REQUIRE(v.session == "");
         REQUIRE(v.value == "test2");
+
+        REQUIRE(kv.lock("nonstring/Key1", session1, 222222));
+
+        v = kv.item("nonstring/Key1");
+        REQUIRE(v);
+        REQUIRE(v.session == session1);
+        REQUIRE(v.get<int>() == 222222);
+
+        REQUIRE(kv.unlock("nonstring/Key1", session1, 333333));
+
+        v = kv.item("nonstring/Key1");
+        REQUIRE(v);
+        REQUIRE(v.session == "");
+        REQUIRE(v.get<int>() == 333333);
     }
 
     SECTION("lock-unlock already locked")
@@ -820,6 +943,22 @@ TEST_CASE("kv.lock_unlock", "[consul][kv][session]")
         v = kv.item("key1");
         REQUIRE(v);
         REQUIRE(v.session == session1);
+        REQUIRE(v.value == "test1");
+
+        REQUIRE(kv.lock("nonstring/Key1", session1, 111111));
+        REQUIRE(!kv.lock("nonstring/Key1", session2, 222222));
+
+        v = kv.item("nonstring/Key1");
+        REQUIRE(v);
+        REQUIRE(v.session == session1);
+        REQUIRE(v.get<int>() == 111111);
+
+        REQUIRE(!kv.unlock("nonstring/Key1", session2, 333333));
+
+        v = kv.item("nonstring/Key1");
+        REQUIRE(v);
+        REQUIRE(v.session == session1);
+        REQUIRE(v.get<int>() == 111111);
         REQUIRE(v.value == "test1");
     }
 

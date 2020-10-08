@@ -9,6 +9,7 @@
 #include "ppconsul/consul.h"
 #include "ppconsul/helpers.h"
 #include "ppconsul/types.h"
+#include <boost/lexical_cast.hpp>
 #include <boost/variant.hpp>
 #include <vector>
 #include <stdint.h>
@@ -28,6 +29,14 @@ namespace ppconsul { namespace kv {
         std::string key;
         std::string value;
         std::string session;
+
+        template<class T>
+        T get() const
+        {
+            if (!valid())
+                throw std::runtime_error("KeyValue invalid");
+            return boost::lexical_cast<T>(value);
+        }
     };
 
     namespace txn_ops {
@@ -264,6 +273,9 @@ namespace ppconsul { namespace kv {
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         std::string get(const std::string& key, const std::string& defaultValue, const Params&... params) const;
 
+        template<class T, class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        T get(const std::string& key, const T& defaultValue, const Params&... params) const;
+
         // Returns invalid KeyValue (i.e. !kv.valid()) if key does not exist.
         // Result contains both headers and data.
         // Allowed parameters:
@@ -395,6 +407,12 @@ namespace ppconsul { namespace kv {
                 throw UpdateError(key);
         }
 
+        template<class T, class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        void set(const std::string& key, const T& value, const Params&... params) const
+        {
+            set(key, boost::lexical_cast<std::string>(value), params...);
+        }
+
         // Compare and set (CAS operation). Returns true if value was successfully set and false otherwise.
         // Allowed parameters:
         // - groups::put
@@ -406,6 +424,12 @@ namespace ppconsul { namespace kv {
                 m_consul.put(keyPath(key), value,
                     kw::token = m_defaultToken, kw::dc = m_defaultDc,
                     kw::cas = expectedIndex, params...));
+        }
+
+        template<class T, class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        bool compareSet(const std::string& key, uint64_t expectedIndex, const T& value, const Params&... params) const
+        {
+            return compareSet(key, expectedIndex, boost::lexical_cast<std::string>(value), params...);
         }
 
         // Compare and erase (CAS operation).
@@ -429,6 +453,12 @@ namespace ppconsul { namespace kv {
                     kw::acquire = session, params...));
         }
 
+        template<class T, class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        bool lock(const std::string& key, const std::string& session, const T& value, const Params&... params) const
+        {
+            return lock(key, session, boost::lexical_cast<std::string>(value), params...);
+        }
+
         // Acquire the lock. Returns true if the lock is acquired and value is set, returns false otherwise.
         // Allowed parameters:
         // - groups::put
@@ -440,6 +470,12 @@ namespace ppconsul { namespace kv {
                 m_consul.put(keyPath(key), value,
                     kw::token = m_defaultToken, kw::dc = m_defaultDc,
                     kw::release = session, params...));
+        }
+
+        template<class T, class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
+        bool unlock(const std::string& key, const std::string& session, const T& value, const Params&... params) const
+        {
+            return unlock(key, session, value, params...);
         }
 
         // Perform a series of operations as a transaction.
@@ -526,6 +562,16 @@ namespace ppconsul { namespace kv {
             return defaultValue;
         else
             return std::move(kv.data().value);
+    }
+
+    template<class T, class... Params, class>
+    T Kv::get(const std::string& key, const T& defaultValue, const Params&... params) const
+    {
+        const auto kv = item(withHeaders, key, params...);
+        if (!kv.data().valid())
+            return defaultValue;
+        else
+            return kv.data().template get<T>();
     }
 
     template<class... Params, class>
