@@ -475,7 +475,7 @@ namespace ppconsul { namespace kv {
         template<class T, class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         bool unlock(const std::string& key, const std::string& session, const T& value, const Params&... params) const
         {
-            return unlock(key, session, value, params...);
+            return unlock(key, session, boost::lexical_cast<std::string>(value), params...);
         }
 
         // Perform a series of operations as a transaction.
