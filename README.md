@@ -160,7 +160,7 @@ Kv kv(consul);
 consul.stop();
 ```
 
-Call to `Consul::stop()` is irreversible: once it's done the `Consul` object is switched to the stopped state forever. This whole feature was made solery for the purpose of timely application shutdown in case when blocking queries are used and should be used accordingly.
+Call to `Consul::stop()` is irreversible: once it's done the `Consul` object is switched to the stopped state forever. This whole feature purpose is to gracefully abort ongoing blocking queries on application/component shutdown.
 
 ### Connect to Consul via HTTPS (TLS/SSL, whatever you call it):
 
