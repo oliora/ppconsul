@@ -128,7 +128,7 @@ TEST_CASE("catalog.services_default_attributes", "[consul][catalog][services]")
     const auto selfMember = Agent(consul).self().second;
     const auto selfNode = Node{ selfMember.name, selfMember.address };
 
-    agent.deregisterService(Uniq_Name_3);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterService(Uniq_Name_3), 404);
     agent.registerService({ Uniq_Name_3 });
 
     sleep(2.0); // Give some time to propogate registered services to the catalog
@@ -153,10 +153,11 @@ TEST_CASE("catalog.services", "[consul][catalog][services]")
     const auto selfMember = Agent(consul).self().second;
     const auto selfNode = Node{ selfMember.name, selfMember.address };
 
-    agent.deregisterService("service1");
-    agent.deregisterService("service2");
-    agent.deregisterService("service3");
-    agent.deregisterService("service4");
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterService("service1"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterService("service2"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterService("service3"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterService("service4"), 404);
+
     agent.registerService(
         agent::kw::name = Uniq_Name_1,
         agent::kw::port = 1234,
@@ -333,9 +334,10 @@ TEST_CASE("catalog.services_blocking", "[consul][catalog][services][blocking]")
     const auto selfMember = Agent(consul).self().second;
     const auto selfNode = Node{ selfMember.name, selfMember.address };
 
-    agent.deregisterService("service1");
-    agent.deregisterService("service2");
-    agent.deregisterService("service3");
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterService("service1"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterService("service2"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterService("service3"), 404);
+
     agent.registerService(
         agent::kw::name = Uniq_Name_1,
         agent::kw::port = 1234,

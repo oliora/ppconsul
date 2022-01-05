@@ -28,3 +28,14 @@ inline std::string get_test_leader()
     auto leader = std::getenv("PPCONSUL_TEST_LEADER_ADDR");
     return leader ? leader : "127.0.0.1:8300";
 }
+
+
+#define REQUIRE_NOTHROW_OR_STATUS(expr, statusCode) \
+    REQUIRE_NOTHROW([&](){                          \
+        try {                                       \
+            expr;                                   \
+        } catch (const ppconsul::BadStatus& ex) {   \
+            if (ex.code() != statusCode)            \
+                throw;                              \
+        }                                           \
+    }())
