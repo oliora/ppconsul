@@ -36,6 +36,19 @@ namespace ppconsul {
         virtual const char *what() const noexcept override { return "Operation aborted"; }
     };
 
+    class RequestTimedOut: public Error
+    {
+    public:
+        RequestTimedOut(std::string message)
+        : m_message(std::move(message))
+        {}
+
+        virtual const char *what() const noexcept override { return m_message.c_str(); }
+
+    private:
+        std::string m_message;
+    };
+
     class BadStatus: public Error
     {
     public:

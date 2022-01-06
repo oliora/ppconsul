@@ -162,6 +162,24 @@ consul.stop();
 
 Call to `Consul::stop()` is irreversible: once it's done the `Consul` object is switched to the stopped state forever. This whole feature purpose is to gracefully abort ongoing blocking queries on application/component shutdown.
 
+### Configure connect and request timeouts
+
+By default, connect timeout is set to 5 seconds and request timeout is not set (so it is unlimited). If needed you can override default values as following:
+
+```cpp
+#include "ppconsul/consul.h"
+
+using namespace ppconsul;
+
+Consul consul("https://localhost:8080",
+              kw::connect_timeout = std::chrono::milliseconds{15000}
+              kw::request_timeout = std::chrono::milliseconds{5000});
+
+// Use consul ...
+```
+
+If you're using blocking queries then make sure that request timeout is longer than block interval, otherwise request will fail with timeout error.
+
 ### Connect to Consul via HTTPS (TLS/SSL, whatever you call it):
 
 ```cpp
@@ -178,14 +196,37 @@ Consul consul("https://localhost:8080",
 ```
 
 ## Multi-Threaded Usage of Ppconsul
+
 Each <code>Consul</code> object has a pool of HTTP(S) clients to perform network requests. It is safe to call any endpoint (e.g. `Kv`, `Agent` etc) object or <code>Consul</code> object from multiple threads in the same time.
 
 Call to `Consul::stop()` method stops all ongoing requests on that particular `Consul` object.
 
+## Multi-Threaded Usage of Ppconsul and libCURL initialization
+
+libCURL requires that global initialization function [`curl_global_init`](https://curl.se/libcurl/c/curl_global_init.html) is called before any oither libCURL function is called and before any additional thread is started.
+Ppconsul calls `curl_global_init` for you at the moment when `makeDefaultHttpClientFactory()` is called for the first time which is usually done when first `Consul` object is created. If this is too late then you need to call to `curl_global_init` and `curl_global_cleanup` at the right moment yourself, similar to this example:
+
+```cpp
+int main(int argc, char *argv[])
+{
+    curl_global_init(CURL_GLOBAL_DEFAULT | CURL_GLOBAL_SSL);
+
+    // Existing code that uses Ppconsul and starts extra threads...
+
+    curl_global_cleanup();
+
+    return 0;
+}
+```
+
+`CURL_GLOBAL_SSL` flag is only needed if your're using HTTPS (TLS/SSL).
+
 ## Custom `http::HttpClient`
+
 If needed, user can implement `http::HttpClient` interface and pass custom `HttpClientFactory` to `Consul`'s constructor.
 
 ## Documentation
+
 TBD
 
 ## How To Build

@@ -11,6 +11,7 @@
 #include <tuple>
 #include <string>
 #include <map>
+#include <chrono>
 
 
 namespace ppconsul { namespace http {
@@ -18,22 +19,28 @@ namespace ppconsul { namespace http {
 
     struct TlsConfig
     {
-        TlsConfig() = default;
-
         std::string cert;
         std::string certType;
         std::string key;
         std::string keyType;
         std::string caPath;
         std::string caInfo;
-        bool verifyPeer = true;
-        bool verifyHost = true;
-        bool verifyStatus = false;
+        bool verifyPeer;
+        bool verifyHost;
+        bool verifyStatus;
 
         // Note that keyPass is c-str rather than std::string. That's to make it possible
-        // to keep the actual password in a specific location like in protected memory or
-        // wiped-afer use memory block and so on.
+        // for the caller to keep the actual password in a secure way like in a wipe after use memory block
+        // and avoid copying the secret around. The pointer must be valid until `Consul` object that uses it is deleted.
         const char *keyPass;
+    };
+
+    struct HttpClientConfig
+    {
+        std::chrono::milliseconds connectTimeout;
+        std::chrono::milliseconds requestTimeout;  // 0 means no timeout
+
+        TlsConfig tls;
     };
 
     using RequestHeaders = std::map<std::string, std::string>;

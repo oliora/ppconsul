@@ -41,7 +41,7 @@ namespace ppconsul { namespace curl {
     {
     public:
         CurlHttpClient(const std::string& endpoint,
-                       const ppconsul::http::TlsConfig& tlsConfig,
+                       const ppconsul::http::HttpClientConfig& config,
                        const std::function<bool()>& cancellationCallback);
 
         virtual ~CurlHttpClient() override;
@@ -87,7 +87,7 @@ namespace ppconsul { namespace curl {
         CurlHttpClientFactory();
 
         std::unique_ptr<CurlHttpClient> operator() (const std::string& endpoint,
-                                                    const ppconsul::http::TlsConfig& tlsConfig,
+                                                    const ppconsul::http::HttpClientConfig& config,
                                                     std::function<bool()> cancellationCallback) const;
     };
 }}

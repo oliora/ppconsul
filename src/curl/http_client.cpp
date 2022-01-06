@@ -81,7 +81,9 @@ namespace ppconsul { namespace curl {
         void throwCurlError(CURLcode code, const char *err)
         {
             if (code == CURLE_ABORTED_BY_CALLBACK)
-                throw ppconsul::OperationAborted();
+                throw OperationAborted();
+            else if (code == CURLE_OPERATION_TIMEDOUT)
+                throw RequestTimedOut(err);
             else
                 throw std::runtime_error(std::string(err) + " (" + std::to_string(code) + ")");
         }
@@ -188,15 +190,15 @@ namespace ppconsul { namespace curl {
     }
 
     std::unique_ptr<CurlHttpClient> CurlHttpClientFactory::operator() (const std::string& endpoint,
-                                                                       const ppconsul::http::TlsConfig& tlsConfig,
+                                                                       const ppconsul::http::HttpClientConfig& config,
                                                                        std::function<bool()> cancellationCallback) const
     {
-        return std::unique_ptr<CurlHttpClient>(new CurlHttpClient(endpoint, tlsConfig, cancellationCallback));
+        return std::unique_ptr<CurlHttpClient>(new CurlHttpClient(endpoint, config, cancellationCallback));
     }
 
 
     CurlHttpClient::CurlHttpClient(const std::string& endpoint,
-                                   const ppconsul::http::TlsConfig& tlsConfig,
+                                   const ppconsul::http::HttpClientConfig& config,
                                    const std::function<bool()>& cancellationCallback)
     : m_cancellationCallback(cancellationCallback)
     , m_endpoint(endpoint)
@@ -224,11 +226,14 @@ namespace ppconsul { namespace curl {
             setopt(CURLOPT_NOPROGRESS, 1l);
         }
 
-        // TODO: CURLOPT_NOSIGNAL?
         setopt(CURLOPT_WRITEFUNCTION, &writeCallback);
         setopt(CURLOPT_READFUNCTION, &readCallback);
 
-        setupTls(tlsConfig);
+        setopt(CURLOPT_NOSIGNAL, 1l);
+        setopt(CURLOPT_TIMEOUT_MS, static_cast<long>(config.requestTimeout.count()));
+        setopt(CURLOPT_CONNECTTIMEOUT_MS, static_cast<long>(config.connectTimeout.count()));
+
+        setupTls(config.tls);
     }
 
     void CurlHttpClient::setupTls(const ppconsul::http::TlsConfig& tlsConfig)
@@ -249,15 +254,15 @@ namespace ppconsul { namespace curl {
         if (tlsConfig.keyPass && *tlsConfig.keyPass)
             setopt(CURLOPT_KEYPASSWD, tlsConfig.keyPass);
 
-        setopt(CURLOPT_SSL_VERIFYPEER, tlsConfig.verifyPeer ? 1 : 0);
-        setopt(CURLOPT_SSL_VERIFYHOST, tlsConfig.verifyHost ? 2 : 0);
+        setopt(CURLOPT_SSL_VERIFYPEER, tlsConfig.verifyPeer ? 1l : 0l);
+        setopt(CURLOPT_SSL_VERIFYHOST, tlsConfig.verifyHost ? 2l : 0l);
 
         if (tlsConfig.verifyStatus)
         {
 #ifdef PPCONSUL_DISABLE_SSL_VERIFYSTATUS
             throw std::runtime_error("Ppconsul was built without support for CURLOPT_SSL_VERIFYSTATUS");
 #else
-            setopt(CURLOPT_SSL_VERIFYSTATUS, 1);
+            setopt(CURLOPT_SSL_VERIFYSTATUS, 1l);
 #endif
         }
     }

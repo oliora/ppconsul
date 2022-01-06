@@ -40,12 +40,12 @@ namespace ppconsul {
 
     struct Consul::Impl
     {
-        Impl(HttpClientFactory clientFactory, std::string dataCenter, std::string defaultToken, std::string endpoint, ppconsul::http::TlsConfig tlsConfig, bool enableStop)
+        Impl(HttpClientFactory clientFactory, std::string dataCenter, std::string defaultToken, std::string endpoint, ppconsul::http::HttpClientConfig clientConfig, bool enableStop)
         : m_clientFactory(std::move(clientFactory))
-	, m_dataCenter(std::move(dataCenter))
-	, m_defaultToken(std::move(defaultToken))
+        , m_dataCenter(std::move(dataCenter))
+        , m_defaultToken(std::move(defaultToken))
         , m_endpoint(std::move(endpoint))
-        , m_tlsConfig(std::move(tlsConfig))
+        , m_clientConfig(std::move(clientConfig))
         , m_enableStop(enableStop)
         , m_stopped{false}
         , m_clientPool([this](){ return createClient(); })
@@ -57,7 +57,7 @@ namespace ppconsul {
             if (m_enableStop)
                 cancellationCallback = [this](){ return stopped(); };
 
-            return m_clientFactory(m_endpoint, m_tlsConfig, std::move(cancellationCallback));
+            return m_clientFactory(m_endpoint, m_clientConfig, std::move(cancellationCallback));
         }
 
         bool stopped() const noexcept
@@ -76,16 +76,16 @@ namespace ppconsul {
         std::string m_dataCenter;
         std::string m_defaultToken;
         std::string m_endpoint;
-        ppconsul::http::TlsConfig m_tlsConfig;
+        ppconsul::http::HttpClientConfig m_clientConfig;
         bool m_enableStop;
         std::atomic_bool m_stopped;
         ClientPool m_clientPool;
     };
 
     Consul::Consul(HttpClientFactory clientFactory, std::string defaultToken, std::string dataCenter, std::string endpoint,
-                   http::TlsConfig tlsConfig, bool enableStop)
+                   http::HttpClientConfig clientConfig, bool enableStop)
     : m_impl(new Impl{std::move(clientFactory), std::move(dataCenter), std::move(defaultToken),
-                      helpers::ensureScheme(endpoint), std::move(tlsConfig), enableStop})
+                      helpers::ensureScheme(endpoint), std::move(clientConfig), enableStop})
     {}
 
     Consul::~Consul() = default;

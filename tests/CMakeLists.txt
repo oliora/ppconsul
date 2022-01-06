@@ -26,6 +26,7 @@ configure_file(consul.json.in consul.json)
 
 add_subdirectory(unittests) # to run unittests before consul ones
 
+add_subdirectory(consul)
 add_subdirectory(agent)
 add_subdirectory(catalog)
 add_subdirectory(kv)
