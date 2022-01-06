@@ -35,27 +35,6 @@ namespace ppconsul { namespace curl {
     using namespace ppconsul::http::impl;
 
     namespace {
-        struct CurlInitializer
-        {
-            CurlInitializer()
-            {
-                m_initialized = 0 == curl_global_init(CURL_GLOBAL_DEFAULT | CURL_GLOBAL_SSL);
-            }
-
-            ~CurlInitializer()
-            {
-                curl_global_cleanup();
-            }
-
-            CurlInitializer(const CurlInitializer&) = delete;
-            CurlInitializer& operator= (const CurlInitializer&) = delete;
-
-            explicit operator bool() const { return m_initialized; }
-
-        private:
-            bool m_initialized;
-        };
-
 #if !defined PPCONSUL_USE_BOOST_REGEX
         using std::regex;
         using std::regex_match;
@@ -179,14 +158,6 @@ namespace ppconsul { namespace curl {
         }
 
         return header_list;
-    }
-
-    CurlHttpClientFactory::CurlHttpClientFactory()
-    {
-        static const CurlInitializer g_initialized;
-
-        if (!g_initialized)
-            throw std::runtime_error("CURL was not successfully initialized");
     }
 
     std::unique_ptr<CurlHttpClient> CurlHttpClientFactory::operator() (const std::string& endpoint,

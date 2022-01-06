@@ -221,6 +221,12 @@ int main(int argc, char *argv[])
 
 `CURL_GLOBAL_SSL` flag is only needed if your're using HTTPS (TLS/SSL).
 
+If your application needs to exclusively control libCURL initialization then you m ay want to skip libCURL initialization in Ppconsul's default HttpClientFactory. To do this, create default HttpClientFactory explicitly via `makeDefaultHttpClientFactory(false)` and pass it to `Consul`:
+
+```cpp
+Consul consul(makeDefaultHttpClientFactory(false), ...);
+```
+
 ## Custom `http::HttpClient`
 
 If needed, user can implement `http::HttpClient` interface and pass custom `HttpClientFactory` to `Consul`'s constructor.

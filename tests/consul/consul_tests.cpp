@@ -20,7 +20,7 @@ TEST_CASE("consul.request_timeout", "[consul][http]")
 {
     auto consul = create_test_consul(kw::request_timeout = std::chrono::milliseconds{10});
     kv::Kv kv(consul);
-    
+
     kv.set("key1", "value1");
     auto index1 = kv.item(ppconsul::withHeaders, "key1").headers().index();
 

@@ -33,8 +33,15 @@ namespace ppconsul {
         return m_what.c_str();
     }
 
-    HttpClientFactory makeDefaultHttpClientFactory()
+    HttpClientFactory makeDefaultHttpClientFactory(bool initCurl)
     {
+        if (initCurl) {
+            static const curl::CurlInitializer g_initialized;
+
+            if (!g_initialized)
+                throw std::runtime_error("CURL was not successfully initialized");
+        }
+
         return curl::CurlHttpClientFactory{};
     }
 

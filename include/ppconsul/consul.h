@@ -108,7 +108,8 @@ namespace ppconsul {
     using HttpClientFactory = std::function<std::unique_ptr<http::HttpClient>(const std::string& endpoint,
                                                                               const ppconsul::http::HttpClientConfig& config,
                                                                               CancellationCallback)>;
-    HttpClientFactory makeDefaultHttpClientFactory();
+
+    HttpClientFactory makeDefaultHttpClientFactory(bool initCurl = true);
 
 
     class Consul
