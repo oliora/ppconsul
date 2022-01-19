@@ -29,6 +29,7 @@ add_subdirectory(unittests) # to run unittests before consul ones
 add_subdirectory(consul)
 add_subdirectory(agent)
 add_subdirectory(catalog)
+add_subdirectory(coordinate)
 add_subdirectory(kv)
 add_subdirectory(sessions)
 add_subdirectory(status)
