@@ -65,6 +65,11 @@ namespace ppconsul { namespace s11n {
         dst = static_cast<uint64_t>(src.number_value());
     }
 
+    inline void load(const Json& src, double& dst)
+    {
+        dst = src.number_value();
+    }
+
     inline void load(const Json& src, std::chrono::minutes& dst)
     {
         dst = std::chrono::minutes(static_cast<int>(src.number_value()));

@@ -10,6 +10,7 @@ set(HEADERS
     agent.h
     catalog.h
     consul.h
+    coordinate.h
     error.h
     health.h
     helpers.h
@@ -32,6 +33,7 @@ set(SOURCES
     agent.cpp
     catalog.cpp
     consul.cpp
+    coordinate.cpp
     helpers.cpp
     health.cpp
     client_pool.cpp
