@@ -86,14 +86,14 @@ namespace ppconsul { namespace coordinate {
             return std::move(nodes(withHeaders, params...).data());
         }
 
-        // Throws NotFoundError if node does not exist
+        // Returns empty vector if node does not exist
         // Result contains both headers and data.
         // Allowed parameters:
         // - group::get
         template<class... Params, class = kwargs::enable_if_kwargs_t<Params...>>
         Response<std::vector<Node>> node(WithHeaders, const std::string& name, const Params&... params) const;
 
-        // Throws NotFoundError if node does not exist
+        // Returns empty vector if node does not exist
         // Result contains data only.
         // Allowed parameters:
         // - group::get
@@ -117,8 +117,8 @@ namespace ppconsul { namespace coordinate {
     {
         KWARGS_CHECK_IN_LIST(Params, (kw::groups::get, kw::segment));
         auto r = m_consul.get(withHeaders, "/v1/coordinate/nodes",
-            kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
-            params...);
+                              kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
+                              params...);
         return makeResponse(r.headers(), impl::parseNodes(r.data()));
     }
 
@@ -126,9 +126,14 @@ namespace ppconsul { namespace coordinate {
     Response<std::vector<Node>> Coordinate::node(WithHeaders, const std::string& name, const Params&... params) const
     {
         KWARGS_CHECK_IN_LIST(Params, (kw::groups::get));
-        auto r = m_consul.get(withHeaders, "/v1/coordinate/node/" + helpers::encodeUrl(name),
-            kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
-            params...);
-        return makeResponse(r.headers(), impl::parseNodes(r.data()));
+        http::Status s;
+        auto r = m_consul.get(s, "/v1/coordinate/node/" + helpers::encodeUrl(name),
+                              kw::consistency = m_defaultConsistency, kw::dc = m_defaultDc,
+                              params...);
+        if (s.success())
+            return makeResponse(r.headers(), std::move(impl::parseNodes(r.data())));
+        if (NotFoundError::Code == s.code())
+            return{ r.headers() };
+        throw BadStatus(std::move(s), std::move(r.data()));
     }
 }}

@@ -28,11 +28,11 @@ namespace {
 
         auto dim = nodes.front().coord.vec.size();
         
-        return std::none_of(
+        return std::all_of(
             nodes.begin(), nodes.end(),
             [dim](const auto& node)
             {
-                return (node.coord.vec.size() != dim);
+                return (node.coord.vec.size() == dim);
             }
         );
     }
@@ -98,7 +98,6 @@ TEST_CASE("coordinate.node", "[consul][coordinate]")
 
     const auto selfMember = Agent(consul).self().second;
 
-    std::cout << selfMember.name << std::endl;
     auto node = coordinate.node(selfMember.name);
 
     REQUIRE(node.size() >= 1);
@@ -109,7 +108,7 @@ TEST_CASE("coordinate.node", "[consul][coordinate]")
     }
     CHECK(sameDim(node));
 
-    CHECK_THROWS_AS(coordinate.node(Non_Existing_Node_Name), ppconsul::NotFoundError);
+    CHECK(coordinate.node(Non_Existing_Node_Name).empty());
 }
 
 TEST_CASE("coordinate.node_float_parse", "[consul][coordinate][parse]")
