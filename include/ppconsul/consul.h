@@ -103,6 +103,8 @@ namespace ppconsul {
 
     const char Default_Server_Endpoint[] = "http://127.0.0.1:8500";
 
+    const char All_Segments[] = "_all";
+
     using CancellationCallback = std::function<bool()>;
 
     using HttpClientFactory = std::function<std::unique_ptr<http::HttpClient>(const std::string& endpoint,
