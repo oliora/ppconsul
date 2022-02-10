@@ -30,7 +30,7 @@ namespace {
         
         return std::all_of(
             nodes.begin(), nodes.end(),
-            [dim](const auto& node)
+            [dim](const Node& node)
             {
                 return (node.coord.vec.size() == dim);
             }
