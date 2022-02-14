@@ -72,14 +72,14 @@ TEST_CASE("coordinate.nodes", "[consul][coordinate]")
     auto consul = create_test_consul();
     Coordinate coordinate(consul);
 
-    const auto selfMember = Agent(consul).self().second;
+    auto self = Agent(consul).self();
 
     auto nodes = coordinate.nodes();
 
     REQUIRE_FALSE(nodes.empty());
 
     auto it = std::find_if(nodes.begin(), nodes.end(), [&](const Node& op){
-        return op.node == selfMember.name;
+        return op.node == self.member.name;
     });
     REQUIRE(it != nodes.end());
 
@@ -96,14 +96,14 @@ TEST_CASE("coordinate.node", "[consul][coordinate]")
     auto consul = create_test_consul();
     Coordinate coordinate(consul);
 
-    const auto selfMember = Agent(consul).self().second;
+    auto self = Agent(consul).self();
 
-    auto node = coordinate.node(selfMember.name);
+    auto node = coordinate.node(self.member.name);
 
     REQUIRE(node.size() >= 1);
     for (const auto& nodeRec : node)
     {
-        CHECK(nodeRec.node == selfMember.name);
+        CHECK(nodeRec.node == self.member.name);
         CHECK_FALSE(nodeRec.coord.vec.empty());
     }
     CHECK(sameDim(node));

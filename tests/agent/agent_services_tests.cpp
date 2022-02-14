@@ -133,7 +133,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         const auto & c = checks.at(serviceCheckId("service1"));
 
         CHECK(c.id == serviceCheckId("service1"));
-        CHECK(c.node == agent.self().second.name);
+        CHECK(c.node == agent.self().member.name);
         CHECK(!c.name.empty());
         CHECK(c.status != CheckStatus::Passing);
         CHECK(c.notes.empty());
@@ -170,7 +170,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         const auto & c = checks.at(serviceCheckId(Unique_Id));
 
         CHECK(c.id == serviceCheckId(Unique_Id));
-        CHECK(c.node == agent.self().second.name);
+        CHECK(c.node == agent.self().member.name);
         CHECK(!c.name.empty());
         CHECK(c.status != CheckStatus::Passing);
         CHECK(c.notes.empty());
@@ -198,7 +198,7 @@ TEST_CASE("agent.service_registration", "[consul][agent][services]")
         const auto & c = checks.at(serviceCheckId("service1"));
 
         CHECK(c.id == serviceCheckId("service1"));
-        CHECK(c.node == agent.self().second.name);
+        CHECK(c.node == agent.self().member.name);
         CHECK(!c.name.empty());
         CHECK(c.status != CheckStatus::Passing);
         CHECK(c.notes.empty());
@@ -238,7 +238,7 @@ TEST_CASE("agent.service_registration_script_check_0_x", "[!hide][consul][agent]
         const auto & c = checks.at(serviceCheckId("service1"));
 
         CHECK(c.id == serviceCheckId("service1"));
-        CHECK(c.node == agent.self().second.name);
+        CHECK(c.node == agent.self().member.name);
         CHECK(!c.name.empty());
         CHECK(c.notes.empty());
         CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
@@ -275,7 +275,7 @@ TEST_CASE("agent.service_registration_script_check_0_x", "[!hide][consul][agent]
         const auto & c = checks.at(serviceCheckId(Unique_Id));
 
         CHECK(c.id == serviceCheckId(Unique_Id));
-        CHECK(c.node == agent.self().second.name);
+        CHECK(c.node == agent.self().member.name);
         CHECK(!c.name.empty());
         CHECK(c.notes.empty());
         CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
@@ -314,7 +314,7 @@ TEST_CASE("agent.service_registration_command_check", "[consul][agent][services]
         const auto & c = checks.at(serviceCheckId("service1"));
 
         CHECK(c.id == serviceCheckId("service1"));
-        CHECK(c.node == agent.self().second.name);
+        CHECK(c.node == agent.self().member.name);
         CHECK(!c.name.empty());
         CHECK(c.notes.empty());
         CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
@@ -351,7 +351,7 @@ TEST_CASE("agent.service_registration_command_check", "[consul][agent][services]
         const auto & c = checks.at(serviceCheckId(Unique_Id));
 
         CHECK(c.id == serviceCheckId(Unique_Id));
-        CHECK(c.node == agent.self().second.name);
+        CHECK(c.node == agent.self().member.name);
         CHECK(!c.name.empty());
         CHECK(c.notes.empty());
         CHECK(c.status != CheckStatus::Passing);    // because of Non_Existing_Script_Name
