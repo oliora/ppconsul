@@ -6,7 +6,22 @@
 
 cmake_minimum_required(VERSION 3.1)
 
-project(Ppconsul VERSION 0.1)
+find_package(Git)
+if(GIT_FOUND)
+    execute_process(
+            COMMAND ${GIT_EXECUTABLE} describe --match "v[0-9]*" --abbrev=0 --tags HEAD
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+            OUTPUT_VARIABLE DESCRIBE_BUILD
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    string(REGEX REPLACE "^v" "" VERSION ${DESCRIBE_BUILD})
+else()
+    set(VERSION "0.0.0")
+endif()
+
+message(STATUS "Building version: ${VERSION}")
+
+project(Ppconsul VERSION ${VERSION})
 
 include(./conan_paths.cmake OPTIONAL)
 
