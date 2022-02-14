@@ -28,6 +28,7 @@ I try to support all modern compilers and platforms but I don't have resources t
 
 The library depends on:
 
+* [git](https://git-scm.com/) (optional) to deduce correct .so version
 * [Boost](http://www.boost.org/) 1.55 or later. Ppconsul needs only headers with one exception: using of GCC 4.8 requires Boost.Regex library because [regular expressions are broken in GCC 4.8](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631).
 * [libCURL](http://curl.haxx.se/libcurl/) to do HTTP/HTTPS.
 
@@ -265,6 +266,7 @@ If you use [Conan](https://conan.io/) then simply run `conan install .` to insta
 
 Otherwise:
 
+* Install [git](https://git-scm.com/) (any version should be fine)
 * Install [Boost](http://www.boost.org/) 1.55 or later. You need compiled Boost.Regex library if you use GCC 4.8, otherwise you need headers only.
 * Install [libCURL](http://curl.haxx.se/libcurl/) (any version should be fine).
 
