@@ -8,18 +8,7 @@
 #include "ppconsul/coordinate.h"
 #include "s11n_types.h"
 
-
-namespace json11 {
-    void load(const json11::Json& src, ppconsul::coordinate::Value& dst)
-    {
-        using ppconsul::s11n::load;
-
-        load(src, dst.adjustment, "Adjustment");
-        load(src, dst.error, "Error");
-        load(src, dst.height, "Height");
-        load(src, dst.vec, "Vec");
-    }
-
+namespace ppconsul { namespace coordinate {
     void load(const json11::Json& src, ppconsul::coordinate::Node& dst)
     {
         using ppconsul::s11n::load;
@@ -37,9 +26,6 @@ namespace json11 {
         load(src, dst.areaId, "AreaID");
         load(src, dst.coordinates, "Coordinates");
     }
-}
-
-namespace ppconsul { namespace coordinate {
 
 namespace impl {
 

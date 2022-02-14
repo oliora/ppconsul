@@ -60,4 +60,14 @@ namespace ppconsul {
         load(src, dst.serviceName, "ServiceName");
     }
 
+    inline void load(const json11::Json& src, Coordinate& dst)
+    {
+        using s11n::load;
+
+        load(src, dst.adjustment, "Adjustment");
+        load(src, dst.error, "Error");
+        load(src, dst.height, "Height");
+        load(src, dst.vec, "Vec");
+    }
+
 }

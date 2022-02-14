@@ -76,6 +76,14 @@ namespace ppconsul {
         Metadata meta;
     };
 
+    struct Coordinate
+    {
+        double adjustment;
+        double error;
+        double height;
+        std::vector<double> vec;
+    };
+
     struct WithHeaders {};
     const WithHeaders withHeaders = WithHeaders();
 

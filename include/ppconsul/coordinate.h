@@ -12,13 +12,7 @@
 
 namespace ppconsul { namespace coordinate {
 
-    struct Value
-    {
-        double adjustment;
-        double error;
-        double height;
-        std::vector<double> vec;
-    };
+    using Value = ppconsul::Coordinate;
 
     struct Node
     {

@@ -8,19 +8,15 @@
 #include "ppconsul/agent.h"
 #include "s11n_types.h"
 
-namespace json11 {
-    inline void load(const json11::Json& src, std::pair<ppconsul::agent::Config, ppconsul::agent::Member>& dst)
-    {
-        using ppconsul::s11n::load;
-
-        load(src, dst.first, "Config");
-        load(src, dst.second, "Member");
-    }
-}
-
-
 namespace ppconsul { namespace agent {
     using s11n::load;
+
+    inline void load(const json11::Json& src, SelfInfo& dst)
+    {
+        load(src, dst.config, "Config");
+        load(src, dst.member, "Member");
+        load(src, dst.coord, "Coord");
+    }
 
     void load(const s11n::Json& src, Config& dst)
     {
@@ -139,9 +135,9 @@ namespace impl {
         return s11n::parseJson<std::vector<Member>>(json);
     }
 
-    std::pair<Config, Member> parseSelf(const std::string& json)
+    SelfInfo parseSelf(const std::string& json)
     {
-        return s11n::parseJson<std::pair<Config, Member>>(json);
+        return s11n::parseJson<SelfInfo>(json);
     }
 
     std::map<std::string, CheckInfo> parseChecks(const std::string& json)

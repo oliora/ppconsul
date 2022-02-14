@@ -44,6 +44,13 @@ namespace ppconsul { namespace agent {
         std::string version;
     };
 
+    struct SelfInfo
+    {
+        Config config;
+        Member member;
+        Coordinate coord;
+    };
+
     struct TtlCheck
     {
         TtlCheck() = default;
@@ -174,7 +181,7 @@ namespace ppconsul { namespace agent {
         struct ServiceRegistrationData;
 
         std::vector<Member> parseMembers(const std::string& json);
-        std::pair<Config, Member> parseSelf(const std::string& json);
+        SelfInfo parseSelf(const std::string& json);
         std::map<std::string, CheckInfo> parseChecks(const std::string& json);
         std::map<std::string, ServiceInfo> parseServices(const std::string& json);
 
@@ -203,7 +210,7 @@ namespace ppconsul { namespace agent {
             return impl::parseMembers(m_consul.get("/v1/agent/members", kw::pool = pool));
         }
         
-        std::pair<Config, Member> self() const
+        SelfInfo self() const
         {
             return impl::parseSelf(m_consul.get("/v1/agent/self"));
         }

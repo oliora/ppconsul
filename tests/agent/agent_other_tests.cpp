@@ -28,28 +28,26 @@ TEST_CASE("agent.self", "[consul][agent][config][self]")
     Agent agent(consul);
 
     auto self = agent.self();
-    auto & selfConfig = self.first;
-    CHECK(!selfConfig.datacenter.empty());
-    CHECK(!selfConfig.nodeName.empty());
-    CHECK(!selfConfig.nodeId.empty());
-    CHECK(!selfConfig.version.empty());
-    // seems like selfConfig.revision can be empty
+    CHECK(!self.config.datacenter.empty());
+    CHECK(!self.config.nodeName.empty());
+    CHECK(!self.config.nodeId.empty());
+    CHECK(!self.config.version.empty());
+    // seems like self.config.revision can be empty
 
-    auto & selfMember = self.second;
-    CHECK(!selfMember.name.empty());
-    CHECK(!selfMember.address.empty());
-    CHECK(selfMember.port);
-    CHECK(!selfMember.tags.empty());
-    CHECK(selfMember.status);
-    CHECK(selfMember.protocolMin);
-    CHECK(selfMember.protocolMin);
-    CHECK(selfMember.protocolMax);
-    CHECK(selfMember.protocolCur);
-    CHECK(selfMember.delegateMin);
-    CHECK(selfMember.delegateMax);
-    CHECK(selfMember.delegateCur);
+    CHECK(!self.member.name.empty());
+    CHECK(!self.member.address.empty());
+    CHECK(self.member.port);
+    CHECK(!self.member.tags.empty());
+    CHECK(self.member.status);
+    CHECK(self.member.protocolMin);
+    CHECK(self.member.protocolMin);
+    CHECK(self.member.protocolMax);
+    CHECK(self.member.protocolCur);
+    CHECK(self.member.delegateMin);
+    CHECK(self.member.delegateMax);
+    CHECK(self.member.delegateCur);
 
-    CHECK(selfConfig.nodeName == selfMember.name);
+    CHECK(self.config.nodeName == self.member.name);
 }
 
 TEST_CASE("agent.members", "[consul][agent][config][members]")
@@ -62,36 +60,36 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
     SECTION("wan")
     {
         const auto members = agent.members(Pool::Wan);
-        const auto selfMember = agent.self().second;
+        auto self = agent.self();
 
         auto it1 = std::find_if(members.begin(), members.end(), [&](const ppconsul::agent::Member& op){
-            return op.address == selfMember.address;
+            return op.address == self.member.address;
         });
 
         REQUIRE(it1 != members.end());
 
         const auto& m = *it1;
 
-        CHECK(m.name.find(selfMember.name + ".") == 0);
-        CHECK(selfMember.address == m.address);
+        CHECK(m.name.find(self.member.name + ".") == 0);
+        CHECK(self.member.address == m.address);
         CHECK(m.port);
 
         // As recently discovered, self have extra tags thus filter them out first
         ppconsul::Metadata filteredTags;
-        for (auto& tag: selfMember.tags)
+        for (auto& tag: self.member.tags)
             if (m.tags.count(tag.first))
                 filteredTags.emplace(tag);
         CHECK(!m.tags.empty());
         CHECK(filteredTags == m.tags);
 
-        CHECK(selfMember.status == m.status);
-        CHECK(selfMember.protocolMin == m.protocolMin);
-        CHECK(selfMember.protocolMin == m.protocolMin);
-        CHECK(selfMember.protocolMax == m.protocolMax);
-        CHECK(selfMember.protocolCur == m.protocolCur);
-        CHECK(selfMember.delegateMin == m.delegateMin);
-        CHECK(selfMember.delegateMax == m.delegateMax);
-        CHECK(selfMember.delegateCur == m.delegateCur);
+        CHECK(self.member.status == m.status);
+        CHECK(self.member.protocolMin == m.protocolMin);
+        CHECK(self.member.protocolMin == m.protocolMin);
+        CHECK(self.member.protocolMax == m.protocolMax);
+        CHECK(self.member.protocolCur == m.protocolCur);
+        CHECK(self.member.delegateMin == m.delegateMin);
+        CHECK(self.member.delegateMax == m.delegateMax);
+        CHECK(self.member.delegateCur == m.delegateCur);
 
         for (const auto& m : members)
         {
@@ -112,29 +110,29 @@ TEST_CASE("agent.members", "[consul][agent][config][members]")
     SECTION("lan")
     {
         const auto members = agent.members();
-        const auto selfMember = agent.self().second;
+        auto self = agent.self();
 
         auto it1 = std::find_if(members.begin(), members.end(), [&](const ppconsul::agent::Member& op){
-            return op.address == selfMember.address;
+            return op.address == self.member.address;
         });
 
         REQUIRE(it1 != members.end());
 
         const auto& m = *it1;
 
-        CHECK((m.name == selfMember.name
-            || m.name.find(selfMember.name + ".") == 0));
-        CHECK(selfMember.address == m.address);
+        CHECK((m.name == self.member.name
+            || m.name.find(self.member.name + ".") == 0));
+        CHECK(self.member.address == m.address);
         CHECK(m.port);
-        CHECK(selfMember.tags == m.tags);
-        CHECK(selfMember.status == m.status);
-        CHECK(selfMember.protocolMin == m.protocolMin);
-        CHECK(selfMember.protocolMin == m.protocolMin);
-        CHECK(selfMember.protocolMax == m.protocolMax);
-        CHECK(selfMember.protocolCur == m.protocolCur);
-        CHECK(selfMember.delegateMin == m.delegateMin);
-        CHECK(selfMember.delegateMax == m.delegateMax);
-        CHECK(selfMember.delegateCur == m.delegateCur);
+        CHECK(self.member.tags == m.tags);
+        CHECK(self.member.status == m.status);
+        CHECK(self.member.protocolMin == m.protocolMin);
+        CHECK(self.member.protocolMin == m.protocolMin);
+        CHECK(self.member.protocolMax == m.protocolMax);
+        CHECK(self.member.protocolCur == m.protocolCur);
+        CHECK(self.member.delegateMin == m.delegateMin);
+        CHECK(self.member.delegateMax == m.delegateMax);
+        CHECK(self.member.delegateCur == m.delegateCur);
 
         // Useful only if the wan farm present
         CHECK(agent.members().size() == agent.members(Pool::Lan).size());
@@ -163,7 +161,7 @@ TEST_CASE("agent.join_and_leave", "[consul][agent][config][join][leave]")
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    CHECK_NOTHROW(agent.forceLeave(agent.self().second.name));
+    CHECK_NOTHROW(agent.forceLeave(agent.self().member.name));
     CHECK_THROWS_AS(agent.join("127.0.0.1:21"), ppconsul::Error);
     CHECK_THROWS_AS(agent.join("127.0.0.1:21", Pool::Wan), ppconsul::Error);
     CHECK_THROWS_AS(agent.join("127.0.0.1:21", Pool::Lan), ppconsul::Error);
