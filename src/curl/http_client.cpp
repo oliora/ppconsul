@@ -203,6 +203,7 @@ namespace ppconsul { namespace curl {
         setopt(CURLOPT_NOSIGNAL, 1l);
         setopt(CURLOPT_TIMEOUT_MS, static_cast<long>(config.requestTimeout.count()));
         setopt(CURLOPT_CONNECTTIMEOUT_MS, static_cast<long>(config.connectTimeout.count()));
+        setopt(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
         setupTls(config.tls);
     }
