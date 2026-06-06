@@ -39,11 +39,9 @@ TEST_CASE("agent.check_deregistration", "[consul][agent][checks]")
     agent.deregisterCheck("check1");
     REQUIRE(!agent.checks().count("check1"));
 
-    // There is a bug in Consul introduced some time ago when it start to return 500 error on
-    // deregistering non-existing checks, see https://github.com/hashicorp/consul/issues/5821
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Non_Existing_Check_Name), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Non_Existing_Check_Name), 404);
 }
 
 TEST_CASE("agent.ttl_check_registration", "[consul][agent][checks]")
@@ -51,8 +49,8 @@ TEST_CASE("agent.ttl_check_registration", "[consul][agent][checks]")
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 404);
 
     SECTION("ttl")
     {
@@ -133,8 +131,8 @@ TEST_CASE("agent.script_check_registration_0_x", "[!hide][consul][agent][checks]
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 404);
 
     SECTION("script")
     {
@@ -221,8 +219,8 @@ TEST_CASE("agent.command_check_registration", "[consul][agent][checks]")
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 404);
 
     SECTION("script")
     {
@@ -291,8 +289,8 @@ TEST_CASE("agent.http_check_registration", "[consul][agent][checks][http_check]"
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 404);
 
     SECTION("default timeout")
     {
@@ -309,8 +307,8 @@ TEST_CASE("agent.tcp_check_registration", "[consul][agent][checks][tcp_check]")
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 404);
 
     SECTION("string address")
     {
@@ -345,8 +343,8 @@ TEST_CASE("agent.docker_check_registration_0_x", "[!hide][consul][agent][checks]
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 404);
 
     SECTION("default shell")
     {
@@ -364,8 +362,8 @@ TEST_CASE("agent.docker_check_registration", "[consul][agent][checks][docker_che
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck(Unique_Id), 404);
 
     SECTION("default shell")
     {
@@ -383,7 +381,7 @@ TEST_CASE("agent.check_update", "[consul][agent][checks][health]")
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
     REQUIRE(!agent.checks().count("check1"));
 
     agent.registerCheck("check1", TtlCheck{std::chrono::minutes(5)}, kw::notes = "the check");
@@ -423,7 +421,7 @@ TEST_CASE("agent.check_update_incorrect", "[consul][agent][checks][health]")
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
     REQUIRE(!agent.checks().count("check1"));
 
     CHECK_THROWS_AS(agent.pass(Non_Existing_Check_Name), ppconsul::Error);
@@ -459,7 +457,7 @@ TEST_CASE("agent.check_update_incorrect_0_x", "[!hide][consul][agent][checks][he
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
     REQUIRE(!agent.checks().count("check1"));
 
     CHECK_THROWS_AS(agent.pass(Non_Existing_Check_Name), ppconsul::Error);
@@ -483,7 +481,7 @@ TEST_CASE("agent.check_expired", "[consul][agent][checks][health]")
     auto consul = create_test_consul();
     Agent agent(consul);
 
-    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 500);
+    REQUIRE_NOTHROW_OR_STATUS(agent.deregisterCheck("check1"), 404);
     REQUIRE(!agent.checks().count("check1"));
 
     agent.registerCheck("check1", TtlCheck{std::chrono::seconds(1)});
