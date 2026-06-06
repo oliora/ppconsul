@@ -250,13 +250,15 @@ conan install .
 mkdir workspace
 cd workspace
 
-# Configure:
+# Configure
 cmake ..
+# Optionally override the default installation destination:
+cmake -DCMAKE_INSTALL_PREFIX=<install_dir> ..
 
 #Build
 cmake --build . --config Release
 
-# Install
+# Install (needs a writable installation destination, see CMAKE_INSTALL_PREFIX above)
 cmake --build . --config Release --target install
 ```
 
