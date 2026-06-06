@@ -4,7 +4,7 @@
 #  Boost Software License, Version 1.0. (See accompanying file
 #  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.10)
 
 find_package(Git)
 if(GIT_FOUND)
@@ -64,9 +64,9 @@ endif()
 
 
 if (NOT ${USE_BOOST_REGEX})
-    find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
+    find_package(Boost ${BOOST_MIN_VERSION} CONFIG REQUIRED)
 else ()
-    find_package(Boost ${BOOST_MIN_VERSION} REQUIRED COMPONENTS regex)
+    find_package(Boost ${BOOST_MIN_VERSION} CONFIG REQUIRED COMPONENTS regex)
     add_definitions(-DPPCONSUL_USE_BOOST_REGEX)
 endif ()
 
