@@ -141,15 +141,21 @@ namespace ppconsul { namespace curl {
     {
         CurlHeaderList header_list = nullptr;
 
+        if (headers.empty()) {
+            return header_list;
+        }
+
+        std::string buf;
+        buf.reserve(512);
+
         for (const auto & header : headers)
         {
-            std::string record;
-            record.reserve(header.first.size() + 2 + header.second.size()); // +2 for ": "
-            record += header.first;
-            record += ": ";
-            record += header.second;
+            buf.clear();
+            buf += header.first;
+            buf += ": ";
+            buf += header.second;
 
-            auto ptr = curl_slist_append(header_list.get(), record.c_str());
+            auto ptr = curl_slist_append(header_list.get(), buf.c_str());
             if (!ptr)
                 throw std::runtime_error("CURL headers append failed");
 

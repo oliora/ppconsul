@@ -10,12 +10,20 @@
 #include <ppconsul/response.h>
 #include <tuple>
 #include <string>
+#include <string_view>
 #include <map>
 #include <chrono>
 
 
 namespace ppconsul { namespace http {
-    const std::string Token_Header_Name("X-Consul-Token");
+    namespace header_names {
+        const std::string_view Consul_Token("X-Consul-Token");
+        const std::string_view Content_Type("Content-Type");
+    }
+
+    namespace content_types {
+        const std::string_view Application_Json("application/json");
+    }
 
     struct TlsConfig
     {
@@ -43,7 +51,7 @@ namespace ppconsul { namespace http {
         TlsConfig tls;
     };
 
-    using RequestHeaders = std::map<std::string, std::string>;
+    using RequestHeaders = std::map<std::string_view, std::string>;
 
     class HttpClient
     {

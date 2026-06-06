@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "http/http_client.h"
 #include <ppconsul/config.h>
 #include <ppconsul/error.h>
 #include <ppconsul/types.h>
@@ -232,7 +233,8 @@ namespace ppconsul {
         http::RequestHeaders makeHeaders(const Params&... params) const
         {
             http::RequestHeaders headers;
-            headers.emplace(http::Token_Header_Name, kwargs::get_opt(kw::token, defaultToken(), params...));
+            headers.emplace(http::header_names::Content_Type, http::content_types::Application_Json);
+            headers.emplace(http::header_names::Consul_Token, kwargs::get_opt(kw::token, defaultToken(), params...));
             return headers;
         }
 
