@@ -279,7 +279,6 @@ namespace ppconsul { namespace curl {
         setopt(CURLOPT_WRITEDATA, &r.second);
         setopt(CURLOPT_HEADERDATA, &r.first);
         setopt(CURLOPT_UPLOAD, 1l);
-        setopt(CURLOPT_PUT, 1l);
         setopt(CURLOPT_INFILESIZE_LARGE, static_cast<curl_off_t>(data.size()));
         setopt(CURLOPT_READDATA, &ctx);
         setHeaders(headers);
